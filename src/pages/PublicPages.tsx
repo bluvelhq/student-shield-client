@@ -86,23 +86,34 @@ export const AboutPage: React.FC = () => {
       {/* Primary body section limits */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
 
-        {/* 2. OUR MISSION & OUR VISION SECTION – Side-by-side Layout with Custom Bold Headings */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 mb-24 text-left border-b border-slate-100 pb-16 select-none">
-          <div className="space-y-4">
-            <h2 className="text-2xl sm:text-3xl font-black tracking-widest text-[#2563EB] font-sans uppercase">
-              OUR MISSION
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-semibold">
-              To revolutionize campus device security by offering sustainable, efficient, and innovative protection solutions that make academic life effortless and technical peace of mind accessible to all.
-            </p>
-          </div>
-          <div className="space-y-4">
-            <h2 className="text-2xl sm:text-3xl font-black tracking-widest text-[#2563EB] font-sans uppercase">
-              OUR VISION
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-semibold">
-              To be the leading provider of reliable, rapid-response device protection solutions on campuses worldwide, fostering tech-backed academic excellence and contributing to uninterrupted study and productivity.
-            </p>
+        {/* 2. OUR MISSION & OUR VISION SECTION – Centered Card Layout */}
+        <div className="mb-24 text-center select-none">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Mission Card */}
+            <div className="bg-gradient-to-br from-royal/5 to-royal/10 border border-royal/20 p-8 rounded-2xl space-y-4 hover:border-royal/40 hover:shadow-lg transition-all duration-300">
+              <div className="w-12 h-12 rounded-full bg-royal/15 flex items-center justify-center mx-auto text-royal mb-2">
+                <span className="text-lg font-bold">🎯</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-heading font-bold text-[#00183D] uppercase tracking-tight">
+                Our Mission
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed font-body">
+                To revolutionize campus device security by offering sustainable, efficient, and innovative protection solutions that make academic life effortless and technical peace of mind accessible to all.
+              </p>
+            </div>
+
+            {/* Vision Card */}
+            <div className="bg-gradient-to-br from-golden/5 to-golden/10 border border-golden/30 p-8 rounded-2xl space-y-4 hover:border-golden/50 hover:shadow-lg transition-all duration-300">
+              <div className="w-12 h-12 rounded-full bg-golden/15 flex items-center justify-center mx-auto text-golden mb-2">
+                <span className="text-lg font-bold">✨</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-heading font-bold text-[#00183D] uppercase tracking-tight">
+                Our Vision
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed font-body">
+                To be the leading provider of reliable, rapid-response device protection solutions on campuses worldwide, fostering tech-backed academic excellence and contributing to uninterrupted study and productivity.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -295,17 +306,6 @@ export const AboutPage: React.FC = () => {
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer" 
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/40 to-transparent flex flex-col justify-end p-6 md:p-8 text-left">
-                <span className="text-[10px] font-mono font-bold tracking-widest text-[#2563EB] uppercase mb-1">
-                  01 / CAMPUS ALPHA CENTER
-                </span>
-                <h3 className="text-xl md:text-2xl font-black text-white font-sans uppercase">
-                  Main Device Protection Lounge
-                </h3>
-                <span className="text-xs text-slate-300 font-medium mt-1">
-                  University of Ghana • Open 9:00 AM - 5:00 PM
-                </span>
-              </div>
             </div>
 
             {/* Card 2: Interactive Location/Booths Companion Picture (col-span-1, row-span-2) */}
@@ -316,17 +316,6 @@ export const AboutPage: React.FC = () => {
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer" 
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/45 to-transparent flex flex-col justify-end p-6 text-left">
-                <span className="text-[10px] font-mono font-bold tracking-widest text-[#2563EB] uppercase mb-1">
-                  02 / STUDENT INTEGRATIONS
-                </span>
-                <h3 className="text-lg font-black text-white font-sans uppercase leading-tight font-sans">
-                  Collaborative Study & Care Booths
-                </h3>
-                <span className="text-xs text-slate-300 font-medium mt-1">
-                  Continuous Academic Protection
-                </span>
-              </div>
             </div>
 
             {/* Card 3: Board Diagnostics focus close-up (col-span-1) */}
@@ -337,14 +326,6 @@ export const AboutPage: React.FC = () => {
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer" 
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent flex flex-col justify-end p-5 text-left">
-                <span className="text-[9px] font-mono font-bold tracking-widest text-[#2563EB] uppercase mb-0.5">
-                  03 / DIAGNOSTIC CRADLE
-                </span>
-                <h3 className="text-sm font-extrabold text-white font-sans uppercase">
-                  Hardware Sweeps & Lab Repairs
-                </h3>
-              </div>
             </div>
 
             {/* Card 4: Collaborative Research Room (col-span-1 lg:col-span-2) */}
@@ -355,17 +336,6 @@ export const AboutPage: React.FC = () => {
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer" 
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/40 to-transparent flex flex-col justify-end p-6 text-left">
-                <span className="text-[10px] font-mono font-bold tracking-widest text-[#2563EB] uppercase mb-1">
-                  04 / CO-WORKING AND TELEMETRY
-                </span>
-                <h3 className="text-base font-black text-white font-sans uppercase leading-tight font-sans">
-                  University Partnered IT Labs & Support Circles
-                </h3>
-                <span className="text-xs text-slate-300 font-medium mt-1">
-                  Building the future of physical on-call campus care
-                </span>
-              </div>
             </div>
           </div>
         </div>

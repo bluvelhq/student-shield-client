@@ -71,15 +71,14 @@ export const LandingFeatures: React.FC = () => {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-20">
-          <span className="bg-royal/10 border border-royal/20 text-royal text-[10px] font-extrabold px-3 py-1 rounded-none uppercase tracking-widest font-mono inline-block mb-3.5">
-            WHAT WE COVER
+          <span className="bg-royal/10 border border-royal/20 text-royal text-[11px] font-body font-semibold px-4 py-2 rounded-full uppercase tracking-wide inline-block mb-6">
+            Key Services
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-navy leading-tight">
-            Everything That Can Go Wrong. <br />
-            <span className="text-royal">We Handle It.</span>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold tracking-tight text-navy leading-tight mb-6">
+            Complete Protection Coverage
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-4 leading-relaxed max-w-2xl mx-auto font-medium">
-            Six categories of support, rolled into one affordable semester subscription. All delivered directly to your hostel.
+          <p className="text-lg sm:text-xl text-slate-600 mt-4 leading-relaxed max-w-2xl mx-auto font-body font-light">
+            Six categories of comprehensive support tailored for academic success.
           </p>
         </div>
 
@@ -102,23 +101,23 @@ export const LandingFeatures: React.FC = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.05, duration: 0.4 }}
-                className={`${colSpans[idx] || 'md:col-span-4'} bg-white border border-slate-200/50 p-6 rounded-none flex flex-col justify-between hover:border-slate-300 hover:translate-y-[-1px] transition-all group text-left relative`}
+                className={`${colSpans[idx] || 'md:col-span-4'} bg-white border border-slate-200/50 p-6 rounded-lg flex flex-col justify-between hover:border-slate-300 hover:-translate-y-px transition-all group text-left relative`}
               >
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {/* Icon & Badge Row */}
                   <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 bg-slate-50 text-navy rounded-none flex items-center justify-center border border-slate-100 group-hover:bg-royal group-hover:text-white transition-all">
-                      <Icon className="w-5 h-5" />
+                    <div className="w-12 h-12 bg-royal/5 text-royal rounded-lg flex items-center justify-center border border-royal/10 group-hover:bg-royal group-hover:text-white transition-all">
+                      <Icon className="w-6 h-6" />
                     </div>
-                    <span className={`text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-none font-bold font-mono ${item.badgeColor}`}>
+                    <span className={`text-[10px] font-body font-semibold px-3 py-1.5 rounded-full ${item.badgeColor}`}>
                       {item.badge}
                     </span>
                   </div>
 
                   {/* Title & Desc */}
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-extrabold text-[#00183D] tracking-tight">{item.title}</h3>
-                    <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-medium">
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-heading font-semibold text-[#00183D]">{item.title}</h3>
+                    <p className="text-base text-slate-600 leading-relaxed font-body font-light">
                       {item.desc}
                     </p>
                   </div>

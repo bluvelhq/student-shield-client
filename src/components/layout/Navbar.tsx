@@ -289,7 +289,7 @@ export const Navbar: React.FC = () => {
                       }}
                       className="flex items-center justify-center space-x-2 py-2 px-4 text-xs font-semibold rounded-none text-red-400 hover:bg-red-400/10 w-full"
                     >
-                      <span>Log Out ($ {user.email})</span>
+                      <span>Log Out ({user.email})</span>
                     </button>
                   </>
                 ) : (
