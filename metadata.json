@@ -1,0 +1,8 @@
+{
+  "name": "Remix: StudentShield",
+  "description": "Premium student tech support and device protection platform offering semester plans, virus removal, device diagnostics, and high-fidelity support ticketing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
