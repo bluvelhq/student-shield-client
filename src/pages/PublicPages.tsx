@@ -19,6 +19,14 @@ import { BackgroundRippleEffect } from '../components/ui/background-ripple-effec
 import { CometCard } from '../components/ui/comet-card';
 // @ts-expect-error - png asset loaded via vite builder
 import studentshieldLady from '../assets/images/LADY WITH BACKROUND.png';
+// @ts-expect-error - png asset loaded via vite builder
+import officeSuite3 from '../assets/images/OFFICE SUIT 3.png';
+// @ts-expect-error - jpg asset loaded via vite builder
+import hoodieDesign from '../assets/images/hoodie-DESIGN.jpg';
+// @ts-expect-error - png asset loaded via vite builder
+import shirtDesign from '../assets/images/SHIRT.png';
+// @ts-expect-error - jpg asset loaded via vite builder
+import tableDesign from '../assets/images/TABLE DESIGN.jpg';
 
 const teamAvatarPlaceholder = 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150&q=80';
 
@@ -29,27 +37,27 @@ export const AboutPage: React.FC = () => {
   const team = [
     { 
       name: 'Derrick Boateng', 
-      role: 'CEO & Co-founder', 
+      role: 'CEO and founder', 
       bio: 'On a mission to redefine device "reliability and structural peace of mind for Uni students and beyond"', 
-      avatar: teamAvatarPlaceholder 
+      avatar: officeSuite3 
     },
     { 
       name: 'Dr. Amina Osei-Poku', 
       role: 'Academic Advisor & Patron', 
       bio: 'Senior member, computer engineering sciences department.', 
-      avatar: teamAvatarPlaceholder 
+      avatar: officeSuite3 
     },
     { 
       name: 'Ato Kwamena Support', 
       role: 'Lead Hardware Technician', 
       bio: 'Electronics specialist covering physical laptop boards & power circuits.', 
-      avatar: teamAvatarPlaceholder 
+      avatar: officeSuite3 
     },
     { 
       name: 'Efua Mensah Asante', 
       role: 'Head of Customer Success', 
       bio: 'Passionate about seamless on-campus support operations and fast diagnostic tickets.', 
-      avatar: teamAvatarPlaceholder 
+      avatar: officeSuite3 
     }
   ];
 
@@ -299,11 +307,11 @@ export const AboutPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto auto-rows-[220px] select-none">
             {/* Card 1: Great Portrait of StudentShield Lady representing Main Tech Hub (col-span-1 lg:col-span-2, row-span-2) */}
-            <div className="group relative overflow-hidden rounded-lg border border-slate-100 col-span-1 md:col-span-2 row-span-2 shadow-none transition-all duration-300">
+            <div className="group relative overflow-hidden rounded-lg border border-slate-100 col-span-1 md:col-span-2 row-span-2 shadow-none transition-all duration-300 bg-[#f8fafc] flex items-center justify-center">
               <img 
-                src={studentshieldLady} 
-                alt="StudentShield Tech Hub Workspace" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                src={hoodieDesign} 
+                alt="StudentShield Hoodie Design" 
+                className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer" 
               />
             </div>
@@ -311,7 +319,7 @@ export const AboutPage: React.FC = () => {
             {/* Card 2: Interactive Location/Booths Companion Picture (col-span-1, row-span-2) */}
             <div className="group relative overflow-hidden rounded-lg border border-slate-100 col-span-1 row-span-2 shadow-none transition-all duration-300">
               <img 
-                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80" 
+                src={officeSuite3} 
                 alt="Active Campus Community study session" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer" 
@@ -319,11 +327,11 @@ export const AboutPage: React.FC = () => {
             </div>
 
             {/* Card 3: Board Diagnostics focus close-up (col-span-1) */}
-            <div className="group relative overflow-hidden rounded-lg border border-slate-100 col-span-1 shadow-none transition-all duration-300">
+            <div className="group relative overflow-hidden rounded-lg border border-slate-100 col-span-1 shadow-none transition-all duration-300 bg-[#f8fafc] flex items-center justify-center">
               <img 
-                src="https://images.unsplash.com/photo-1597852074816-d933c4d2b988?auto=format&fit=crop&w=800&q=80" 
-                alt="Hardware motherboard diagnostics close-up" 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                src={shirtDesign} 
+                alt="StudentShield Shirt Design" 
+                className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer" 
               />
             </div>
@@ -331,8 +339,8 @@ export const AboutPage: React.FC = () => {
             {/* Card 4: Collaborative Research Room (col-span-1 lg:col-span-2) */}
             <div className="group relative overflow-hidden rounded-lg border border-slate-100 col-span-1 md:col-span-2 shadow-none transition-all duration-300">
               <img 
-                src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=1200&q=80" 
-                alt="Tech workstation layout" 
+                src={tableDesign} 
+                alt="StudentShield Table Design" 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 referrerPolicy="no-referrer" 
               />
