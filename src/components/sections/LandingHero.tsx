@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { 
+import {
   Shield, Zap, HelpCircle, MapPin, CreditCard, Clock
 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -41,7 +41,7 @@ export const LandingHero: React.FC = () => {
 
   return (
     <div id="home" className="relative bg-white text-[#00183D] pt-32 pb-0 overflow-hidden select-none">
-      
+
       {/* Background Ripple Effect - only Home Hero and About Hero */}
       <div className="absolute inset-0 w-full h-full opacity-100 pointer-events-auto z-0 overflow-hidden [--cell-border-color:rgba(37,99,235,0.15)] [--cell-fill-color:rgba(37,99,235,0.005)]">
         <BackgroundRippleEffect rows={12} cols={35} cellSize={60} />
@@ -53,16 +53,16 @@ export const LandingHero: React.FC = () => {
       {/* Primary Container Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
-          
+
           {/* LEFT COLUMN: Clean typography and CTAs */}
           <div className="lg:col-span-6 space-y-10 text-left max-w-2xl lg:max-w-none mx-auto lg:mx-0">
-            
+
             {/* Soft modern upper Pill badge */}
-            <motion.div 
-               initial={{ opacity: 0, y: -10 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.5 }}
-               className="inline-flex items-center space-x-2 bg-royal/10 border border-royal/20 rounded-full px-4 py-2 text-[11px] text-royal font-heading font-semibold uppercase tracking-wide"
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center space-x-2 bg-royal/10 border border-royal/20 rounded-full px-4 py-2 text-[11px] text-royal font-heading font-semibold uppercase tracking-wide"
             >
               <div className="w-1.5 h-1.5 rounded-full bg-royal animate-pulse" />
               <span>Now Active on Campus</span>
@@ -70,7 +70,7 @@ export const LandingHero: React.FC = () => {
 
             {/* High impact Headline with improved typography */}
             <div className="space-y-6">
-              <motion.h1 
+              <motion.h1
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.5 }}
@@ -81,7 +81,7 @@ export const LandingHero: React.FC = () => {
                 Your Studies <span className="text-royal">Secured.</span>
               </motion.h1>
 
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
@@ -92,11 +92,11 @@ export const LandingHero: React.FC = () => {
             </div>
 
             {/* CTA Option buttons pairing */}
-            <motion.div 
-               initial={{ opacity: 0, y: 15 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ delay: 0.3, duration: 0.5 }}
-               className="flex flex-wrap gap-4 pt-4"
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="flex flex-wrap gap-4 pt-4"
             >
               <button
                 onClick={() => navigate(user ? 'dashboard' : 'register')}
@@ -105,7 +105,7 @@ export const LandingHero: React.FC = () => {
                 <Shield className="w-5 h-5 text-white" />
                 <span>Get Started</span>
               </button>
-              
+
               <button
                 onClick={handleScrollToPlans}
                 className="px-8 py-4 text-base font-heading font-semibold rounded-full bg-transparent border-2 border-slate-300 text-slate-700 hover:border-royal hover:text-royal transition-all flex items-center space-x-2.5 cursor-pointer"
@@ -115,7 +115,7 @@ export const LandingHero: React.FC = () => {
             </motion.div>
 
             {/* Stats row with improved spacing */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
@@ -139,9 +139,9 @@ export const LandingHero: React.FC = () => {
 
           {/* RIGHT COLUMN: Hero Image */}
           <div className="lg:col-span-6 relative flex justify-center lg:justify-end items-center">
-            <motion.img 
-              src={heroImage} 
-              alt="Student Shield Member" 
+            <motion.img
+              src={heroImage}
+              alt="Student Shield Member"
               referrerPolicy="no-referrer"
               className="w-full max-w-md h-auto object-contain"
               initial={{ opacity: 0, scale: 0.95 }}

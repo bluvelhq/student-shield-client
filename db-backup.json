@@ -17,6 +17,12 @@
       "email": "admin@studentshield.com",
       "role": "admin",
       "created_at": "2026-06-10T11:42:10.735Z"
+    },
+    {
+      "id": "usr-reg-99hnelj",
+      "email": "db723252@gmail.com",
+      "role": "student",
+      "created_at": "2026-06-15T10:49:41.448Z"
     }
   ],
   "profiles": [
@@ -49,6 +55,16 @@
       "phone": "+233 20 111 0000",
       "avatar_url": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=150&q=80",
       "created_at": "2026-06-10T11:42:10.735Z"
+    },
+    {
+      "id": "prof-5jywtsf",
+      "user_id": "usr-reg-99hnelj",
+      "full_name": "Derrick Boateg",
+      "university": "University of Ghana (Legon)",
+      "student_id": "11218606",
+      "phone": "0592739947",
+      "avatar_url": "https://api.dicebear.com/7.x/initials/svg?seed=Derrick%20Boateg",
+      "created_at": "2026-06-15T10:49:41.448Z"
     }
   ],
   "devices": [
@@ -77,6 +93,32 @@
       "image_url": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=300&q=80",
       "status": "unprotected",
       "created_at": "2026-05-26T11:42:10.735Z"
+    },
+    {
+      "id": "dev-3x4a9mb",
+      "user_id": "usr-reg-99hnelj",
+      "name": "Laptop Hp.Laptop",
+      "type": "laptop",
+      "brand": "Laptop",
+      "model": "Hp.Laptop",
+      "serial_number": "SN-78881",
+      "operating_system": "Windows 11 Setup (2026)",
+      "image_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80",
+      "status": "active",
+      "created_at": "2026-06-15T10:49:41.569Z"
+    },
+    {
+      "id": "dev-md8pr9m",
+      "user_id": "usr-reg-99hnelj",
+      "name": "Laptop Hp.Laptop",
+      "type": "laptop",
+      "brand": "Laptop",
+      "model": "Hp.Laptop",
+      "serial_number": "SN-97941",
+      "operating_system": "Windows 11 Setup (2026)",
+      "image_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80",
+      "status": "active",
+      "created_at": "2026-06-15T10:49:41.591Z"
     }
   ],
   "subscriptions": [
@@ -88,6 +130,15 @@
       "start_date": "2026-05-11T11:42:10.735Z",
       "end_date": "2026-09-08T11:42:10.735Z",
       "created_at": "2026-05-11T11:42:10.735Z"
+    },
+    {
+      "id": "sub-t3t658z",
+      "user_id": "usr-reg-99hnelj",
+      "plan_id": "basic-plan",
+      "status": "pending",
+      "start_date": "2026-06-15T10:49:41.448Z",
+      "end_date": "2026-10-13T10:49:41.448Z",
+      "created_at": "2026-06-15T10:49:41.448Z"
     }
   ],
   "payments": [
@@ -181,6 +232,24 @@
       "type": "info",
       "is_read": true,
       "created_at": "2026-05-11T11:42:10.735Z"
+    },
+    {
+      "id": "notif-yqah0ht",
+      "user_id": "usr-reg-99hnelj",
+      "title": "Device Shield Registered",
+      "content": "Security sweep initialized on Laptop Hp.Laptop!",
+      "type": "info",
+      "is_read": false,
+      "created_at": "2026-06-15T10:49:41.569Z"
+    },
+    {
+      "id": "notif-2o9el9u",
+      "user_id": "usr-reg-99hnelj",
+      "title": "Device Shield Registered",
+      "content": "Security sweep initialized on Laptop Hp.Laptop!",
+      "type": "info",
+      "is_read": false,
+      "created_at": "2026-06-15T10:49:41.591Z"
     }
   ],
   "activityLogs": [
@@ -197,6 +266,20 @@
       "action": "Subscription Creation",
       "details": "Purchased Premium Shield subscription GH₵50 via MTN Mobile Money.",
       "created_at": "2026-05-11T11:42:10.735Z"
+    },
+    {
+      "id": "log-wel5n5q",
+      "user_id": "usr-reg-99hnelj",
+      "action": "Device Added",
+      "details": "Registered device serial trace: SN-78881",
+      "created_at": "2026-06-15T10:49:41.569Z"
+    },
+    {
+      "id": "log-thyikgu",
+      "user_id": "usr-reg-99hnelj",
+      "action": "Device Added",
+      "details": "Registered device serial trace: SN-97941",
+      "created_at": "2026-06-15T10:49:41.591Z"
     }
   ]
 }

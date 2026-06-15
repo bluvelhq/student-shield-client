@@ -23,8 +23,7 @@ export const BackgroundRippleEffect = ({
       ref={ref}
       className={cn(
         "absolute inset-0 h-full w-full",
-        "[--cell-border-color:var(--color-neutral-300)] [--cell-fill-color:var(--color-neutral-100)] [--cell-shadow-color:var(--color-neutral-500)]",
-        "dark:[--cell-border-color:var(--color-neutral-700)] dark:[--cell-fill-color:var(--color-neutral-900)] dark:[--cell-shadow-color:var(--color-neutral-800)]",
+        "dark:[--cell-border-color:var(--color-neutral-700)] dark:[--cell-shadow-color:var(--color-neutral-800)]",
       )}
     >
       <div className="relative h-auto w-auto overflow-hidden">
@@ -35,8 +34,8 @@ export const BackgroundRippleEffect = ({
           rows={rows}
           cols={cols}
           cellSize={cellSize}
-          borderColor="var(--cell-border-color)"
-          fillColor="var(--cell-fill-color)"
+          borderColor="var(--cell-border-color, var(--color-neutral-300))"
+          fillColor="var(--cell-fill-color, transparent)"
           clickedCell={clickedCell}
           onCellClick={(row: number, col: number) => {
             setClickedCell({ row, col });
