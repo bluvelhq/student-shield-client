@@ -68,15 +68,15 @@ export const PricingGrid: React.FC = () => {
             <div>
               {/* Nested top container block */}
               <div className="bg-slate-50 p-8 rounded-xl border border-slate-200/50 mb-8 relative">
-                {/* Starter Pill Badge */}
+                {/* Basic Pill Badge */}
                 <span className="inline-block bg-white border border-slate-300 text-slate-800 text-[10px] font-body font-semibold uppercase tracking-wide px-4 py-2 mb-6 rounded-full">
-                  Starter
+                  Basic
                 </span>
                 
                 {/* Big Bold Price */}
                 <div className="mb-4">
                   <div className="flex items-baseline space-x-2">
-                    <span className="text-5xl sm:text-6xl font-heading font-bold text-slate-900 tracking-tight">GH₵10</span>
+                    <span className="text-5xl sm:text-6xl font-heading font-bold text-slate-900 tracking-tight">GH₵20</span>
                     <span className="text-slate-500 text-base font-body">/semester</span>
                   </div>
                 </div>
@@ -145,17 +145,17 @@ export const PricingGrid: React.FC = () => {
             className="border border-slate-200 p-8 rounded-[2.5rem] bg-white relative flex flex-col justify-between text-left hover:scale-[1.01] transition-all h-full shadow-none"
           >
             <div>
-              {/* Nested top container block with subtle Blue gradient as in design's Professional card */}
+              {/* Nested top container block with subtle Blue gradient as in design's Premium card */}
               <div className="bg-linear-to-br from-[#E2EAFD] via-[#E8EBFF] to-[#FAF9F6] border border-royal/10 p-7 rounded-4xl mb-8 relative">
-                {/* Professional Pill Badge */}
+                {/* Premium Pill Badge */}
                 <span className="inline-block bg-white border border-slate-200/70 text-slate-800 text-[10px] font-extrabold uppercase tracking-widest px-4 py-1.5 mb-6 rounded-full shadow-sm">
-                  Professional
+                  Premium
                 </span>
                 
                 {/* Big Bold Price */}
                 <div className="mb-3">
                   <div className="flex items-baseline space-x-0.5">
-                    <span className="text-4xl sm:text-5xl font-black text-slate-900 font-sans tracking-tight">GH₵30</span>
+                    <span className="text-4xl sm:text-5xl font-black text-slate-900 font-sans tracking-tight">GH₵50</span>
                     <span className="text-royal text-xs font-bold font-sans">/semester</span>
                   </div>
                 </div>
@@ -227,8 +227,8 @@ export const PricingGrid: React.FC = () => {
             <thead>
               <tr className="bg-white border-b border-slate-100 font-semibold text-slate-500">
                 <th className="px-6 py-3.5">Technical Cover Feature</th>
-                <th className="px-6 py-3.5 w-40 text-center">Basic (GH₵10)</th>
-                <th className="px-6 py-3.5 w-40 text-center">Premium (GH₵30)</th>
+                <th className="px-6 py-3.5 w-40 text-center">Basic (GH₵20)</th>
+                <th className="px-6 py-3.5 w-40 text-center">Premium (GH₵50)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">

@@ -124,7 +124,7 @@ const DEFAULT_STORE: LocalStore = {
       id: "pay-1",
       user_id: "usr-student-1",
       subscription_id: "sub-1",
-      amount: 30,
+      amount: 50,
       currency: "GHS",
       status: "successful",
       payment_method: "Mobile Money (MTN)",
@@ -224,7 +224,7 @@ const DEFAULT_STORE: LocalStore = {
       id: "log-2",
       user_id: "usr-student-1",
       action: "Subscription Creation",
-      details: "Purchased Premium Shield subscription GH₵30 via MTN Mobile Money.",
+      details: "Purchased Premium Shield subscription GH₵50 via MTN Mobile Money.",
       created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
     }
   ]
@@ -662,7 +662,7 @@ app.post("/api/payments/verify", async (req, res) => {
           await client.from("payments").insert({
             user_id: userId,
             subscription_id: subscriptionId,
-            amount: amount || 10.00,
+            amount: amount || 20.00,
             currency: "GHS",
             status: "successful",
             payment_method: payMethod,
@@ -716,7 +716,7 @@ app.post("/api/payments/verify", async (req, res) => {
       id: `pay-${Math.random().toString(36).substring(2, 9)}`,
       user_id: userId,
       subscription_id: subscriptionId,
-      amount: Number(amount) || (planId === "premium-plan" ? 30 : 10),
+      amount: Number(amount) || (planId === "premium-plan" ? 50 : 20),
       currency: "GHS",
       status: "successful",
       payment_method: payMethod,

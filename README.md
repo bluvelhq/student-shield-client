@@ -9,7 +9,7 @@ StudentShield is a university on-campus student technology support and device pr
 1. **Landing Page**: Animated high-contrast hero section, distinct flat pricing tiles with comparison logs, dynamic interactive features overview, and a mobile money integration timeline walkthrough.
 2. **About Page**: Origins, mission guidelines, operational pillars, and our advisors team profile grid.
 3. **Services Page**: Comprehensive details covering software driver troubleshooting, clean macOS/Windows 11 installations, MS Office setups, and workshop hardware routing.
-4. **Pricing Page**: Detailed flat semester pricing (Basic GH₵10 & Premium GH₵30), distinct features checklist grid, and FAQ.
+4. **Pricing Page**: Detailed flat semester pricing (Basic GH₵20 & Premium GH₵50), distinct features checklist grid, and FAQ.
 5. **Contact Page**: Interactive support dispatch form and dynamic central on-campus library booth coordinates block.
 6. **Blog Forum**: Searchable technical articles covering cybersecurity backups, Windows 11 optimizations, and hardware value decisions.
 7. **Help Center**: Knowledge base repository with search capability and expanding FAQ accordions.

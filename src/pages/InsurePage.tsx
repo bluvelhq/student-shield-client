@@ -77,7 +77,7 @@ export const InsurePage: React.FC = () => {
     }
 
     const fullName = `${firstName} ${lastName}`.trim();
-    const finalPrice = selectedPlan === 'premium-plan' ? 30 : 10;
+    const finalPrice = selectedPlan === 'premium-plan' ? 50 : 20;
 
     try {
       // 1. Submit Account Auto Creation route
@@ -221,7 +221,7 @@ export const InsurePage: React.FC = () => {
               <div>
                 <span className="text-xs font-bold text-slate-900 block font-sans">Basic Plan</span>
                 <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
-                  <span className="text-2xl font-extrabold text-[#00183D] font-sans">GH₵10</span>
+                  <span className="text-2xl font-extrabold text-[#00183D] font-sans">GH₵20</span>
                   <span className="text-slate-400 text-[10px] font-semibold font-sans">/ semester</span>
                 </div>
               </div>
@@ -244,7 +244,7 @@ export const InsurePage: React.FC = () => {
                   <span className="text-xs font-bold text-slate-900 block font-sans">Premium Plan ⭐️</span>
                 </div>
                 <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
-                  <span className="text-2xl font-extrabold text-[#00183D] font-sans">GH₵30</span>
+                  <span className="text-2xl font-extrabold text-[#00183D] font-sans">GH₵50</span>
                   <span className="text-slate-400 text-[10px] font-semibold font-sans">/ semester</span>
                 </div>
               </div>

@@ -87,7 +87,7 @@ export const LandingHero: React.FC = () => {
                 transition={{ delay: 0.2, duration: 0.5 }}
                 className="text-lg sm:text-xl text-slate-600 max-w-xl leading-relaxed font-body font-light"
               >
-                For as little as GH₵ 10 per semester, get unlimited software fixes, OS reinstalls, virus removal and more — right on campus. Zero consultation fees. Zero hidden charges.
+                For as little as GH₵ 20 per semester, get unlimited software fixes, OS reinstalls, virus removal and more — right on campus. Zero consultation fees. Zero hidden charges.
               </motion.p>
             </div>
 
@@ -122,7 +122,7 @@ export const LandingHero: React.FC = () => {
               className="grid grid-cols-3 gap-8 pt-12 border-t border-slate-200/40"
             >
               <div>
-                <span className="block text-3xl sm:text-4xl font-heading font-bold text-[#00183D]">GH₵10</span>
+                <span className="block text-3xl sm:text-4xl font-heading font-bold text-[#00183D]">GH₵20</span>
                 <span className="block text-sm text-slate-500 font-body font-medium mt-2 leading-tight">Starting per semester</span>
               </div>
               <div>

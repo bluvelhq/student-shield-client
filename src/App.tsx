@@ -64,7 +64,7 @@ function MainLayout() {
       setShowMockCheckout(true);
       setMockDetails({
         reference: params.get('reference'),
-        amount: params.get('amount') || '10',
+        amount: params.get('amount') || '20',
         subId: params.get('subId'),
         userId: params.get('userId'),
         planId: params.get('planId') || 'basic-plan'
@@ -75,7 +75,7 @@ function MainLayout() {
       const subId = params.get('sub_id') || params.get('subId');
       const userId = params.get('user_id') || params.get('userId');
       const planId = params.get('plan_id') || params.get('planId');
-      const amount = params.get('amount') || '10';
+      const amount = params.get('amount') || '20';
 
       if (subId && userId) {
         setVerifying(true);

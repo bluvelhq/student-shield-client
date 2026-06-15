@@ -18,9 +18,9 @@ import { BlogPost, FAQ } from '../types';
 import { BackgroundRippleEffect } from '../components/ui/background-ripple-effect';
 import { CometCard } from '../components/ui/comet-card';
 // @ts-expect-error - png asset loaded via vite builder
-import derrickAvatar from '../assets/images/derrick_avatar_1779727860275.png';
-// @ts-expect-error - png asset loaded via vite builder
-import studentshieldLady from '../assets/images/studentshield_lady_1779840235585.png';
+import studentshieldLady from '../assets/images/LADY WITH BACKROUND.png';
+
+const teamAvatarPlaceholder = 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150&q=80';
 
 // =========================================================================
 // ABOUT PAGE
@@ -31,25 +31,25 @@ export const AboutPage: React.FC = () => {
       name: 'Derrick Boateng', 
       role: 'CEO & Co-founder', 
       bio: 'On a mission to redefine device "reliability and structural peace of mind for Uni students and beyond"', 
-      avatar: derrickAvatar 
+      avatar: teamAvatarPlaceholder 
     },
     { 
       name: 'Dr. Amina Osei-Poku', 
       role: 'Academic Advisor & Patron', 
       bio: 'Senior member, computer engineering sciences department.', 
-      avatar: derrickAvatar 
+      avatar: teamAvatarPlaceholder 
     },
     { 
       name: 'Ato Kwamena Support', 
       role: 'Lead Hardware Technician', 
       bio: 'Electronics specialist covering physical laptop boards & power circuits.', 
-      avatar: derrickAvatar 
+      avatar: teamAvatarPlaceholder 
     },
     { 
       name: 'Efua Mensah Asante', 
       role: 'Head of Customer Success', 
       bio: 'Passionate about seamless on-campus support operations and fast diagnostic tickets.', 
-      avatar: derrickAvatar 
+      avatar: teamAvatarPlaceholder 
     }
   ];
 

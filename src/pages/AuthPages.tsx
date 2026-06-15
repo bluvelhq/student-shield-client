@@ -44,7 +44,7 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
 
   const selectedPlanId = viewState?.selectPlanId || 'basic-plan';
   const planName = selectedPlanId === 'premium-plan' ? 'Premium Shield Cover' : 'Basic Cover Option';
-  const planPrice = selectedPlanId === 'premium-plan' ? 'GH₵30' : 'GH₵10';
+  const planPrice = selectedPlanId === 'premium-plan' ? 'GH₵50' : 'GH₵20';
 
   const handleAutoFill = async (role: 'student' | 'admin') => {
     if (role === 'student') {
@@ -121,7 +121,7 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
 
         const registeredUserId = regData.user.id;
         const pendingSubId = regData.subscription.id;
-        const finalPrice = selectedPlanId === 'premium-plan' ? 30 : 10;
+        const finalPrice = selectedPlanId === 'premium-plan' ? 50 : 20;
 
         // Sync local client session in localStorage so that navigation loads authenticated stats
         dbService.loginSession(regData.user, regData.profile);

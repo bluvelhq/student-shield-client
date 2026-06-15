@@ -95,7 +95,7 @@
       "id": "pay-1",
       "user_id": "usr-student-1",
       "subscription_id": "sub-1",
-      "amount": 30,
+      "amount": 50,
       "currency": "GHS",
       "status": "successful",
       "payment_method": "Mobile Money (MTN)",
@@ -195,7 +195,7 @@
       "id": "log-2",
       "user_id": "usr-student-1",
       "action": "Subscription Creation",
-      "details": "Purchased Premium Shield subscription GH₵30 via MTN Mobile Money.",
+      "details": "Purchased Premium Shield subscription GH₵50 via MTN Mobile Money.",
       "created_at": "2026-05-11T11:42:10.735Z"
     }
   ]

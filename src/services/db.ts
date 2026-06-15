@@ -22,7 +22,7 @@ const DEFAULT_PLANS: Plan[] = [
   {
     id: 'basic-plan',
     name: 'Basic Cover',
-    price: 10,
+    price: 20,
     billing_cycle: 'semester',
     description: 'Essential software support and virus removal for student laptops.',
     features: [
@@ -37,7 +37,7 @@ const DEFAULT_PLANS: Plan[] = [
   {
     id: 'premium-plan',
     name: 'Premium Shield',
-    price: 30,
+    price: 50,
     billing_cycle: 'semester',
     description: 'Full-coverage protection including deep diagnostics and priority hardware repair routing.',
     features: [
@@ -63,12 +63,12 @@ const DEFAULT_FAQS: FAQ[] = [
     id: 'faq-2',
     category: 'Pricing',
     question: 'Is the billing automatic or semester-based?',
-    answer: 'It is semester-based! We understand student budgets. You pay a single payment of GH₵10 (Basic) or GH₵30 (Premium) for the entire semester. No automatic recurring surprises.'
+    answer: 'It is semester-based! We understand student budgets. You pay a single payment of GH₵20 (Basic) or GH₵50 (Premium) for the entire semester. No automatic recurring surprises.'
   },
   {
     id: 'faq-3',
     category: 'Hardware',
-    question: 'Does the GH₵30 tier pay for broken spare parts?',
+    question: 'Does the GH₵50 tier pay for broken spare parts?',
     answer: 'The Premium plan covers complete diagnostic evaluation, device cleaning, operating system setups, and labor fees for replacing components. If you need physical hardware replacement parts (like a new laptop screen or battery), you only pay the direct parts cost from our certified supplier; our technician labor charge is completely covered under your Premium Shield plan.'
   },
   {
@@ -230,7 +230,7 @@ class StudentShieldDB {
           id: 'pay-1',
           user_id: 'usr-student-1',
           subscription_id: 'sub-1',
-          amount: 30,
+          amount: 50,
           currency: 'GHS',
           status: 'successful',
           payment_method: 'Mobile Money (MTN)',
@@ -334,7 +334,7 @@ class StudentShieldDB {
           id: 'log-2',
           user_id: 'usr-student-1',
           action: 'Subscription Creation',
-          details: 'Purchased Premium Shield subscription GH₵30 via MTN Mobile Money.',
+          details: 'Purchased Premium Shield subscription GH₵50 via MTN Mobile Money.',
           created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
         }
       ];

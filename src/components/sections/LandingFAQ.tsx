@@ -114,7 +114,7 @@ export const LandingFAQ: React.FC = () => {
                 className="py-3.5 px-8 text-xs font-black uppercase tracking-widest bg-royal hover:bg-royal/90 text-white rounded-none transition-transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer inline-flex items-center space-x-2 shadow-none"
               >
                 <Shield className="w-4 h-4 text-white" />
-                <span>Get Insured for GH₵ 10</span>
+                <span>Get Insured for GH₵ 20</span>
               </button>
             </div>
           </div>

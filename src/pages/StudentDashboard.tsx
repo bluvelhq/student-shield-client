@@ -492,7 +492,7 @@ export const StudentDashboard: React.FC = () => {
               {isPremium ? 'Premium' : 'Basic'}
             </span>
             <span className="text-xs text-slate-400 block mt-1.5">
-              GH₵ {isPremium ? '30' : '10'} / semester
+              GH₵ {isPremium ? '50' : '20'} / semester
             </span>
           </div>
 

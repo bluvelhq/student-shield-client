@@ -38,7 +38,7 @@ export interface Device {
 export interface Plan {
   id: string;
   name: string;
-  price: number; // e.g. 10 or 30 (in GH₵)
+  price: number; // e.g. 20 or 50 (in GH₵)
   billing_cycle: 'semester';
   features: string[];
   description: string;
