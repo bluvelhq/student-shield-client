@@ -41,7 +41,7 @@ export const PricingGrid: React.FC = () => {
   return (
     <div id="coverage-plans" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Header Titles */}
         <div className="text-center max-w-3xl mx-auto mb-20 select-none">
           <span className="text-[11px] font-body font-semibold text-royal block mb-4 uppercase tracking-wide">
@@ -57,7 +57,7 @@ export const PricingGrid: React.FC = () => {
 
         {/* Flat pricing cards layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-20">
-          
+
           {/* Basic Card */}
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
@@ -72,7 +72,7 @@ export const PricingGrid: React.FC = () => {
                 <span className="inline-block bg-white border border-slate-300 text-slate-800 text-[10px] font-body font-semibold uppercase tracking-wide px-4 py-2 mb-6 rounded-full">
                   Basic
                 </span>
-                
+
                 {/* Big Bold Price */}
                 <div className="mb-4">
                   <div className="flex items-baseline space-x-2">
@@ -151,7 +151,7 @@ export const PricingGrid: React.FC = () => {
                 <span className="inline-block bg-white border border-slate-200/70 text-slate-800 text-[10px] font-extrabold uppercase tracking-widest px-4 py-1.5 mb-6 rounded-full shadow-sm">
                   Premium
                 </span>
-                
+
                 {/* Big Bold Price */}
                 <div className="mb-3">
                   <div className="flex items-baseline space-x-0.5">

@@ -119,6 +119,58 @@
       "image_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80",
       "status": "active",
       "created_at": "2026-06-15T10:49:41.591Z"
+    },
+    {
+      "id": "dev-gdmaja8",
+      "user_id": "usr-reg-99hnelj",
+      "name": "Laptop dfdfdfdf",
+      "type": "laptop",
+      "brand": "Laptop",
+      "model": "dfdfdfdf",
+      "serial_number": "SN-61663",
+      "operating_system": "Windows 11 Setup (2026)",
+      "image_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80",
+      "status": "active",
+      "created_at": "2026-06-15T23:13:16.319Z"
+    },
+    {
+      "id": "dev-jgh5h4h",
+      "user_id": "usr-reg-99hnelj",
+      "name": "Laptop dfdfdfdf",
+      "type": "laptop",
+      "brand": "Laptop",
+      "model": "dfdfdfdf",
+      "serial_number": "SN-61164",
+      "operating_system": "Windows 11 Setup (2026)",
+      "image_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80",
+      "status": "active",
+      "created_at": "2026-06-15T23:13:16.486Z"
+    },
+    {
+      "id": "dev-dqo3zek",
+      "user_id": "usr-reg-99hnelj",
+      "name": "Laptop Hp",
+      "type": "laptop",
+      "brand": "Laptop",
+      "model": "Hp",
+      "serial_number": "SN-31410",
+      "operating_system": "Windows 11 Setup (2026)",
+      "image_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80",
+      "status": "active",
+      "created_at": "2026-06-17T11:52:05.605Z"
+    },
+    {
+      "id": "dev-8736izx",
+      "user_id": "usr-reg-99hnelj",
+      "name": "Laptop Hp",
+      "type": "laptop",
+      "brand": "Laptop",
+      "model": "Hp",
+      "serial_number": "SN-66578",
+      "operating_system": "Windows 11 Setup (2026)",
+      "image_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80",
+      "status": "active",
+      "created_at": "2026-06-17T11:52:05.614Z"
     }
   ],
   "subscriptions": [
@@ -250,6 +302,42 @@
       "type": "info",
       "is_read": false,
       "created_at": "2026-06-15T10:49:41.591Z"
+    },
+    {
+      "id": "notif-wqwldl0",
+      "user_id": "usr-reg-99hnelj",
+      "title": "Device Shield Registered",
+      "content": "Security sweep initialized on Laptop dfdfdfdf!",
+      "type": "info",
+      "is_read": false,
+      "created_at": "2026-06-15T23:13:16.319Z"
+    },
+    {
+      "id": "notif-vb822xq",
+      "user_id": "usr-reg-99hnelj",
+      "title": "Device Shield Registered",
+      "content": "Security sweep initialized on Laptop dfdfdfdf!",
+      "type": "info",
+      "is_read": false,
+      "created_at": "2026-06-15T23:13:16.486Z"
+    },
+    {
+      "id": "notif-srm5mb1",
+      "user_id": "usr-reg-99hnelj",
+      "title": "Device Shield Registered",
+      "content": "Security sweep initialized on Laptop Hp!",
+      "type": "info",
+      "is_read": false,
+      "created_at": "2026-06-17T11:52:05.605Z"
+    },
+    {
+      "id": "notif-r7ppvg5",
+      "user_id": "usr-reg-99hnelj",
+      "title": "Device Shield Registered",
+      "content": "Security sweep initialized on Laptop Hp!",
+      "type": "info",
+      "is_read": false,
+      "created_at": "2026-06-17T11:52:05.614Z"
     }
   ],
   "activityLogs": [
@@ -280,6 +368,34 @@
       "action": "Device Added",
       "details": "Registered device serial trace: SN-97941",
       "created_at": "2026-06-15T10:49:41.591Z"
+    },
+    {
+      "id": "log-q77d50j",
+      "user_id": "usr-reg-99hnelj",
+      "action": "Device Added",
+      "details": "Registered device serial trace: SN-61663",
+      "created_at": "2026-06-15T23:13:16.319Z"
+    },
+    {
+      "id": "log-wiazt4o",
+      "user_id": "usr-reg-99hnelj",
+      "action": "Device Added",
+      "details": "Registered device serial trace: SN-61164",
+      "created_at": "2026-06-15T23:13:16.486Z"
+    },
+    {
+      "id": "log-12qydfu",
+      "user_id": "usr-reg-99hnelj",
+      "action": "Device Added",
+      "details": "Registered device serial trace: SN-31410",
+      "created_at": "2026-06-17T11:52:05.605Z"
+    },
+    {
+      "id": "log-cif7x8k",
+      "user_id": "usr-reg-99hnelj",
+      "action": "Device Added",
+      "details": "Registered device serial trace: SN-66578",
+      "created_at": "2026-06-17T11:52:05.614Z"
     }
   ]
 }

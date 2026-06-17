@@ -1,9 +1,4 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   Shield, Zap, HelpCircle, MapPin, CreditCard, Clock
@@ -13,11 +8,108 @@ import { BackgroundRippleEffect } from '../ui/background-ripple-effect';
 // @ts-expect-error - png asset loaded via vite builder proxy
 import heroImage from '../../assets/images/LADY WITH BACKROUND.png';
 
+// ── Typewriter configuration ────────────────────────────────────────────────
+const TYPEWRITER_PHRASES = [
+  'Your Laptop Protected. Your Studies Secured.',
+  "No Stress. No Panic. We've Got Your Tech.",
+  'Study Without Interruptions.',
+  'Fast Support. Zero Worries.',
+  'Stay Connected. Stay Protected.',
+];
+const TYPE_SPEED   = 42;   // ms per character while typing
+const DELETE_SPEED = 22;   // ms per character while deleting
+const PAUSE_AFTER_TYPE   = 2600; // ms to pause when phrase is fully typed
+const PAUSE_AFTER_DELETE = 420;  // ms to pause before starting next phrase
+
+/** Split a phrase into [body, lastWord] so the last word can be accented. */
+function splitPhrase(phrase: string): { body: string; accent: string } {
+  const trimmed = phrase.trimEnd();
+  const lastSpace = trimmed.lastIndexOf(' ');
+  if (lastSpace === -1) return { body: '', accent: trimmed };
+  return { body: trimmed.slice(0, lastSpace + 1), accent: trimmed.slice(lastSpace + 1) };
+}
+
+function useTypewriter(phrases: string[]) {
+  const [displayed, setDisplayed] = useState('');
+  const stateRef = useRef({ phraseIdx: 0, charIdx: 0, deleting: false });
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+
+    const tick = () => {
+      const { phraseIdx, charIdx, deleting } = stateRef.current;
+      const target = phrases[phraseIdx];
+
+      if (!deleting) {
+        // Typing forward
+        if (charIdx < target.length) {
+          const next = charIdx + 1;
+          stateRef.current.charIdx = next;
+          setDisplayed(target.slice(0, next));
+          timer = setTimeout(tick, TYPE_SPEED);
+        } else {
+          // Fully typed – pause then start deleting
+          timer = setTimeout(() => {
+            stateRef.current.deleting = true;
+            tick();
+          }, PAUSE_AFTER_TYPE);
+        }
+      } else {
+        // Deleting
+        if (charIdx > 0) {
+          const next = charIdx - 1;
+          stateRef.current.charIdx = next;
+          setDisplayed(target.slice(0, next));
+          timer = setTimeout(tick, DELETE_SPEED);
+        } else {
+          // Fully deleted – move to next phrase
+          stateRef.current.deleting = false;
+          stateRef.current.phraseIdx = (phraseIdx + 1) % phrases.length;
+          timer = setTimeout(tick, PAUSE_AFTER_DELETE);
+        }
+      }
+    };
+
+    // Kick off with the first phrase already showing a character
+    timer = setTimeout(tick, 600);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return displayed;
+}
+
+// Blinking-cursor style injected once
+const CURSOR_STYLE = `
+  @keyframes ss-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .ss-cursor::after {
+    content: '|';
+    display: inline-block;
+    margin-left: 2px;
+    animation: ss-blink 1s step-start infinite;
+    color: #2563EB;
+    font-weight: 300;
+  }
+`;
+
 export const LandingHero: React.FC = () => {
   const { navigate, user } = useApp();
   const [scanActive, setScanActive] = useState(true);
   const [livePulse, setLivePulse] = useState(72);
   const [demoTab, setDemoTab] = useState<'overview' | 'diagnostics' | 'tickets'>('overview');
+
+  // Inject blinking-cursor keyframe once into <head>
+  useEffect(() => {
+    if (document.getElementById('ss-typewriter-style')) return;
+    const tag = document.createElement('style');
+    tag.id = 'ss-typewriter-style';
+    tag.textContent = CURSOR_STYLE;
+    document.head.appendChild(tag);
+  }, []);
+
+  // Typewriter animated headline
+  const displayedText = useTypewriter(TYPEWRITER_PHRASES);
+  const { body, accent } = splitPhrase(displayedText);
 
   // Interactive local simulation inside live laptop screen
   useEffect(() => {
@@ -74,11 +166,9 @@ export const LandingHero: React.FC = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.5 }}
-                className="text-5xl sm:text-6xl lg:text-7xl font-heading font-bold tracking-tight text-[#00183D] leading-[1.05] selection:bg-royal/35"
+                className="text-5xl sm:text-6xl lg:text-7xl font-heading font-bold tracking-tight text-[#00183D] leading-[1.05] selection:bg-royal/35 min-h-[1.05em] ss-cursor"
               >
-                Your Laptop <br />
-                Protected.<br />
-                Your Studies <span className="text-royal">Secured.</span>
+                {body}<span className="text-royal">{accent}</span>
               </motion.h1>
 
               <motion.p
@@ -110,7 +200,7 @@ export const LandingHero: React.FC = () => {
                 onClick={handleScrollToPlans}
                 className="px-8 py-4 text-base font-heading font-semibold rounded-full bg-transparent border-2 border-slate-300 text-slate-700 hover:border-royal hover:text-royal transition-all flex items-center space-x-2.5 cursor-pointer"
               >
-                <span>View Demo</span>
+                <span>View Plans</span>
               </button>
             </motion.div>
 

@@ -680,6 +680,71 @@ class StudentShieldDB {
     return { subscription: newSub, payment: newPayment };
   }
 
+  public activateSubscription(
+    subscriptionId: string,
+    userId: string,
+    planId: string,
+    amount: number,
+    reference: string,
+    paymentMethod: string
+  ): void {
+    const subs = this.getTable<Subscription>('ss_subscriptions');
+    const idx = subs.findIndex(s => s.id === subscriptionId);
+    
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 120); // standard semester length
+
+    if (idx !== -1) {
+      subs[idx].status = 'active';
+      subs[idx].start_date = new Date().toISOString();
+      subs[idx].end_date = expiryDate.toISOString();
+      this.setTable('ss_subscriptions', subs);
+    } else {
+      subs.push({
+        id: subscriptionId,
+        user_id: userId,
+        plan_id: planId,
+        status: 'active',
+        start_date: new Date().toISOString(),
+        end_date: expiryDate.toISOString(),
+        created_at: new Date().toISOString()
+      });
+      this.setTable('ss_subscriptions', subs);
+    }
+
+    // Record payment
+    const payments = this.getTable<Payment>('ss_payments');
+    if (!payments.some(p => p.transaction_ref === reference)) {
+      payments.push({
+        id: `pay-${Math.random().toString(36).substring(2, 9)}`,
+        user_id: userId,
+        subscription_id: subscriptionId,
+        amount,
+        currency: 'GHS',
+        status: 'successful',
+        payment_method: paymentMethod,
+        transaction_ref: reference,
+        created_at: new Date().toISOString()
+      });
+      this.setTable('ss_payments', payments);
+    }
+
+    // Create welcoming notification
+    this.createNotification(
+      userId,
+      'Subscription Shield ACTIVE',
+      'Welcome to campus protection. Register your protected laptop details now to secure full diagnostic coverage!',
+      'success'
+    );
+
+    // Record audit logs
+    this.createActivityLog(
+      userId,
+      'Coverage Activated',
+      `Paystack transaction validated successfully. Ref: ${reference}`
+    );
+  }
+
   // TICKETS API
   public getTickets(): SupportTicket[] {
     const session = this.getCurrentUser();

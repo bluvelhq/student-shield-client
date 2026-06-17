@@ -93,6 +93,18 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
         return;
       }
 
+      const safeJson = async (response: Response) => {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            return await response.json();
+          } catch (e) {
+            throw new Error('Invalid JSON format from server.');
+          }
+        }
+        throw new Error('OFFLINE_FALLBACK');
+      };
+
       try {
         // 1. Submit Account Auto Creation route
         const regResp = await fetch('/api/auth/register', {
@@ -109,13 +121,20 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
           })
         });
 
-        if (!regResp.ok) {
-          const errBody = await regResp.json();
-          throw new Error(errBody.error || 'Failed to auto-provision account profiles.');
+        let regData: any = null;
+        if (regResp.ok) {
+          regData = await safeJson(regResp);
+        } else {
+          try {
+            const errBody = await safeJson(regResp);
+            throw new Error(errBody.error || 'Failed to auto-provision account profiles.');
+          } catch (e: any) {
+            if (e.message === 'OFFLINE_FALLBACK') throw e;
+            throw new Error(e.message || 'Failed to auto-provision account profiles.');
+          }
         }
 
-        const regData = await regResp.json();
-        if (!regData.success) {
+        if (!regData || !regData.success) {
           throw new Error('Onboarding backend authentication reject.');
         }
 
@@ -157,12 +176,14 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
           })
         });
 
-        if (!payResp.ok) {
+        let payData: any = null;
+        if (payResp.ok) {
+          payData = await safeJson(payResp);
+        } else {
           throw new Error('Verification pipeline failed to prepare transaction.');
         }
 
-        const payData = await payResp.json();
-        if (payData.success && payData.authorization_url) {
+        if (payData && payData.success && payData.authorization_url) {
           setTimeout(() => {
             window.location.href = payData.authorization_url;
           }, 600);
@@ -171,8 +192,42 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
         }
 
       } catch (err: any) {
-        setErrorMsg(err.message || 'System onboarding transaction aborted.');
-        setLoading(false);
+        if (err.message === 'OFFLINE_FALLBACK') {
+          console.warn("API Server registration offline, engaging client-side Local DB flow.");
+          const res = dbService.signUp({
+            email,
+            fullName,
+            university,
+            studentId: studentId || `TBD-${Math.floor(100000 + Math.random() * 900000)}`,
+            phone,
+            role: 'student'
+          });
+
+          // Register device locally if supplied
+          if (deviceBrand && deviceModel) {
+            dbService.registerDevice({
+              name: `${deviceBrand} ${deviceModel}`,
+              type: 'laptop',
+              brand: deviceBrand,
+              model: deviceModel,
+              serialNumber: deviceSerial || 'TBD-DEVICESERIAL',
+              operatingSystem: `Windows 11 Setup (${new Date().getFullYear()})`
+            });
+          }
+
+          const finalPrice = selectedPlanId === 'premium-plan' ? 50 : 20;
+          const pendingSubId = `sub-${Math.random().toString(36).substring(2, 9)}`;
+          const ref = `REF-SIM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+          const checkoutMockUrl = `${window.location.origin}?mock_checkout=1&reference=${ref}&amount=${finalPrice}&subId=${pendingSubId}&userId=${res.user.id}&planId=${selectedPlanId}`;
+          
+          setSuccessMsg('Onboarding successful! Connecting securely with Paystack checkout hub...');
+          setTimeout(() => {
+            window.location.href = checkoutMockUrl;
+          }, 600);
+        } else {
+          setErrorMsg(err.message || 'System onboarding transaction aborted.');
+          setLoading(false);
+        }
       }
     }
   };
