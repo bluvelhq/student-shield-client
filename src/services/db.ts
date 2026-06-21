@@ -75,7 +75,7 @@ const DEFAULT_FAQS: FAQ[] = [
     id: 'faq-4',
     category: 'Campus Support',
     question: 'Where can I find StudentShield technicians on campus?',
-    answer: 'We operate support boots at central campus locations (typically near the Main Library and Science Complex). Our technicians are available Monday to Friday from 8:00 AM to 6:00 PM.'
+    answer: 'We operate support boots at central campus locations (typically near the Main Library and Science Complex). Our technicians are available Monday to Saturday from 8:00 AM to 5:00 PM.'
   },
   {
     id: 'faq-5',

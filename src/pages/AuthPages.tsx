@@ -339,9 +339,6 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
                     className="w-full text-xs px-3 py-2 border border-slate-200 bg-slate-50 rounded-xl text-slate-800 focus:outline-none focus:border-royal"
                   >
                     <option>University of Ghana (Legon)</option>
-                    <option>KNUST (Kumasi)</option>
-                    <option>Ashesi University</option>
-                    <option>Academic Hub (Accra Mall)</option>
                   </select>
                 </div>
 

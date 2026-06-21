@@ -355,10 +355,9 @@ export const AboutPage: React.FC = () => {
           </span>
           <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16 opacity-40 hover:opacity-100 transition-opacity duration-300">
             <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-extrabold text-navy/70">UG SRC</span>
-            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-extrabold text-navy/70">KNUST TECH</span>
-            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-extrabold text-navy/70">ASHESI HUB</span>
-            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-extrabold text-navy/70">UCC CODES</span>
-            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-extrabold text-navy/70">UPSA LAB</span>
+            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-extrabold text-navy/70">UG COMPUTER SCIENCE</span>
+            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-extrabold text-navy/70">UG LEGON LIBRARY</span>
+            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-extrabold text-navy/70">UG BUSINESS SCHOOL</span>
           </div>
         </div>
 
@@ -736,24 +735,24 @@ export const ContactPage: React.FC = () => {
                   <Calendar className="w-4 h-4 text-royal mt-0.5 flex-shrink-0" />
                   <div>
                     <span className="font-bold text-navy block">Desk Hours</span>
-                    <span className="text-slate-500 block">Monday to Friday (8:00 AM — 6:00 PM)</span>
+                    <span className="text-slate-500 block">Monday to Saturday (8:00 AM — 5:00 PM)</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Simulated Live status map */}
-            <div className="bg-slate-100 border border-slate-200/80 rounded-none relative flex flex-col items-center justify-center p-6 h-full min-h-[220px]">
-              <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-45 pointer-events-none" />
-              
-              <div className="p-4 bg-royal text-white rounded-none shadow-lg border border-white/20 relative z-10 flex items-center space-x-3 animate-pulse select-none">
-                <MapPin className="w-5 h-5 flex-shrink-0" />
-                <span className="text-xs font-black uppercase tracking-wider font-sans">UG LEGON LIBRARY DESK</span>
-              </div>
-
-              <span className="absolute bottom-4 text-[9px] uppercase tracking-widest text-slate-400 font-extrabold z-10 mt-3 block">
-                Active Tech Support Spot
-              </span>
+            {/* Integrated Google Maps View */}
+            <div className="border border-slate-200/80 rounded-none relative overflow-hidden h-full min-h-[280px]">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.6698942202685!2d-0.18731792518388484!3d5.651737494329241!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x11eecf84db091011%3A0xe54e6e666a7b7914!2sBalme%20Library!5e0!3m2!1sen!2sgh!4v1718928000000!5m2!1sen!2sgh" 
+                width="100%" 
+                height="100%" 
+                style={{ border: 0, minHeight: '280px' }} 
+                allowFullScreen={true} 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Google Maps - Balme Library, University of Ghana"
+              ></iframe>
             </div>
 
           </div>

@@ -99,7 +99,7 @@ export const StudentDashboard: React.FC = () => {
   const [welcomeBrand, setWelcomeBrand] = useState('Asus');
   const [welcomeModel, setWelcomeModel] = useState('');
   const [welcomeSerial, setWelcomeSerial] = useState('');
-  const [welcomeYear, setWelcomeYear] = useState('2025');
+  const [welcomeYear, setWelcomeYear] = useState('2026');
   const [welcomeUploading, setWelcomeUploading] = useState(false);
 
   useEffect(() => {
@@ -267,7 +267,7 @@ export const StudentDashboard: React.FC = () => {
                   required
                   value={welcomeYear}
                   onChange={(e) => setWelcomeYear(e.target.value)}
-                  placeholder="2025"
+                  placeholder="2026"
                   className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all"
                 />
               </div>
@@ -312,7 +312,7 @@ export const StudentDashboard: React.FC = () => {
               Welcome back, {profile?.full_name || 'fdfdfdf'} 👋
             </h1>
             <p className="text-xs text-slate-400 mt-1 font-medium">
-              StudentShield • {isPremium ? 'Premium Shield Cover' : 'Basic Cover Plan'} • Semester 2, 2025
+              StudentShield • {isPremium ? 'Premium Shield Cover' : 'Basic Cover Plan'} • Semester 2, 2026
             </p>
           </div>
 
@@ -519,7 +519,7 @@ export const StudentDashboard: React.FC = () => {
           <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
             <span className="text-[10px] uppercase font-bold text-royal tracking-wide block font-sans">COVERAGE ENDS</span>
             <span className="text-2xl font-black text-navy mt-1 tracking-tight block">
-              Dec 2025
+              Dec 2026
             </span>
             <span className="text-xs text-slate-400 block mt-1.5">
               End of exams
@@ -616,7 +616,7 @@ export const StudentDashboard: React.FC = () => {
                 </h3>
               </div>
               <span className="text-xs text-slate-350 font-medium block">
-                Valid until: December 2025
+                Valid until: December 2026
               </span>
             </div>
 
@@ -719,7 +719,7 @@ export const StudentDashboard: React.FC = () => {
                   <div className="p-4.5 bg-slate-50/50 border border-slate-200/60 rounded-2xl flex justify-between items-center">
                     <div className="space-y-1">
                       <h4 className="font-bold text-navy text-xs leading-snug tracking-tight">Windows 11 Activation Error</h4>
-                      <span className="text-[10px] text-slate-400 font-medium block">Nov 12, 2025</span>
+                      <span className="text-[10px] text-slate-400 font-medium block">Nov 12, 2026</span>
                     </div>
                     <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase text-emerald-700 bg-emerald-50 border border-emerald-150">
                       Resolved
@@ -729,7 +729,7 @@ export const StudentDashboard: React.FC = () => {
                   <div className="p-4.5 bg-slate-50/50 border border-slate-200/60 rounded-2xl flex justify-between items-center">
                     <div className="space-y-1">
                       <h4 className="font-bold text-navy text-xs leading-snug tracking-tight">Keyboard key not responding</h4>
-                      <span className="text-[10px] text-slate-400 font-medium block">Oct 28, 2025</span>
+                      <span className="text-[10px] text-slate-400 font-medium block">Oct 28, 2026</span>
                     </div>
                     <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase text-emerald-700 bg-emerald-50 border border-emerald-150">
                       Resolved
@@ -739,7 +739,7 @@ export const StudentDashboard: React.FC = () => {
                   <div className="p-4.5 bg-slate-50/50 border border-slate-200/60 rounded-2xl flex justify-between items-center">
                     <div className="space-y-1">
                       <h4 className="font-bold text-navy text-xs leading-snug tracking-tight font-sans">Malware removal &amp; cleanup</h4>
-                      <span className="text-[10px] text-slate-400 font-medium block font-sans">Oct 5, 2025</span>
+                      <span className="text-[10px] text-slate-400 font-medium block font-sans">Oct 5, 2026</span>
                     </div>
                     <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase text-emerald-700 bg-emerald-50 border border-emerald-150">
                       Resolved
@@ -749,7 +749,7 @@ export const StudentDashboard: React.FC = () => {
                   <div className="p-4.5 bg-slate-50/50 border border-slate-200/60 rounded-2xl flex justify-between items-center">
                     <div className="space-y-1">
                       <h4 className="font-bold text-navy text-xs leading-snug tracking-tight">MS Office installation &amp; setup</h4>
-                      <span className="text-[10px] text-slate-400 font-medium block">Sep 14, 2025</span>
+                      <span className="text-[10px] text-slate-400 font-medium block">Sep 14, 2026</span>
                     </div>
                     <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase text-emerald-700 bg-emerald-50 border border-emerald-150">
                       Resolved

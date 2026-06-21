@@ -120,7 +120,14 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <div className="text-left text-slate-400 block">
-                  On Campus — Daily
+                  <span className="font-bold text-white block">Working Days:</span>
+                  <span>Monday - Saturday</span>
+                </div>
+              </li>
+              <li>
+                <div className="text-left text-slate-400 block">
+                  <span className="font-bold text-white block">Working Hours:</span>
+                  <span>8:00 AM - 5:00 PM</span>
                 </div>
               </li>
             </ul>
@@ -129,7 +136,7 @@ export const Footer: React.FC = () => {
           {/* Newsletter Box */}
           <div className="space-y-4">
             <h4 className="text-xs font-bold tracking-widest text-white uppercase font-sans">
-              STAY CODE-CLEAN
+              Subscribe to Stay Updated
             </h4>
             <p className="text-xs text-slate-400 leading-relaxed font-sans">
               Subscribe to get virus warnings, software discounts, and diagnostic bulletins.
@@ -162,7 +169,7 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="border-t border-white/10 mt-12 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 font-sans">
-          <p>© 2025 StudentShield. All rights reserved.</p>
+          <p>© 2026 StudentShield. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 sm:mt-0">
             <button onClick={() => navigate('pricing')} className="hover:text-royal transition-colors">Semester License Rules</button>
             <span>•</span>
