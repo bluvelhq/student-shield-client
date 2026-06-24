@@ -23,6 +23,12 @@
       "email": "db723252@gmail.com",
       "role": "student",
       "created_at": "2026-06-15T10:49:41.448Z"
+    },
+    {
+      "id": "usr-reg-i8ti7yr",
+      "email": "db72325@gmail.com",
+      "role": "student",
+      "created_at": "2026-06-23T16:18:39.734Z"
     }
   ],
   "profiles": [
@@ -65,6 +71,16 @@
       "phone": "0592739947",
       "avatar_url": "https://api.dicebear.com/7.x/initials/svg?seed=Derrick%20Boateg",
       "created_at": "2026-06-15T10:49:41.448Z"
+    },
+    {
+      "id": "prof-yqr6uvh",
+      "user_id": "usr-reg-i8ti7yr",
+      "full_name": "Derrick  Boateng",
+      "university": "University of Ghana (Legon)",
+      "student_id": "11217595",
+      "phone": "05927339947",
+      "avatar_url": "https://api.dicebear.com/7.x/initials/svg?seed=Derrick%20%20Boateng",
+      "created_at": "2026-06-23T16:18:39.734Z"
     }
   ],
   "devices": [
@@ -171,6 +187,32 @@
       "image_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80",
       "status": "active",
       "created_at": "2026-06-17T11:52:05.614Z"
+    },
+    {
+      "id": "dev-fycst2k",
+      "user_id": "usr-reg-i8ti7yr",
+      "name": "HP Envy",
+      "type": "laptop",
+      "brand": "HP",
+      "model": "Envy",
+      "serial_number": "SN-80759",
+      "operating_system": "Windows 11 Setup (2026)",
+      "image_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80",
+      "status": "active",
+      "created_at": "2026-06-23T16:18:39.747Z"
+    },
+    {
+      "id": "dev-knf9ytd",
+      "user_id": "usr-reg-i8ti7yr",
+      "name": "HP Envy",
+      "type": "laptop",
+      "brand": "HP",
+      "model": "Envy",
+      "serial_number": "SN-10133",
+      "operating_system": "Windows 11 Setup (2026)",
+      "image_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80",
+      "status": "active",
+      "created_at": "2026-06-23T16:18:39.763Z"
     }
   ],
   "subscriptions": [
@@ -191,6 +233,15 @@
       "start_date": "2026-06-15T10:49:41.448Z",
       "end_date": "2026-10-13T10:49:41.448Z",
       "created_at": "2026-06-15T10:49:41.448Z"
+    },
+    {
+      "id": "sub-r5xtfay",
+      "user_id": "usr-reg-i8ti7yr",
+      "plan_id": "basic-plan",
+      "status": "active",
+      "start_date": "2026-06-23T16:18:51.800Z",
+      "end_date": "2026-10-21T16:18:51.797Z",
+      "created_at": "2026-06-23T16:18:39.734Z"
     }
   ],
   "payments": [
@@ -204,6 +255,17 @@
       "payment_method": "Mobile Money (MTN)",
       "transaction_ref": "TXN-MM-892837482",
       "created_at": "2026-05-11T11:42:10.735Z"
+    },
+    {
+      "id": "pay-vsj1l5u",
+      "user_id": "usr-reg-i8ti7yr",
+      "subscription_id": "sub-r5xtfay",
+      "amount": 20,
+      "currency": "GHS",
+      "status": "successful",
+      "payment_method": "MTN Mobile Money",
+      "transaction_ref": "REF-SIM-GV5NOMU",
+      "created_at": "2026-06-23T16:18:51.800Z"
     }
   ],
   "tickets": [
@@ -230,6 +292,18 @@
       "status": "resolved",
       "created_at": "2026-05-29T11:42:10.735Z",
       "updated_at": "2026-05-31T11:42:10.735Z"
+    },
+    {
+      "id": "tick-yqetpuj",
+      "user_id": "usr-reg-i8ti7yr",
+      "device_id": "dev-hjvcybh",
+      "title": "blue Screen of Death",
+      "description": "the machine fell and from there ai'm seegina a blue screen of death\n",
+      "category": "diagnostic",
+      "priority": "high",
+      "status": "open",
+      "created_at": "2026-06-23T16:20:20.690Z",
+      "updated_at": "2026-06-23T16:20:20.690Z"
     }
   ],
   "messages": [
@@ -338,6 +412,33 @@
       "type": "info",
       "is_read": false,
       "created_at": "2026-06-17T11:52:05.614Z"
+    },
+    {
+      "id": "notif-l5nfr8s",
+      "user_id": "usr-reg-i8ti7yr",
+      "title": "Device Shield Registered",
+      "content": "Security sweep initialized on HP Envy!",
+      "type": "info",
+      "is_read": false,
+      "created_at": "2026-06-23T16:18:39.747Z"
+    },
+    {
+      "id": "notif-ya1eu84",
+      "user_id": "usr-reg-i8ti7yr",
+      "title": "Device Shield Registered",
+      "content": "Security sweep initialized on HP Envy!",
+      "type": "info",
+      "is_read": false,
+      "created_at": "2026-06-23T16:18:39.763Z"
+    },
+    {
+      "id": "notif-1tjc47o",
+      "user_id": "usr-reg-i8ti7yr",
+      "title": "Subscription Shield ACTIVE",
+      "content": "Welcome to campus protection. Register your protected laptop details now to secure full diagnostic coverage!",
+      "type": "success",
+      "is_read": false,
+      "created_at": "2026-06-23T16:18:51.800Z"
     }
   ],
   "activityLogs": [
@@ -396,6 +497,34 @@
       "action": "Device Added",
       "details": "Registered device serial trace: SN-66578",
       "created_at": "2026-06-17T11:52:05.614Z"
+    },
+    {
+      "id": "log-fc7sp5b",
+      "user_id": "usr-reg-i8ti7yr",
+      "action": "Device Added",
+      "details": "Registered device serial trace: SN-80759",
+      "created_at": "2026-06-23T16:18:39.747Z"
+    },
+    {
+      "id": "log-etv76ab",
+      "user_id": "usr-reg-i8ti7yr",
+      "action": "Device Added",
+      "details": "Registered device serial trace: SN-10133",
+      "created_at": "2026-06-23T16:18:39.763Z"
+    },
+    {
+      "id": "log-8l5v2sr",
+      "user_id": "usr-reg-i8ti7yr",
+      "action": "Coverage Activated",
+      "details": "Paystack transaction validated successfully. Ref: REF-SIM-GV5NOMU",
+      "created_at": "2026-06-23T16:18:51.800Z"
+    },
+    {
+      "id": "log-iraskdw",
+      "user_id": "usr-reg-i8ti7yr",
+      "action": "Ticket opened",
+      "details": "Subject: blue Screen of Death",
+      "created_at": "2026-06-23T16:20:20.690Z"
     }
   ]
 }
