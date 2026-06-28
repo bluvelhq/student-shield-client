@@ -4,25 +4,21 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx server.ts",
-    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
-    "start": "node dist/server.cjs",
+    "dev": "vite",
+    "build": "vite build",
+    "start": "vite preview --port 3000 --host",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit",
-    "test": "tsx test-integration.ts"
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",
     "@google/genai": "^2.4.0",
-    "@supabase/supabase-js": "^2.106.2",
     "@tabler/icons-react": "^3.44.0",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
-    "esbuild": "^0.25.12",
-    "express": "^4.21.2",
     "lucide-react": "^0.546.0",
     "motion": "^12.41.0",
     "radix-ui": "^1.5.0",
@@ -36,10 +32,8 @@
     "vite": "^6.2.3"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
-    "tsx": "^4.22.3",
     "vite": "^6.2.3"
   }
 }

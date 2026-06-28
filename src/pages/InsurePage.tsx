@@ -27,14 +27,17 @@ export const InsurePage: React.FC = () => {
   const { navigate, refreshData, viewState } = useApp();
   
   // Plan State selection defaulting to basic-plan or passed parameter
-  const [selectedPlan, setSelectedPlan] = useState<'basic-plan' | 'premium-plan'>(
-    (viewState?.selectPlanId === 'premium-plan') ? 'premium-plan' : 'basic-plan'
+  const [selectedPlan, setSelectedPlan] = useState<'basic-plan' | 'premium-plan' | 'bonanza-plan'>(
+    (viewState?.selectPlanId === 'premium-plan') ? 'premium-plan' : 
+    (viewState?.selectPlanId === 'bonanza-plan') ? 'bonanza-plan' : 'basic-plan'
   );
 
   // Sync state if viewState propagation changes selectPlanId
   React.useEffect(() => {
     if (viewState?.selectPlanId === 'premium-plan') {
       setSelectedPlan('premium-plan');
+    } else if (viewState?.selectPlanId === 'bonanza-plan') {
+      setSelectedPlan('bonanza-plan');
     } else if (viewState?.selectPlanId === 'basic-plan') {
       setSelectedPlan('basic-plan');
     }
@@ -44,13 +47,22 @@ export const InsurePage: React.FC = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [studentId, setStudentId] = useState('');
-  const [programme, setProgramme] = useState('');
+  const [university, setUniversity] = useState('');
+  const [gender, setGender] = useState('');
   const [level, setLevel] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [laptopDetails, setLaptopDetails] = useState('');
   const [hostel, setHostel] = useState('');
   const [momoNumber, setMomoNumber] = useState('');
+
+  const [institutions, setInstitutions] = useState<string[]>([]);
+  React.useEffect(() => {
+    const list = dbService.getInstitutions().map(i => i.name);
+    setInstitutions(list);
+    if (list.length > 0) {
+      setUniversity(list[0]);
+    }
+  }, []);
 
   // Auxiliary States
   const [errorMsg, setErrorMsg] = useState('');
@@ -64,7 +76,7 @@ export const InsurePage: React.FC = () => {
     setLoading(true);
 
     // Standard Client Validation
-    if (!firstName || !lastName || !phone || !email || !laptopDetails || !momoNumber) {
+    if (!firstName || !lastName || !phone || !email || !momoNumber || !gender || !university) {
       setErrorMsg('Please complete all required fields marked with an asterisk (*).');
       setLoading(false);
       return;
@@ -77,174 +89,26 @@ export const InsurePage: React.FC = () => {
     }
 
     const fullName = `${firstName} ${lastName}`.trim();
-    const finalPrice = selectedPlan === 'premium-plan' ? 50 : 20;
+    const finalPrice = selectedPlan === 'bonanza-plan' ? 120 : (selectedPlan === 'premium-plan' ? 50 : 20);
 
-    const safeJson = async (response: Response) => {
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        try {
-          return await response.json();
-        } catch (e) {
-          throw new Error('Invalid JSON format from server.');
-        }
-      }
-      throw new Error('OFFLINE_FALLBACK');
-    };
+    const offlineUserSession = dbService.signUp({
+      email,
+      fullName,
+      university,
+      studentId: studentId || `TBD-${Math.floor(100000 + Math.random() * 900000)}`,
+      phone,
+      gender,
+      role: 'student'
+    });
 
-    try {
-      // 1. Submit Account Auto Creation route
-      const regResp = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName,
-          email,
-          phone,
-          university: 'University of Ghana (Legon)',
-          studentId: studentId || `TBD-${Math.floor(100000 + Math.random() * 900000)}`,
-          password: 'LegonShield233!',
-          planId: selectedPlan
-        })
-      });
-
-      let regData: any = null;
-      if (regResp.ok) {
-        regData = await safeJson(regResp);
-      } else {
-        try {
-          const errBody = await safeJson(regResp);
-          throw new Error(errBody.error || 'Failed to auto-provision account profiles.');
-        } catch (e: any) {
-          if (e.message === 'OFFLINE_FALLBACK') throw e;
-          throw new Error(e.message || 'Failed to auto-provision account profiles.');
-        }
-      }
-
-      if (!regData || !regData.success) {
-        throw new Error('Onboarding backend authentication rejected.');
-      }
-
-      const registeredUserId = regData.user.id;
-      const pendingSubId = regData.subscription.id;
-
-      // Sync local client session in localStorage so that navigation loads authenticated stats
-      dbService.loginSession(regData.user, regData.profile);
-
-      // Parse laptopDetails into separate Brand and Model safely
-      let deviceBrand = 'Laptop';
-      let deviceModel = laptopDetails;
-      if (laptopDetails.includes(' ')) {
-        const parts = laptopDetails.trim().split(' ');
-        deviceBrand = parts[0];
-        deviceModel = parts.slice(1).join(' ');
-      } else if (laptopDetails.includes(',')) {
-        const parts = laptopDetails.split(',');
-        deviceBrand = parts[0];
-        deviceModel = parts.slice(1).join(' ').trim();
-      }
-
-      // 2. Submit Device registration detail
-      await fetch('/api/devices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: registeredUserId,
-          brand: deviceBrand,
-          model: deviceModel,
-          serialNumber: `SN-${Math.floor(10000 + Math.random() * 90000)}`,
-          purchaseYear: new Date().getFullYear(),
-          imageUrl: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80'
-        })
-      });
-
-      // Synchronize in local offline db structures too
-      dbService.registerDevice({
-        name: `${deviceBrand} ${deviceModel}`,
-        type: 'laptop',
-        brand: deviceBrand,
-        model: deviceModel,
-        serialNumber: `SN-${Math.floor(10000 + Math.random() * 90000)}`,
-        operatingSystem: 'Windows 11 Setup (Automatic)',
-      });
-
-      // 3. Initiate checkout process on the endpoint
-      setSuccessMsg('Onboarding successful! Connecting securely with Paystack checkout hub...');
-      
-      const payResp = await fetch('/api/payments/initialize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email,
-          amount: finalPrice,
-          planId: selectedPlan,
-          userId: registeredUserId,
-          subscriptionId: pendingSubId
-        })
-      });
-
-      let payData: any = null;
-      if (payResp.ok) {
-        payData = await safeJson(payResp);
-      } else {
-        throw new Error('Verification pipeline failed to prepare transaction.');
-      }
-
-      if (payData && payData.success && payData.authorization_url) {
-        setTimeout(() => {
-          window.location.href = payData.authorization_url;
-        }, 800);
-      } else {
-        throw new Error('Securing transaction parameters failed.');
-      }
-
-    } catch (err: any) {
-      if (err.message === 'OFFLINE_FALLBACK') {
-        console.warn("API Server registration offline, engaging client-side Local DB flow.");
-        
-        const offlineUserSession = dbService.signUp({
-          email,
-          fullName,
-          university: 'University of Ghana (Legon)',
-          studentId: studentId || `TBD-${Math.floor(100000 + Math.random() * 900000)}`,
-          phone,
-          role: 'student'
-        });
-
-        // Parse laptopDetails into separate Brand and Model safely
-        let deviceBrand = 'Laptop';
-        let deviceModel = laptopDetails;
-        if (laptopDetails.includes(' ')) {
-          const parts = laptopDetails.trim().split(' ');
-          deviceBrand = parts[0];
-          deviceModel = parts.slice(1).join(' ');
-        } else if (laptopDetails.includes(',')) {
-          const parts = laptopDetails.split(',');
-          deviceBrand = parts[0];
-          deviceModel = parts.slice(1).join(' ').trim();
-        }
-
-        dbService.registerDevice({
-          name: `${deviceBrand} ${deviceModel}`,
-          type: 'laptop',
-          brand: deviceBrand,
-          model: deviceModel,
-          serialNumber: `SN-${Math.floor(10000 + Math.random() * 90000)}`,
-          operatingSystem: 'Windows 11 Setup (Automatic)',
-        });
-
-        const pendingSubId = `sub-${Math.random().toString(36).substring(2, 9)}`;
-        const ref = `REF-SIM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-        const checkoutMockUrl = `${window.location.origin}?mock_checkout=1&reference=${ref}&amount=${finalPrice}&subId=${pendingSubId}&userId=${offlineUserSession.user.id}&planId=${selectedPlan}`;
-        
-        setSuccessMsg('Onboarding successful! Connecting securely with Paystack checkout hub...');
-        setTimeout(() => {
-          window.location.href = checkoutMockUrl;
-        }, 800);
-      } else {
-        setErrorMsg(err.message || 'System onboarding transaction aborted.');
-        setLoading(false);
-      }
-    }
+    const pendingSubId = `sub-${Math.random().toString(36).substring(2, 9)}`;
+    const ref = `REF-SIM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+    const checkoutMockUrl = `${window.location.origin}?mock_checkout=1&reference=${ref}&amount=${finalPrice}&subId=${pendingSubId}&userId=${offlineUserSession.user.id}&planId=${selectedPlan}`;
+    
+    setSuccessMsg('Onboarding successful! Connecting securely with Paystack checkout hub...');
+    setTimeout(() => {
+      window.location.href = checkoutMockUrl;
+    }, 800);
   };
 
   return (
@@ -272,49 +136,68 @@ export const InsurePage: React.FC = () => {
             SELECT YOUR PLAN
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             
             {/* Basic Plan option */}
             <div 
               onClick={() => setSelectedPlan('basic-plan')}
-              className={`p-6 bg-white border cursor-pointer transition-all flex flex-col justify-between text-left rounded-none ${
+              className={`p-5 bg-white border cursor-pointer transition-all flex flex-col justify-between text-left rounded-xl ${
                 selectedPlan === 'basic-plan' 
-                  ? 'border-[#FFC500] ring-1 ring-[#FFC500] bg-white shadow-none' 
+                  ? 'border-royal ring-1 ring-royal bg-white shadow-sm' 
                   : 'border-slate-200 hover:border-slate-300 shadow-none'
               }`}
             >
               <div>
                 <span className="text-xs font-bold text-slate-900 block font-sans">Basic Plan</span>
                 <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
-                  <span className="text-2xl font-extrabold text-[#00183D] font-sans">GH₵20</span>
-                  <span className="text-slate-400 text-[10px] font-semibold font-sans">/ semester</span>
+                  <span className="text-xl font-extrabold text-[#00183D] font-sans">GH₵20</span>
+                  <span className="text-slate-450 text-[9px] font-semibold font-sans">/ sem</span>
                 </div>
               </div>
-              <p className="text-[11px] text-slate-500 mt-1 font-medium select-none font-sans">
-                Unlimited software support all semester.
+              <p className="text-[10px] text-slate-500 mt-1 font-medium select-none font-sans leading-normal">
+                Unlimited software install & fault diagnosis support.
               </p>
             </div>
 
             {/* Premium Plan option */}
             <div 
               onClick={() => setSelectedPlan('premium-plan')}
-              className={`p-6 bg-white border cursor-pointer transition-all flex flex-col justify-between text-left relative overflow-hidden rounded-none ${
+              className={`p-5 bg-white border cursor-pointer transition-all flex flex-col justify-between text-left rounded-xl relative overflow-hidden ${
                 selectedPlan === 'premium-plan' 
-                  ? 'border-[#FFC500] ring-1 ring-[#FFC500] bg-white shadow-none' 
+                  ? 'border-royal ring-1 ring-royal bg-white shadow-sm' 
                   : 'border-slate-200 hover:border-slate-300 shadow-none'
               }`}
             >
               <div>
-                <div className="flex items-center space-x-1">
-                  <span className="text-xs font-bold text-slate-900 block font-sans">Premium Plan ⭐️</span>
-                </div>
+                <span className="text-xs font-bold text-slate-900 block font-sans">Premium Shield ⭐️</span>
                 <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
-                  <span className="text-2xl font-extrabold text-[#00183D] font-sans">GH₵50</span>
-                  <span className="text-slate-400 text-[10px] font-semibold font-sans">/ semester</span>
+                  <span className="text-xl font-extrabold text-[#00183D] font-sans">GH₵50</span>
+                  <span className="text-slate-450 text-[9px] font-semibold font-sans">/ sem</span>
                 </div>
               </div>
-              <p className="text-[11px] text-slate-500 mt-1 font-medium select-none font-sans">
-                Software + hardware. Free labour always.
+              <p className="text-[10px] text-slate-500 mt-1 font-medium select-none font-sans leading-normal">
+                Free repair labor + free personal portfolio website setup.
+              </p>
+            </div>
+
+            {/* Bonanza Plan option */}
+            <div 
+              onClick={() => setSelectedPlan('bonanza-plan')}
+              className={`p-5 bg-white border cursor-pointer transition-all flex flex-col justify-between text-left rounded-xl relative overflow-hidden ${
+                selectedPlan === 'bonanza-plan' 
+                  ? 'border-amber-500 ring-1 ring-amber-500 bg-[#FFFDF6] shadow-sm' 
+                  : 'border-slate-200 hover:border-slate-300 shadow-none'
+              }`}
+            >
+              <div>
+                <span className="text-xs font-bold text-amber-900 block font-sans">Bonanza Plan 🚀</span>
+                <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
+                  <span className="text-xl font-extrabold text-amber-950 font-sans">GH₵120</span>
+                  <span className="text-amber-700 text-[9px] font-semibold font-sans">/ sem</span>
+                </div>
+              </div>
+              <p className="text-[10px] text-amber-800 mt-1 font-medium select-none font-sans leading-normal">
+                3 devices + Business Web Setup + Hosting + Consultations.
               </p>
             </div>
 
@@ -358,7 +241,7 @@ export const InsurePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Row 2: Student ID & Course */}
+            {/* Row 2: Student ID & Gender */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
               <div className="space-y-1">
                 <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans">Student ID</label>
@@ -371,14 +254,21 @@ export const InsurePage: React.FC = () => {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans">Programme / Course</label>
-                <input
-                  type="text"
-                  value={programme}
-                  onChange={(e) => setProgramme(e.target.value)}
-                  placeholder="BSc Computer Science"
-                  className="w-full text-xs px-4 py-2.5 border border-slate-200 rounded-none text-slate-800 bg-white focus:outline-none focus:border-royal transition-colors font-sans font-medium"
-                />
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans font-medium">Gender *</label>
+                <div className="relative">
+                  <select
+                    required
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className="w-full text-xs px-4 py-2.5 border border-slate-200 rounded-none text-slate-800 bg-white focus:outline-none focus:border-royal appearance-none cursor-pointer font-sans font-medium"
+                  >
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <ChevronDown className="absolute right-3.5 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
               </div>
             </div>
 
@@ -403,7 +293,7 @@ export const InsurePage: React.FC = () => {
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans">Phone Number *</label>
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans font-medium">Phone Number *</label>
                 <input
                   type="text"
                   required
@@ -415,31 +305,38 @@ export const InsurePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Row 4: Email Address */}
-            <div className="space-y-1">
-              <label className="text-[10.5px] font-bold text-slate-700 block select-none">Email Address *</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="ama@ug.edu.gh"
-                className="w-full text-xs px-4 py-2.5 border border-slate-200 rounded-none text-slate-800 bg-white focus:outline-none focus:border-royal transition-colors font-sans font-medium"
-              />
+            {/* Row 4: Email Address & Institution */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+              <div className="space-y-1">
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none">Email Address *</label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="ama@ug.edu.gh"
+                  className="w-full text-xs px-4 py-2.5 border border-slate-200 rounded-none text-slate-800 bg-white focus:outline-none focus:border-royal transition-colors font-sans font-medium"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans font-medium">Institution *</label>
+                <div className="relative">
+                  <select
+                    required
+                    value={university}
+                    onChange={(e) => setUniversity(e.target.value)}
+                    className="w-full text-xs px-4 py-2.5 border border-slate-200 rounded-none text-slate-800 bg-white focus:outline-none focus:border-royal appearance-none cursor-pointer font-sans font-medium"
+                  >
+                    {institutions.map(inst => (
+                      <option key={inst} value={inst}>{inst}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3.5 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
             </div>
 
-            {/* Row 5: Laptop Brand & Model */}
-            <div className="space-y-1">
-              <label className="text-[10.5px] font-bold text-slate-700 block select-none">Laptop Brand & Model *</label>
-              <input
-                type="text"
-                required
-                value={laptopDetails}
-                onChange={(e) => setLaptopDetails(e.target.value)}
-                placeholder="e.g. HP 250 G8, Lenovo IdeaPad 3"
-                className="w-full text-xs px-4 py-2.5 border border-slate-200 rounded-none text-slate-800 bg-white focus:outline-none focus:border-royal transition-colors font-sans font-medium"
-              />
-            </div>
+
 
             {/* Row 6: Hostel / Residence */}
             <div className="space-y-1">

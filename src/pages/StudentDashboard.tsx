@@ -3,13 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { dbService } from '../services/db';
 import { 
   Shield, Cpu, FileText, CheckCircle, 
-  PlusCircle, MessageCircle, Send, ArrowLeft, 
-  X, Laptop, ArrowRight, Search, Bell, ChevronDown, User, LogOut
+  PlusCircle, ArrowLeft, X, Laptop, 
+  ArrowRight, Search, Bell, ChevronDown, User, 
+  LogOut, History, CreditCard, AlertTriangle, 
+  Printer, Download, QrCode, Smartphone, Info,
+  Play, Image as ImageIcon, Video, Plus, Trash2, Check,
+  Sliders, Calendar, Menu
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Device, SupportTicket, Message } from '../types';
@@ -20,15 +24,24 @@ export const StudentDashboard: React.FC = () => {
     refreshData, logout, updateProfile, notifications 
   } = useApp();
 
-  // Dialog & Modal Control states 
-  const [showDeviceModal, setShowDeviceModal] = useState(false);
-  const [showTicketModal, setShowTicketModal] = useState(false);
+  // Sidebar active tab
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'devices' | 'make_request' | 'profile' | 'history' | 'notifications'>('dashboard');
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  // Profile navigation dropdown & search & notification overlay triggers
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  // Dialog & Modal states
+  const [selectedRequestForReceipt, setSelectedRequestForReceipt] = useState<SupportTicket | null>(null);
+  
+  // Custom Modern Success Modal for Device Addition
+  const [showDeviceSuccessModal, setShowDeviceSuccessModal] = useState(false);
+  const [lastAddedDevice, setLastAddedDevice] = useState<Device | null>(null);
+
+  // Custom Video Lightbox modal
+  const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
+
+  // Search & notifications overlay triggers
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
 
   // Profile coordinates editor state binds
   const [editName, setEditName] = useState(profile?.full_name || '');
@@ -36,7 +49,74 @@ export const StudentDashboard: React.FC = () => {
   const [editUni, setEditUni] = useState(profile?.university || '');
   const [profileSaved, setProfileSaved] = useState(false);
 
-  // Sync edit form with latest profile database changes
+  // New Device registration fields
+  const [newDeviceName, setNewDeviceName] = useState('');
+  const [newDeviceBrand, setNewDeviceBrand] = useState('Asus');
+  const [customBrand, setCustomBrand] = useState('');
+  const [newDeviceModel, setNewDeviceModel] = useState('');
+  const [newDeviceOS, setNewDeviceOS] = useState('Windows 11');
+  const [customOS, setCustomOS] = useState('');
+  const [newDeviceSN, setNewDeviceSN] = useState('');
+  const [newDeviceType, setNewDeviceType] = useState('laptop');
+  const [customType, setCustomType] = useState('');
+  const [deviceError, setDeviceError] = useState('');
+
+  // Device files attachments
+  const [attachedImages, setAttachedImages] = useState<string[]>([]);
+  const [attachedVideo, setAttachedVideo] = useState<string>('');
+  const [imageLoading, setImageLoading] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(false);
+
+  // Device Custom fields
+  const [customFields, setCustomFields] = useState<{ label: string; value: string }[]>([]);
+  const [newFieldLabel, setNewFieldLabel] = useState('');
+  const [newFieldValue, setNewFieldValue] = useState('');
+
+  // Edit Device form states
+  const [editingDevice, setEditingDevice] = useState<Device | null>(null);
+  const [deletingDevice, setDeletingDevice] = useState<Device | null>(null);
+
+  const [editDevName, setEditDevName] = useState('');
+  const [editDevBrand, setEditDevBrand] = useState('Asus');
+  const [editCustomBrand, setEditCustomBrand] = useState('');
+  const [editDevModel, setEditDevModel] = useState('');
+  const [editDevOS, setEditDevOS] = useState('Windows 11');
+  const [editCustomOS, setEditCustomOS] = useState('');
+  const [editDevSN, setEditDevSN] = useState('');
+  const [editDevType, setEditDevType] = useState('laptop');
+  const [editCustomType, setEditCustomType] = useState('');
+  const [editAttachedImages, setEditAttachedImages] = useState<string[]>([]);
+  const [editAttachedVideo, setEditAttachedVideo] = useState<string>('');
+  const [editCustomFields, setEditCustomFields] = useState<{ label: string; value: string }[]>([]);
+  const [editFieldLabel, setEditFieldLabel] = useState('');
+  const [editFieldValue, setEditFieldValue] = useState('');
+  const [editImageLoading, setEditImageLoading] = useState(false);
+  const [editVideoLoading, setEditVideoLoading] = useState(false);
+
+  // Make Request state binds
+  const [reqCategory, setReqCategory] = useState<SupportTicket['category']>('software');
+  const [reqTitle, setReqTitle] = useState('');
+  const [reqDesc, setReqDesc] = useState('');
+  const [reqPriority, setReqPriority] = useState<SupportTicket['priority']>('medium');
+  const [reqDeviceId, setReqDeviceId] = useState('');
+  
+  // Website request details
+  const [webBusinessName, setWebBusinessName] = useState('');
+  const [webSubdomain, setWebSubdomain] = useState('');
+  const [webDescription, setWebDescription] = useState('');
+  const [webPagesCount, setWebPagesCount] = useState(5);
+  const [webHosting, setWebHosting] = useState(true);
+
+  // Active chat session
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
+  const [chatMessages, setChatMessages] = useState<{ message: Message; senderName: string; senderAvatar?: string }[]>([]);
+  const [newMsgContent, setNewMsgContent] = useState('');
+
+  // File Inputs references
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-fill edits on user profiles loading
   useEffect(() => {
     if (profile) {
       setEditName(profile.full_name || '');
@@ -44,6 +124,12 @@ export const StudentDashboard: React.FC = () => {
       setEditUni(profile.university || '');
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (selectedTicket) {
+      setChatMessages(dbService.getTicketMessages(selectedTicket.id));
+    }
+  }, [selectedTicket]);
 
   const handleUpdateProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,114 +141,314 @@ export const StudentDashboard: React.FC = () => {
     }
   };
 
-  // Live filter lists based on the search circular input field
-  const filteredTickets = tickets.filter(t => {
-    if (!searchValue.trim()) return true;
-    const q = searchValue.toLowerCase();
-    return (t.title || '').toLowerCase().includes(q) || 
-           (t.description || '').toLowerCase().includes(q) || 
-           (t.id || '').toLowerCase().includes(q);
-  });
-
-  const filteredDevices = devices.filter(dev => {
-    if (!searchValue.trim()) return true;
-    const q = searchValue.toLowerCase();
-    const name = dev.name || '';
-    const brand = dev.brand || '';
-    const model = dev.model || '';
-    const sn = dev.serial_number || dev.serialNumber || '';
-    return name.toLowerCase().includes(q) || 
-           brand.toLowerCase().includes(q) || 
-           model.toLowerCase().includes(q) || 
-           sn.toLowerCase().includes(q);
-  });
-  
-  // New Device creation fields
-  const [newDeviceName, setNewDeviceName] = useState('');
-  const [newDeviceBrand, setNewDeviceBrand] = useState('Asus');
-  const [newDeviceModel, setNewDeviceModel] = useState('');
-  const [newDeviceOS, setNewDeviceOS] = useState('Windows 11 Education');
-  const [newDeviceSN, setNewDeviceSN] = useState('');
-
-  // New Support Ticket creation fields
-  const [newTicketTitle, setNewTicketTitle] = useState('');
-  const [newTicketDesc, setNewTicketDesc] = useState('');
-  const [newTicketCat, setNewTicketCat] = useState<SupportTicket['category']>('software');
-  const [newTicketPriority, setNewTicketPriority] = useState<SupportTicket['priority']>('medium');
-
-  // Interactive ticket chat focus overlay states
-  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
-  const [chatMessages, setChatMessages] = useState<{ message: Message; senderName: string; senderAvatar?: string }[]>([]);
-  const [newMsgContent, setNewMsgContent] = useState('');
-
-  // Device registration onboarding helper states
-  const [welcomeBrand, setWelcomeBrand] = useState('Asus');
-  const [welcomeModel, setWelcomeModel] = useState('');
-  const [welcomeSerial, setWelcomeSerial] = useState('');
-  const [welcomeYear, setWelcomeYear] = useState('2026');
-  const [welcomeUploading, setWelcomeUploading] = useState(false);
-
-  useEffect(() => {
-    if (selectedTicket) {
-      setChatMessages(dbService.getTicketMessages(selectedTicket.id));
+  const handleUpgradeDowngrade = (planId: string) => {
+    const confirmChange = window.confirm(`Are you sure you want to change your cover plan to ${planId.replace('-', ' ').toUpperCase()}?`);
+    if (confirmChange) {
+      dbService.purchasePlan(planId, 'Mobile Money Upgrade');
+      refreshData();
+      alert('Plan updated successfully!');
     }
-  }, [selectedTicket]);
+  };
 
-  const handleWelcomeDeviceSubmit = async (e: React.FormEvent) => {
+  // Edit Device handlers
+  const handleOpenEditModal = (dev: Device) => {
+    setEditingDevice(dev);
+    setEditDevName(dev.name);
+    setEditDevModel(dev.model);
+    setEditDevSN(dev.serial_number);
+    
+    // Check if brand is custom
+    const commonBrands = ['Asus', 'Apple', 'HP', 'Dell', 'Lenovo', 'Acer'];
+    if (commonBrands.includes(dev.brand)) {
+      setEditDevBrand(dev.brand);
+      setEditCustomBrand('');
+    } else {
+      setEditDevBrand('other');
+      setEditCustomBrand(dev.brand);
+    }
+
+    // Check if type is custom
+    const commonTypes = ['laptop', 'desktop', 'tablet', 'phone'];
+    if (commonTypes.includes(dev.type)) {
+      setEditDevType(dev.type);
+      setEditCustomType('');
+    } else {
+      setEditDevType('other');
+      setEditCustomType(dev.type);
+    }
+
+    // Check if OS is custom
+    const commonOSs = ['Windows 11', 'Windows 10', 'macOS Sequoia', 'Linux Ubuntu', 'Android OS', 'iOS Standard'];
+    if (commonOSs.includes(dev.operating_system)) {
+      setEditDevOS(dev.operating_system);
+      setEditCustomOS('');
+    } else {
+      setEditDevOS('other');
+      setEditCustomOS(dev.operating_system);
+    }
+
+    setEditAttachedImages(dev.device_images || (dev.image_url ? [dev.image_url] : []));
+    setEditAttachedVideo(dev.video_url || '');
+    setEditCustomFields(dev.custom_fields || []);
+  };
+
+  const handleDeviceUpdateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (welcomeModel && welcomeSerial) {
-      setWelcomeUploading(true);
-      // Brief aesthetic processing simulation
-      setTimeout(() => {
-        dbService.registerDevice({
-          name: `${welcomeBrand} ${welcomeModel}`,
-          type: 'laptop',
-          brand: welcomeBrand,
-          model: welcomeModel,
-          serialNumber: welcomeSerial,
-          operatingSystem: 'Windows 11 Education',
-          image_url: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80'
-        });
-        setWelcomeUploading(false);
-        refreshData();
-      }, 1000);
+    if (!editingDevice) return;
+
+    const brandVal = editDevBrand === 'other' ? editCustomBrand : editDevBrand;
+    const typeVal = editDevType === 'other' ? editCustomType : editDevType;
+    const osVal = editDevOS === 'other' ? editCustomOS : editDevOS;
+
+    const updated = dbService.updateDevice(editingDevice.id, {
+      name: editDevName,
+      type: typeVal,
+      brand: brandVal,
+      model: editDevModel,
+      serial_number: editDevSN,
+      operating_system: osVal,
+      device_images: editAttachedImages,
+      image_url: editAttachedImages[0] || editingDevice.image_url,
+      video_url: editAttachedVideo || undefined,
+      custom_fields: editCustomFields
+    });
+
+    if (updated) {
+      setEditingDevice(null);
+      refreshData();
+      alert('Device specs updated successfully!');
     }
+  };
+
+  const handleDeviceDeleteSubmit = () => {
+    if (!deletingDevice) return;
+    const deleted = dbService.deleteDevice(deletingDevice.id);
+    if (deleted) {
+      setDeletingDevice(null);
+      refreshData();
+      alert('Device removed from coverage logs.');
+    }
+  };
+
+  const handleEditImageUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    setEditImageLoading(true);
+
+    const loadPromises = Array.from(files).map((file) => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(loadPromises).then((results) => {
+      setEditAttachedImages((prev) => [...prev, ...results]);
+      setEditImageLoading(false);
+    });
+  };
+
+  const handleEditVideoUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setEditVideoLoading(true);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setEditAttachedVideo(reader.result as string);
+      setEditVideoLoading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Device registration limit checks
+  const planId = subscription?.plan_id || 'basic-plan';
+  const isBonanza = planId === 'bonanza-plan';
+  const isPremium = planId === 'premium-plan';
+  const maxDevicesAllowed = isBonanza ? 3 : 1;
+  const currentDevicesCount = devices.length;
+
+  // File loading methods
+  const handleImageUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    setImageLoading(true);
+
+    const loadPromises = Array.from(files).map((file) => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(loadPromises).then((results) => {
+      setAttachedImages((prev) => [...prev, ...results]);
+      setImageLoading(false);
+    });
+  };
+
+  const handleVideoUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setVideoLoading(true);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAttachedVideo(reader.result as string);
+      setVideoLoading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const addCustomField = () => {
+    if (newFieldLabel.trim() && newFieldValue.trim()) {
+      setCustomFields([...customFields, { label: newFieldLabel.trim(), value: newFieldValue.trim() }]);
+      setNewFieldLabel('');
+      setNewFieldValue('');
+    }
+  };
+
+  const removeCustomField = (index: number) => {
+    setCustomFields(customFields.filter((_, i) => i !== index));
   };
 
   const handleDeviceRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setDeviceError('');
+
+    if (currentDevicesCount >= maxDevicesAllowed) {
+      setDeviceError(`Plan Limit Reached: Your current plan only allows up to ${maxDevicesAllowed} registered device(s). Please upgrade to Bonanza to register up to 3 devices.`);
+      return;
+    }
+
     if (newDeviceName && newDeviceModel && newDeviceSN) {
-      dbService.registerDevice({
+      const brandVal = newDeviceBrand === 'other' ? customBrand : newDeviceBrand;
+      const typeVal = newDeviceType === 'other' ? customType : newDeviceType;
+      const osVal = newDeviceOS === 'other' ? customOS : newDeviceOS;
+
+      const generatedId = `DEV-${brandVal.slice(0,3).toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`;
+      
+      const newDevObject = {
         name: newDeviceName,
-        type: 'laptop',
-        brand: newDeviceBrand,
+        type: typeVal,
+        brand: brandVal,
         model: newDeviceModel,
         serialNumber: newDeviceSN,
-        operatingSystem: newDeviceOS,
-        image_url: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80'
-      });
-      setNewDeviceName('');
-      setNewDeviceModel('');
-      setNewDeviceSN('');
-      setShowDeviceModal(false);
-      refreshData();
+        operatingSystem: osVal,
+        image_url: attachedImages[0] || (typeVal === 'phone' 
+          ? 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=300&q=80' 
+          : 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80'),
+        video_url: attachedVideo || undefined,
+        device_images: attachedImages.length > 0 ? attachedImages : undefined,
+        custom_fields: customFields.length > 0 ? customFields : undefined
+      };
+
+      const registered = dbService.registerDevice(newDevObject);
+
+      if (registered) {
+        // Sync local storage id mapping override
+        const currentDevices = dbService.getDevices();
+        if (currentDevices.length > 0) {
+          const lastDevice = currentDevices[currentDevices.length - 1];
+          lastDevice.id = generatedId;
+          localStorage.setItem('ss_devices', JSON.stringify(currentDevices));
+          setLastAddedDevice(lastDevice);
+        }
+
+        // Clear states
+        setNewDeviceName('');
+        setNewDeviceModel('');
+        setNewDeviceSN('');
+        setNewDeviceBrand('Asus');
+        setCustomBrand('');
+        setNewDeviceOS('Windows 11');
+        setCustomOS('');
+        setNewDeviceType('laptop');
+        setCustomType('');
+        setAttachedImages([]);
+        setAttachedVideo('');
+        setCustomFields([]);
+
+        refreshData();
+        setShowDeviceSuccessModal(true);
+      }
     }
   };
 
-  const handleTicketSubmit = (e: React.FormEvent) => {
+  // Service options filtered by plan tier
+  const getSelectableRequestServices = () => {
+    const options = [
+      { value: 'software', label: 'Software Installation & Setup', minPlan: 'basic-plan' },
+      { value: 'diagnostic', label: 'Hardware Fault Diagnosis', minPlan: 'basic-plan' },
+      { value: 'other', label: 'Repair Coordination & Assistance', minPlan: 'basic-plan' },
+      { value: 'hardware', label: 'Hardware Labor Repair (Free Labor)', minPlan: 'premium-plan' },
+      { value: 'website_portfolio', label: 'Free Portfolio / Personal Website Request', minPlan: 'premium-plan' },
+      { value: 'website_business', label: '5-Page Business Website Setup', minPlan: 'bonanza-plan' },
+      { value: 'tech_consultation', label: 'Free Tech Consultation Session', minPlan: 'bonanza-plan' },
+      { value: 'domain_hosting', label: 'Domain & Hosting Support setup', minPlan: 'bonanza-plan' },
+      { value: 'monthly_maintenance', label: 'Monthly Maintenance & System Checkup', minPlan: 'bonanza-plan' },
+    ];
+
+    if (isBonanza) return options;
+    if (isPremium) return options.filter(o => o.minPlan === 'basic-plan' || o.minPlan === 'premium-plan');
+    return options.filter(o => o.minPlan === 'basic-plan');
+  };
+
+  const handleMakeRequestSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newTicketTitle && newTicketDesc) {
-      dbService.createTicket({
-        deviceId: devices[0]?.id,
-        title: newTicketTitle,
-        description: newTicketDesc,
-        category: newTicketCat,
-        priority: newTicketPriority
-      });
-      setNewTicketTitle('');
-      setNewTicketDesc('');
-      setShowTicketModal(false);
+    if (!reqTitle || !reqDesc) {
+      alert('Please fill out all details.');
+      return;
+    }
+
+    if (subscription?.status === 'suspended') {
+      alert('Your subscription is suspended. Service requests are currently locked.');
+      return;
+    }
+
+    const isHardwareOrSoftware = ['software', 'diagnostic', 'hardware', 'monthly_maintenance'].includes(reqCategory);
+    if (isHardwareOrSoftware && !reqDeviceId) {
+      alert('Please select the registered device for this repair / update.');
+      return;
+    }
+
+    const websiteDetails = ['website_portfolio', 'website_business'].includes(reqCategory) ? {
+      business_name: webBusinessName || `${profile?.full_name}'s Site`,
+      subdomain: webSubdomain || `${profile?.full_name?.toLowerCase().replace(/\s+/g, '')}.studentshield.com`,
+      description: webDescription,
+      pages_count: reqCategory === 'website_business' ? webPagesCount : 1,
+      hosting_required: webHosting
+    } : undefined;
+
+    const requestObj = dbService.createServiceRequest({
+      deviceId: isHardwareOrSoftware ? reqDeviceId : undefined,
+      title: reqTitle,
+      description: reqDesc,
+      category: reqCategory,
+      priority: reqPriority,
+      websiteDetails
+    });
+
+    if (requestObj) {
       refreshData();
+      
+      // Clear forms
+      setReqTitle('');
+      setReqDesc('');
+      setReqDeviceId('');
+      setWebBusinessName('');
+      setWebSubdomain('');
+      setWebDescription('');
+
+      // Auto-show receipt
+      setSelectedRequestForReceipt(requestObj);
+      setActiveTab('dashboard');
     }
   };
 
@@ -176,17 +462,20 @@ export const StudentDashboard: React.FC = () => {
     }
   };
 
-  // Compute a unique premium/basic subscription hash/serial key deterministically per user
-  const isPremium = subscription?.plan_id === 'premium-plan';
-  const prefix = isPremium ? 'PRE' : 'BAS';
-  const rawId = (profile?.student_id || 'BNLJPG').toUpperCase().replace(/[^A-Z0-9]/g, '');
-  const finalId = rawId.length >= 6 ? rawId.slice(-6) : (rawId + 'BNLJPG').slice(0, 6);
-  const subscriberKey = `SS-2026-${prefix}-${finalId}`;
+  // Determistic student credentials based on mock
+  const userEmail = user?.email || '';
+  const personalWebUrl = `https://${profile?.full_name?.toLowerCase().replace(/\s+/g, '') || 'portfolio'}.studentshield.net`;
+  const websiteAdminDashboardUrl = `https://wp-admin.studentshield.net/auth?user=${encodeURIComponent(userEmail)}`;
 
-  // QR Code Image endpoint
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(subscriberKey)}`;
+  // Filter values
+  const filteredTickets = tickets.filter(t => {
+    if (!searchValue.trim()) return true;
+    const q = searchValue.toLowerCase();
+    return (t.title || '').toLowerCase().includes(q) || 
+           (t.description || '').toLowerCase().includes(q) || 
+           (t.id || '').toLowerCase().includes(q);
+  });
 
-  // Status badging styles
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'resolved':
@@ -200,784 +489,1756 @@ export const StudentDashboard: React.FC = () => {
     }
   };
 
-  // Onboarding Laptop detail layout if they have a active membership but no device linked yet
-  if (subscription && devices.length === 0) {
-    return (
-      <div className="min-h-[85vh] bg-slate-50 flex items-center justify-center pt-24 pb-12 px-4 select-none text-left">
-        <div className="max-w-xl w-full bg-white border border-slate-200/70 rounded-3xl p-6 sm:p-8 space-y-6 shadow-none">
-          
-          <div className="text-center space-y-3 pb-5 border-b border-slate-100">
-            <div className="w-14 h-14 bg-royal/10 text-royal rounded-2xl flex items-center justify-center mx-auto">
-              <Shield className="w-7 h-7 flex-shrink-0 animate-pulse text-royal" />
-            </div>
-            <div>
-              <h2 className="text-lg font-extrabold text-[#00183D] font-sans">Initialize Your Protection Plan</h2>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                To activate coverage, please register your protected laptop details. Each StudentShield subscription is linked to exactly one device to secure diagnostic booth compliance.
-              </p>
-            </div>
-          </div>
-
-          <form onSubmit={handleWelcomeDeviceSubmit} className="space-y-4 font-sans text-xs">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Laptop Brand</label>
-                <select
-                  value={welcomeBrand}
-                  onChange={(e) => setWelcomeBrand(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all"
-                >
-                  <option>Asus</option>
-                  <option>Apple</option>
-                  <option>HP</option>
-                  <option>Lenovo</option>
-                  <option>Dell</option>
-                  <option>Acer</option>
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Device Model</label>
-                <input
-                  type="text"
-                  required
-                  value={welcomeModel}
-                  onChange={(e) => setWelcomeModel(e.target.value)}
-                  placeholder="E.g. MacBook Air, ZenBook 14"
-                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Serial Tag Code</label>
-                <input
-                  type="text"
-                  required
-                  value={welcomeSerial}
-                  onChange={(e) => setWelcomeSerial(e.target.value)}
-                  placeholder="E.g. SN-89283-Z"
-                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Purchase Year</label>
-                <input
-                  type="number"
-                  required
-                  value={welcomeYear}
-                  onChange={(e) => setWelcomeYear(e.target.value)}
-                  placeholder="2026"
-                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={welcomeUploading}
-              className="w-full py-3 bg-[#3B82F6] hover:bg-slate-900 text-white rounded-xl font-bold uppercase tracking-wide cursor-pointer disabled:opacity-50 transition-all font-sans text-xs mt-2"
-            >
-              {welcomeUploading ? 'Securing Hardware Allocation...' : 'Activate Full Protection Coverage'}
-            </button>
-          </form>
-
-        </div>
-      </div>
-    );
-  }
+  const planPrice = isBonanza ? '120' : (isPremium ? '50' : '20');
+  const planName = isBonanza ? 'Bonanza Plan' : (isPremium ? 'Premium Shield' : 'Basic Cover');
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-left font-sans select-none flex flex-col justify-between">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full mt-24">
-        
-        {/* Dynamic Header Section Match with Waving Hand and Clean Coverage Pill */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200/60 pb-6 mb-8 font-sans">
-          <div>
-            <div className="flex items-center space-x-2.5">
-              <span className="text-xs uppercase tracking-wider text-slate-400 font-bold font-mono">My Account Portal</span>
-              {subscription ? (
-                <span className="bg-emerald-50 text-emerald-700 text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border border-emerald-200 flex items-center space-x-1 font-mono">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span>Coverage Active</span>
-                </span>
-              ) : (
-                <span className="bg-rose-50 text-rose-600 text-[9px] px-2 py-0.5 rounded-full font-bold uppercase border border-rose-200 flex items-center space-x-1 font-mono">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                  <span>Coverage Inactive</span>
-                </span>
-              )}
+    <div className="min-h-screen bg-slate-50 flex font-sans select-none text-left antialiased relative">
+      
+      {/* 1. Left Sidebar Section - Desktop */}
+      <aside className="hidden md:flex w-64 bg-navy text-white flex flex-col justify-between border-r border-slate-800 shrink-0 sticky top-0 h-screen select-none z-30">
+        <div className="p-6">
+          <div className="flex items-center space-x-3 pb-6 border-b border-slate-800">
+            <div className="w-8 h-8 bg-royal rounded-lg flex items-center justify-center text-white">
+              <Shield className="w-5 h-5 flex-shrink-0" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#00183D] tracking-tight mt-1.5">
-              Welcome back, {profile?.full_name || 'fdfdfdf'} 👋
-            </h1>
-            <p className="text-xs text-slate-400 mt-1 font-medium">
-              StudentShield • {isPremium ? 'Premium Shield Cover' : 'Basic Cover Plan'} • Semester 2, 2026
-            </p>
-          </div>
-
-          <div className="flex flex-col items-start sm:items-end gap-3.5 relative">
-            
-            {/* Round Circle Profile with details inspired strictly by image preview */}
-            <div className="flex items-center space-x-3 relative">
-              
-              {/* Search Toggle button inside pill */}
-              <div className="flex items-center relative">
-                <AnimatePresence>
-                  {searchOpen && (
-                    <motion.input
-                      initial={{ width: 0, opacity: 0 }}
-                      animate={{ width: 155, opacity: 1 }}
-                      exit={{ width: 0, opacity: 0 }}
-                      type="text"
-                      placeholder="Search tickets, notebooks..."
-                      value={searchValue}
-                      onChange={(e) => setSearchValue(e.target.value)}
-                      className="mr-2 text-[10px] px-3 py-1.5 border border-slate-200 bg-white rounded-none text-slate-800 focus:outline-none focus:border-royal transition-all font-sans"
-                    />
-                  )}
-                </AnimatePresence>
-                <button
-                  onClick={() => setSearchOpen(!searchOpen)}
-                  aria-label="Search"
-                  className="w-8 h-8 md:w-9 md:h-9 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full flex items-center justify-center cursor-pointer transition-colors border border-slate-200/50"
-                >
-                  <Search className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Actionable Notification Alert Bell Button */}
-              <div className="relative">
-                <button
-                  onClick={() => setNotifOpen(!notifOpen)}
-                  aria-label="Notifications"
-                  className="w-8 h-8 md:w-9 md:h-9 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full flex items-center justify-center cursor-pointer transition-colors border border-slate-200/50 relative"
-                >
-                  <Bell className="w-4 h-4" />
-                  {notifications && notifications.length > 0 && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-amber-500 rounded-full border border-white" />
-                  )}
-                </button>
-                
-                <AnimatePresence>
-                  {notifOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 p-4 rounded-none shadow-xl z-50 text-xs font-sans space-y-2.5"
-                    >
-                      <div className="font-bold text-navy uppercase tracking-wider text-[10px] border-b border-slate-100 pb-1.5">
-                        Triage alerts Log
-                      </div>
-                      <div className="space-y-2 max-h-48 overflow-y-auto font-sans">
-                        {notifications && notifications.length > 0 ? (
-                          notifications.map((notif) => (
-                            <div key={notif.id} className="border-b border-slate-50 pb-2 last:border-0 text-left">
-                              <p className="font-semibold text-slate-800 text-[10px]">{notif.title}</p>
-                              <p className="text-slate-500 text-[9px] mt-0.5">{notif.message}</p>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-slate-400 text-center py-2">
-                            All systems operating within specifications.
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Avatar and name in a clean pill wrapper matching instructions */}
-              <div className="relative">
-                <div 
-                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center bg-slate-100/80 p-1.5 pr-3.5 rounded-full border border-slate-200 hover:bg-slate-200/40 transition-all select-none cursor-pointer font-sans"
-                >
-                  <div className="w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden border border-slate-200 flex-shrink-0">
-                    <img 
-                      src={profile?.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'} 
-                      alt="Student Avatar"
-                      className="h-full w-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
-                  <span className="text-xs font-bold text-navy ml-2 font-sans tracking-tight">
-                    {profile?.full_name || 'fdfdfdf'}
-                  </span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-navy ml-1.5 transition-transform duration-300 ${profileDropdownOpen ? 'rotate-180' : ''}`} />
-                </div>
-
-                <AnimatePresence>
-                  {profileDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-72 bg-white border border-slate-200/80 p-5 rounded-none shadow-sm z-[95] text-xs font-sans space-y-4"
-                    >
-                      {/* Step 1: Profile card & Dynamic Profile Editor */}
-                      <div className="space-y-3 pb-3 border-b border-slate-100">
-                        <div className="flex items-center space-x-2 border-b border-slate-100 pb-1.5">
-                          <User className="w-3.5 h-3.5 text-royal" />
-                          <span className="text-[10px] uppercase font-bold text-slate-400 font-sans tracking-wider">
-                            Student Profile
-                          </span>
-                        </div>
-
-                        <form onSubmit={handleUpdateProfileSubmit} className="space-y-2.5 font-sans">
-                          <div className="text-left">
-                            <label className="text-[10px] uppercase font-bold text-slate-400 block font-sans">Mail address</label>
-                            <div className="text-[10px] text-slate-500 bg-slate-50/50 border border-slate-200/50 px-2.5 py-1.5 select-all font-sans truncate">
-                              {user?.email || 'student@university.edu'}
-                            </div>
-                          </div>
-
-                          <div className="text-left">
-                            <label className="text-[10px] uppercase font-bold text-slate-400 block font-sans">Complete Name</label>
-                            <input
-                              type="text"
-                              required
-                              value={editName}
-                              onChange={(e) => setEditName(e.target.value)}
-                              className="w-full text-xs bg-slate-50/20 border border-slate-200/60 px-2.5 py-1.5 focus:bg-white focus:outline-none focus:ring-1 focus:ring-royal/30 focus:border-royal/50 transition-all rounded-none text-slate-800 font-sans"
-                            />
-                          </div>
-
-                          <div className="text-left">
-                            <label className="text-[10px] uppercase font-bold text-slate-400 block font-sans">Contact Phone</label>
-                            <input
-                              type="text"
-                              required
-                              value={editPhone}
-                              onChange={(e) => setEditPhone(e.target.value)}
-                              className="w-full text-xs bg-slate-50/20 border border-slate-200/60 px-2.5 py-1.5 focus:bg-white focus:outline-none focus:ring-1 focus:ring-royal/30 focus:border-royal/50 transition-all rounded-none text-slate-800 font-sans"
-                            />
-                          </div>
-
-                          <button 
-                            type="submit"
-                            className="w-full py-2 bg-[#00183D] hover:bg-slate-900 text-white font-bold uppercase text-[10px] tracking-widest rounded-none cursor-pointer transition-colors font-sans"
-                          >
-                            {profileSaved ? 'Changes Saved! ✓' : 'Save changes'}
-                          </button>
-                        </form>
-                      </div>
-
-                      {/* Step 2: LogOut with red high contrast button according to design principles */}
-                      <div className="text-left">
-                        <button
-                          onClick={() => logout()}
-                          className="w-full py-2 bg-red-600 hover:bg-red-700 text-white font-bold uppercase text-[10px] tracking-widest rounded-none shadow-none cursor-pointer transition-colors flex items-center justify-center font-sans"
-                        >
-                          LOGOUT
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
+            <div>
+              <span className="font-extrabold text-sm tracking-tight block">StudentShield</span>
+              <span className="text-[9px] text-slate-400 font-mono tracking-widest uppercase">Student Portal</span>
             </div>
           </div>
-        </div>
 
-        {/* 4-Column Summary Cards Metric Board Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 text-left mb-8 font-sans">
-          
-          <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
-            <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">PLAN</span>
-            <span className="text-2xl font-black text-navy mt-1 tracking-tight block">
-              {isPremium ? 'Premium' : 'Basic'}
-            </span>
-            <span className="text-xs text-slate-400 block mt-1.5">
-              GH₵ {isPremium ? '50' : '20'} / semester
-            </span>
-          </div>
-
-          <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
-            <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">TICKETS FILED</span>
-            <span className="text-2xl font-black text-navy mt-1 tracking-tight block">
-              {tickets.length > 0 ? tickets.length : '4'}
-            </span>
-            <span className="text-xs text-slate-400 block mt-1.5">
-              This semester
-            </span>
-          </div>
-
-          <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
-            <span className="text-[10px] uppercase font-bold text-royal tracking-wide block font-sans">AMOUNT SAVED</span>
-            <span className="text-2xl font-black text-emerald-600 mt-1 tracking-tight block">
-              GH₵ {isPremium ? '340' : '120'}
-            </span>
-            <span className="text-xs text-slate-400 block mt-1.5">
-              vs. market rates
-            </span>
-          </div>
-
-          <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
-            <span className="text-[10px] uppercase font-bold text-royal tracking-wide block font-sans">COVERAGE ENDS</span>
-            <span className="text-2xl font-black text-navy mt-1 tracking-tight block">
-              Dec 2026
-            </span>
-            <span className="text-xs text-slate-400 block mt-1.5">
-              End of exams
-            </span>
-          </div>
-
-        </div>
-
-        {/* Support Chat Overlay View if a ticket is clicked (High Fidelity Interactive Experience) */}
-        <AnimatePresence>
-          {selectedTicket && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 12 }}
-              className="mb-8 border border-slate-200 bg-white rounded-2xl p-5 sm:p-6 text-xs text-left"
+          <nav className="mt-8 space-y-2.5">
+            <button 
+              onClick={() => { setActiveTab('dashboard'); setSelectedTicket(null); }}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'dashboard' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
             >
-              <div className="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
-                <div className="flex items-center space-x-3 text-left">
-                  <button onClick={() => setSelectedTicket(null)} className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 cursor-pointer">
-                    <ArrowLeft className="w-4 h-4" />
-                  </button>
-                  <div>
-                    <span className="text-[9px] uppercase font-bold text-royal font-mono tracking-wide">ACTIVE CASE: #{selectedTicket.id}</span>
-                    <h3 className="text-sm font-bold text-navy line-clamp-1">{selectedTicket.title}</h3>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase border ${getStatusBadgeClass(selectedTicket.status)}`}>
-                    {selectedTicket.status.replace('_', ' ')}
-                  </span>
-                  <button onClick={() => setSelectedTicket(null)} className="p-1 rounded bg-slate-50 hover:bg-slate-100 text-slate-400 cursor-pointer">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Chat room message feed container */}
-              <div className="h-56 overflow-y-auto space-y-3.5 p-3.5 border border-slate-100 bg-slate-50/50 rounded-xl mb-4 font-sans text-xs">
-                {chatMessages.map((msg, idx) => {
-                  const isStaff = msg.message.sender_role === 'admin';
-                  return (
-                    <div key={idx} className={`flex items-start space-x-2.5 max-w-[85%] ${isStaff ? 'ml-auto text-right flex-row-reverse space-x-reverse' : 'mr-auto text-left'}`}>
-                      <div className="w-6 h-6 rounded-full overflow-hidden border flex-shrink-0">
-                        <img 
-                          src={isStaff ? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=150&q=80' : 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(profile?.full_name || 'fdfdfdf')} 
-                          alt="Avatar" 
-                          className="h-full w-full object-cover" 
-                        />
-                      </div>
-                      <div className={`p-3 rounded-2xl ${isStaff ? 'bg-royal text-white' : 'bg-white border border-slate-150 text-slate-700'}`}>
-                        <span className="text-[9px] font-bold block mb-1 opacity-75 uppercase tracking-wide">{msg.senderName} ({msg.message.sender_role})</span>
-                        <p className="whitespace-pre-line leading-relaxed text-[11px]">{msg.message.content}</p>
-                        <span className="text-[8px] block mt-1 opacity-50">{new Date(msg.message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <form onSubmit={handleSendChatMessage} className="flex gap-2 font-sans">
-                <input
-                  type="text"
-                  required
-                  placeholder="Enter message here to speak with campus support booth..."
-                  value={newMsgContent}
-                  onChange={(e) => setNewMsgContent(e.target.value)}
-                  className="w-full text-xs border border-slate-200 rounded-xl px-4 py-3 bg-slate-50 focus:outline-none focus:border-royal focus:bg-white transition-all text-slate-800"
-                />
-                <button type="submit" className="px-5 bg-royal hover:bg-royal/90 text-white rounded-xl transition-all flex items-center justify-center cursor-pointer">
-                  <Send className="w-4 h-4" />
-                </button>
-              </form>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Split Grid Column layout matching fdfdfdf's photo exactly */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start font-sans">
-          
-          {/* Left Column (Your Coverage details with dark navy active card & dynamic QR) */}
-          <div className="lg:col-span-5 text-left space-y-4">
-            <h2 className="text-sm font-extrabold text-navy uppercase tracking-wider">Your Coverage</h2>
-            
-            <div className="bg-[#00183D] p-6.5 rounded-3xl text-white select-none relative overflow-hidden flex flex-col justify-between h-40">
-              <div className="absolute top-0 right-0 w-36 h-36 bg-royal/10 filter blur-2xl rounded-full pointer-events-none" />
-              <div>
-                <span className="bg-[#FFC500]/15 border border-[#FFC500]/30 text-[#FFC500] text-[9px] font-extrabold font-mono rounded px-2 py-0.5 tracking-wider uppercase inline-block">
-                  ACTIVE PLAN
-                </span>
-                <h3 className="text-lg font-black tracking-tight mt-2.5">
-                  {isPremium ? 'Premium Shield' : 'Basic Cover'}
-                </h3>
-              </div>
-              <span className="text-xs text-slate-350 font-medium block">
-                Valid until: December 2026
-              </span>
-            </div>
-
-            {/* Coverage Specifications Specs list matched with Green/Yellow badging */}
-            <div className="bg-white border border-slate-200/60 p-5 rounded-2xl space-y-3.5 text-xs">
-              <div className="flex justify-between items-center border-b border-slate-50 pb-2.5">
-                <span className="text-slate-500 font-medium font-sans">Software Fixes:</span>
-                <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 border border-emerald-100 rounded">✓ Unlimited</span>
-              </div>
-              
-              <div className="flex justify-between items-center border-b border-slate-50 pb-2.5">
-                <span className="text-slate-500 font-medium font-sans">OS Installation:</span>
-                <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 border border-emerald-100 rounded">✓ Unlimited</span>
-              </div>
-
-              <div className="flex justify-between items-center border-b border-slate-50 pb-2.5">
-                <span className="text-slate-500 font-medium font-sans">Hardware Labour:</span>
-                {isPremium ? (
-                  <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 border border-emerald-100 rounded">✓ Free</span>
-                ) : (
-                  <span className="text-slate-500 font-bold bg-slate-50 px-2 py-0.5 border border-slate-150 rounded">~ Not Covered</span>
-                )}
-              </div>
-
-              <div className="flex justify-between items-center border-b border-slate-50 pb-2.5">
-                <span className="text-slate-500 font-medium font-sans">Parts Cost:</span>
-                <span className="text-amber-700 font-bold bg-amber-50 px-2 py-0.5 border border-amber-100 rounded">~ You pay</span>
-              </div>
-
-              <div className="flex justify-between items-center border-b border-slate-50 pb-2.5">
-                <span className="text-slate-500 font-medium font-sans">Priority Response:</span>
-                {isPremium ? (
-                  <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 border border-emerald-100 rounded">✓ Same day</span>
-                ) : (
-                  <span className="text-slate-500 font-bold bg-slate-50 px-2 py-0.5 border border-slate-150 rounded">~ 24-48 Hours</span>
-                )}
-              </div>
-
-              <div className="flex justify-between items-center pb-1">
-                <span className="text-slate-500 font-medium font-sans">Consultation Fee:</span>
-                <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 border border-emerald-100 rounded">✓ Always FREE</span>
-              </div>
-            </div>
-
-            {/* QR Verification Widget block */}
-            <div className="bg-white border border-slate-200/60 p-6 rounded-2xl flex flex-col items-center justify-center space-y-4 select-none">
-              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block font-sans">Verification Token</span>
-              
-              <div className="p-2 border border-slate-100 rounded-2xl bg-slate-50/50">
-                <img 
-                  src={qrCodeUrl} 
-                  alt="StudentShield secure subscriber QR" 
-                  className="w-40 h-40 object-contain rounded-xl mix-blend-multiply" 
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-
-              <div className="text-center space-y-1">
-                <span className="block text-[11px] font-mono font-bold tracking-widest text-navy uppercase">
-                  {subscriberKey}
-                </span>
-                <p className="text-[10px] text-slate-400 font-sans max-w-xs leading-normal">
-                  Show this unique QR code at any campus repair booth to verify active protection.
-                </p>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Column (Repair history case list & ticket submits) */}
-          <div className="lg:col-span-7 text-left space-y-4 w-full">
-            <h2 className="text-sm font-extrabold text-navy uppercase tracking-wider">Repair History</h2>
-            
-            <div className="space-y-3.5">
-              {/* Combine seeded history items from screenshot to match perfectly, plus any database items */}
-              {filteredTickets.length > 0 ? (
-                filteredTickets.map((t) => (
-                  <div 
-                    key={t.id}
-                    onClick={() => setSelectedTicket(t)}
-                    className="p-4.5 bg-slate-50/50 hover:bg-slate-50 hover:border-royal/30 border border-slate-200/60 rounded-2xl flex justify-between items-center transition-all cursor-pointer font-sans"
-                  >
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-navy text-xs leading-snug tracking-tight">{t.title}</h4>
-                      <span className="text-[10px] text-slate-400 font-medium block">
-                        {new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase ${getStatusBadgeClass(t.status)}`}>
-                        {t.status.replace('_', ' ')}
-                      </span>
-                      <ArrowRight className="w-4 h-4 text-slate-350" />
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <>
-                  {/* Seeded layouts directly from the high-fidelity screenshot */}
-                  <div className="p-4.5 bg-slate-50/50 border border-slate-200/60 rounded-2xl flex justify-between items-center">
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-navy text-xs leading-snug tracking-tight">Windows 11 Activation Error</h4>
-                      <span className="text-[10px] text-slate-400 font-medium block">Nov 12, 2026</span>
-                    </div>
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase text-emerald-700 bg-emerald-50 border border-emerald-150">
-                      Resolved
-                    </span>
-                  </div>
-
-                  <div className="p-4.5 bg-slate-50/50 border border-slate-200/60 rounded-2xl flex justify-between items-center">
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-navy text-xs leading-snug tracking-tight">Keyboard key not responding</h4>
-                      <span className="text-[10px] text-slate-400 font-medium block">Oct 28, 2026</span>
-                    </div>
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase text-emerald-700 bg-emerald-50 border border-emerald-150">
-                      Resolved
-                    </span>
-                  </div>
-
-                  <div className="p-4.5 bg-slate-50/50 border border-slate-200/60 rounded-2xl flex justify-between items-center">
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-navy text-xs leading-snug tracking-tight font-sans">Malware removal &amp; cleanup</h4>
-                      <span className="text-[10px] text-slate-400 font-medium block font-sans">Oct 5, 2026</span>
-                    </div>
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase text-emerald-700 bg-emerald-50 border border-emerald-150">
-                      Resolved
-                    </span>
-                  </div>
-
-                  <div className="p-4.5 bg-slate-50/50 border border-slate-200/60 rounded-2xl flex justify-between items-center">
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-navy text-xs leading-snug tracking-tight">MS Office installation &amp; setup</h4>
-                      <span className="text-[10px] text-slate-400 font-medium block">Sep 14, 2026</span>
-                    </div>
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase text-emerald-700 bg-emerald-50 border border-emerald-150">
-                      Resolved
-                    </span>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Custom styled Solid CTA button with thin outlines and branding color */}
-            <button
-              onClick={() => setShowTicketModal(true)}
-              className="mt-4 bg-[#00183D] hover:bg-navy/95 text-white rounded-2xl tracking-wide font-bold py-3.5 px-6 block w-full text-center hover:scale-[1.01] active:scale-95 transition-all select-none cursor-pointer text-xs uppercase"
-            >
-              + Submit New Ticket
+              <Cpu className="w-4 h-4" />
+              <span>Overview Analytics</span>
             </button>
-          </div>
 
+            <button 
+              onClick={() => { setActiveTab('devices'); setSelectedTicket(null); }}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'devices' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            >
+              <Laptop className="w-4 h-4" />
+              <span>Add Device</span>
+              <span className="ml-auto bg-slate-800 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold text-slate-350">{currentDevicesCount}/{maxDevicesAllowed}</span>
+            </button>
+
+            <button 
+              onClick={() => { setActiveTab('make_request'); setSelectedTicket(null); }}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'make_request' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            >
+              <Sliders className="w-4 h-4" />
+              <span>Make Service Request</span>
+            </button>
+
+            <button 
+              onClick={() => { setActiveTab('history'); setSelectedTicket(null); }}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'history' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            >
+              <History className="w-4 h-4" />
+              <span>History & Receipts</span>
+            </button>
+
+            <button 
+              onClick={() => { setActiveTab('notifications'); setSelectedTicket(null); }}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'notifications' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            >
+              <Bell className="w-4 h-4" />
+              <span>Notifications</span>
+              {notifications.filter(n => !n.is_read).length > 0 && (
+                <span className="ml-auto bg-amber-500 text-slate-950 text-[9px] px-1.5 py-0.2 rounded-full font-extrabold font-mono">
+                  {notifications.filter(n => !n.is_read).length}
+                </span>
+              )}
+            </button>
+
+            <button 
+              onClick={() => { setActiveTab('profile'); setSelectedTicket(null); }}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'profile' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            >
+              <User className="w-4 h-4" />
+              <span>Profile Settings</span>
+            </button>
+          </nav>
         </div>
 
-      </div>
+        <div className="p-6 border-t border-slate-800 space-y-3">
+          <div className="bg-slate-900/55 p-3 rounded-xl border border-slate-850 flex items-center space-x-2.5">
+            <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-700 bg-slate-800">
+              <img src={profile?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${profile?.full_name}`} alt="Avatar" className="h-full w-full object-cover" />
+            </div>
+            <div className="truncate">
+              <span className="text-[11px] font-bold block truncate text-slate-200">{profile?.full_name}</span>
+              <span className="text-[9px] text-royal block font-semibold truncate capitalize">{planName}</span>
+            </div>
+          </div>
 
-      {/* MODAL 1: REGISTER EXTRA NOTEBOOK COMPONENT */}
+          <button 
+            onClick={logout}
+            className="w-full py-2 bg-red-655/15 hover:bg-red-655/25 text-red-400 border border-red-500/10 rounded-xl text-[10px] uppercase font-bold tracking-widest transition-colors flex items-center justify-center space-x-2 cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Secure Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Mobile Sidebar Overlay Backdrop */}
       <AnimatePresence>
-        {showDeviceModal && (
-          <motion.div
+        {mobileSidebarOpen && (
+          <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[999] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 text-left"
-          >
-            <motion.div
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.95 }}
-              className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 w-full max-w-md select-none relative"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[40] md:hidden"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Sidebar Navigation Drawer */}
+      <aside className={`fixed top-0 left-0 bottom-0 w-64 bg-navy text-white flex flex-col justify-between border-r border-slate-800 transition-transform duration-300 z-[45] md:hidden ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="p-6">
+          <div className="flex items-center justify-between pb-6 border-b border-slate-800">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-royal rounded-lg flex items-center justify-center text-white">
+                <Shield className="w-5 h-5 flex-shrink-0" />
+              </div>
+              <div>
+                <span className="font-extrabold text-sm tracking-tight block">StudentShield</span>
+                <span className="text-[9px] text-slate-400 font-mono tracking-widest uppercase">Student Portal</span>
+              </div>
+            </div>
+            <button 
+              onClick={() => setMobileSidebarOpen(false)}
+              className="p-1 text-slate-400 hover:text-white cursor-pointer"
             >
-              <button 
-                onClick={() => setShowDeviceModal(false)}
-                className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-400 cursor-pointer"
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <nav className="mt-8 space-y-2.5">
+            <button 
+              onClick={() => { setActiveTab('dashboard'); setSelectedTicket(null); setMobileSidebarOpen(false); }}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'dashboard' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            >
+              <Cpu className="w-4 h-4" />
+              <span>Overview Analytics</span>
+            </button>
+
+            <button 
+              onClick={() => { setActiveTab('devices'); setSelectedTicket(null); setMobileSidebarOpen(false); }}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'devices' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            >
+              <Laptop className="w-4 h-4" />
+              <span>Add Device</span>
+              <span className="ml-auto bg-slate-800 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold text-slate-350">{currentDevicesCount}/{maxDevicesAllowed}</span>
+            </button>
+
+            <button 
+              onClick={() => { setActiveTab('make_request'); setSelectedTicket(null); setMobileSidebarOpen(false); }}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'make_request' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            >
+              <Sliders className="w-4 h-4" />
+              <span>Make Service Request</span>
+            </button>
+
+            <button 
+              onClick={() => { setActiveTab('history'); setSelectedTicket(null); setMobileSidebarOpen(false); }}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'history' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            >
+              <History className="w-4 h-4" />
+              <span>History & Receipts</span>
+            </button>
+
+            <button 
+              onClick={() => { setActiveTab('notifications'); setSelectedTicket(null); setMobileSidebarOpen(false); }}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'notifications' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            >
+              <Bell className="w-4 h-4" />
+              <span>Notifications</span>
+              {notifications.filter(n => !n.is_read).length > 0 && (
+                <span className="ml-auto bg-amber-500 text-slate-950 text-[9px] px-1.5 py-0.2 rounded-full font-extrabold font-mono">
+                  {notifications.filter(n => !n.is_read).length}
+                </span>
+              )}
+            </button>
+
+            <button 
+              onClick={() => { setActiveTab('profile'); setSelectedTicket(null); setMobileSidebarOpen(false); }}
+              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'profile' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+            >
+              <User className="w-4 h-4" />
+              <span>Profile Settings</span>
+            </button>
+          </nav>
+        </div>
+
+        <div className="p-6 border-t border-slate-800 space-y-3">
+          <div className="bg-slate-900/55 p-3 rounded-xl border border-slate-850 flex items-center space-x-2.5">
+            <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-700 bg-slate-800">
+              <img src={profile?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${profile?.full_name}`} alt="Avatar" className="h-full w-full object-cover" />
+            </div>
+            <div className="truncate">
+              <span className="text-[11px] font-bold block truncate text-slate-200">{profile?.full_name}</span>
+              <span className="text-[9px] text-royal block font-semibold truncate capitalize">{planName}</span>
+            </div>
+          </div>
+
+          <button 
+            onClick={logout}
+            className="w-full py-2 bg-red-655/15 hover:bg-red-655/25 text-red-400 border border-red-500/10 rounded-xl text-[10px] uppercase font-bold tracking-widest transition-colors flex items-center justify-center space-x-2 cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Secure Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* 2. Main Content Frame */}
+      <main className="flex-grow flex flex-col justify-between overflow-y-auto h-screen w-full relative">
+        <header className="h-16 border-b border-slate-200/60 bg-white/70 backdrop-blur px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center space-x-2.5">
+            <button 
+              onClick={() => setMobileSidebarOpen(true)}
+              className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-655 border border-slate-200 rounded-lg md:hidden cursor-pointer mr-2.5"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider font-mono">WORKSPACE</span>
+            <span className="text-slate-300">/</span>
+            <span className="text-xs text-navy font-bold uppercase tracking-wider capitalize">{activeTab.replace('_', ' ')}</span>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center relative">
+              <AnimatePresence>
+                {searchOpen && (
+                  <motion.input
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: 180, opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
+                    type="text"
+                    placeholder="Search requests, devices..."
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    className="mr-2 text-xs px-3 py-1.5 border border-slate-200 bg-slate-50/50 rounded-lg text-slate-800 focus:outline-none focus:border-royal transition-all font-sans"
+                  />
+                )}
+              </AnimatePresence>
+              <button
+                onClick={() => setSearchOpen(!searchOpen)}
+                className="w-8 h-8 bg-slate-50 hover:bg-slate-100 text-slate-655 rounded-full border border-slate-200/50 flex items-center justify-center cursor-pointer transition-colors"
               >
-                <X className="w-4 h-4" />
+                <Search className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Notification alert dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
+                className="w-8 h-8 bg-slate-50 hover:bg-slate-100 text-slate-655 rounded-full border border-slate-200/50 flex items-center justify-center cursor-pointer transition-colors relative"
+              >
+                <Bell className="w-3.5 h-3.5" />
+                {notifications.filter(n => !n.is_read).length > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-amber-500 rounded-full border border-white" />
+                )}
               </button>
 
-              <div className="mb-4">
-                <span className="text-[9px] uppercase font-bold text-royal font-mono">My Notebooks</span>
-                <h3 className="text-sm font-black text-navy mt-1">Active Hardware Inventory</h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">Your coverage plan covers diagnostics on these items.</p>
-              </div>
-
-              {/* List of registered inventory devices */}
-              <div className="space-y-2.5 mb-5 max-h-40 overflow-y-auto">
-                {filteredDevices.map((dev) => (
-                  <div key={dev.id} className="p-3 bg-slate-50 border border-slate-150 rounded-xl flex justify-between items-center text-xs">
-                    <div className="text-left flex items-center space-x-2.5">
-                      <Cpu className="w-5 h-5 text-royal" />
-                      <div>
-                        <span className="font-bold text-navy block">{dev.name}</span>
-                        <span className="text-[9px] text-slate-400 font-mono font-medium block">SN: {dev.serial_number}</span>
-                      </div>
+              <AnimatePresence>
+                {notifDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute right-0 mt-2.5 w-72 bg-white border border-slate-200 rounded-xl shadow-xl z-50 text-xs p-4 space-y-2.5"
+                  >
+                    <div className="font-extrabold text-navy uppercase text-[9px] tracking-wider border-b border-slate-100 pb-1.5 flex justify-between items-center">
+                      <span>Recent Alerts</span>
+                      <button onClick={() => setNotifDropdownOpen(false)} className="text-slate-400 hover:text-navy font-bold">Close</button>
                     </div>
-                    <span className="text-[9px] uppercase font-bold text-emerald-600 bg-emerald-50 border border-emerald-150 px-2 py-0.5 rounded">
-                      {dev.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {notifications.length > 0 ? (
+                        notifications.map((notif) => (
+                          <div key={notif.id} className="border-b border-slate-50 pb-2 last:border-0">
+                            <p className="font-bold text-slate-800 text-[10px]">{notif.title}</p>
+                            <p className="text-slate-500 text-[9px] mt-0.5">{notif.content}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-slate-400 text-center py-4 font-mono text-[9px]">No triage updates.</div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </header>
 
-              {/* Form to submit extra registration hardware */}
-              <form onSubmit={handleDeviceRegisterSubmit} className="space-y-3.5 text-xs font-sans">
-                <div className="font-bold border-t border-slate-100 pt-3 relative text-[10px] uppercase text-slate-400 block tracking-wider font-mono">
-                  Register Another Laptop
+        {/* Dashboard Frame Content */}
+        <div className="p-8 flex-grow">
+
+          {/* Active plan banner state warning */}
+          {subscription?.status === 'suspended' && (
+            <div className="mb-6 p-4.5 bg-rose-50 border border-rose-250 text-rose-800 rounded-2xl flex items-start space-x-3.5">
+              <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-bold text-xs">Academic Insure Plan Suspended</h4>
+                <p className="text-[10px] text-rose-700 mt-0.5 font-medium">
+                  Your student subscription has been suspended by the administrator (typically triggered at the end of the academic semester). Make request actions and tech support diagnostics are temporarily locked. Please contact Booth technicians.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 1: OVERVIEW DASHBOARD */}
+          {activeTab === 'dashboard' && (
+            <div className="space-y-8">
+              
+              {/* Header greeting */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h2 className="text-2xl font-black text-navy tracking-tight">Welcome back, {profile?.full_name} 👋</h2>
+                  <p className="text-xs text-slate-400 font-semibold font-sans mt-0.5">
+                    {profile?.university} • Student ID: {profile?.student_id} • Semester 2
+                  </p>
                 </div>
 
+                <div className="flex items-center space-x-2">
+                  <span className="text-[9px] uppercase tracking-wider text-slate-450 font-extrabold font-mono">PLAN LEVEL:</span>
+                  <span className={`text-[10px] font-bold font-mono px-3 py-1 rounded-full uppercase border ${
+                    subscription?.status === 'suspended' 
+                      ? 'bg-rose-50 text-rose-600 border-rose-200' 
+                      : 'bg-emerald-50 text-emerald-700 border-emerald-250'
+                  }`}>
+                    {planName} ({subscription?.status === 'suspended' ? 'Suspended' : 'Active'})
+                  </span>
+                </div>
+              </div>
+
+              {/* Bento analytics stats blocks */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
+                  <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">PLAN COVER</span>
+                  <span className="text-xl font-black text-navy mt-1 tracking-tight block capitalize">{planName}</span>
+                  <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">GH₵ {planPrice} Paid</span>
+                </div>
+
+                <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
+                  <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">DEVICES ADDED</span>
+                  <span className="text-xl font-black text-navy mt-1 tracking-tight block">{currentDevicesCount} / {maxDevicesAllowed}</span>
+                  <span className="text-[10px] text-slate-455 block mt-1.5 font-semibold">Allocated devices count</span>
+                </div>
+
+                <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
+                  <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">TREATMENT REPAIRS</span>
+                  <span className="text-xl font-black text-emerald-600 mt-1 tracking-tight block">
+                    {filteredTickets.filter(t => t.status === 'resolved').length} Resolved
+                  </span>
+                  <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">
+                    {filteredTickets.filter(t => t.status !== 'resolved' && t.status !== 'closed').length} in triage queue
+                  </span>
+                </div>
+
+                <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
+                  <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">SAVINGS CALCULATOR</span>
+                  <span className="text-xl font-black text-[#D97706] mt-1 tracking-tight block">
+                    GH₵ {isBonanza ? '580.00' : (isPremium ? '320.00' : '80.00')}
+                  </span>
+                  <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">vs. external service costs</span>
+                </div>
+              </div>
+
+              {/* Website Credentials Block for Premium/Bonanza Web Hosting */}
+              {(isPremium || isBonanza) && (
+                <div className="bg-white border border-slate-200 rounded-2xl p-6 text-left space-y-4">
+                  <div className="flex items-center space-x-2 border-b border-slate-100 pb-2.5">
+                    <Smartphone className="w-5 h-5 text-royal" />
+                    <div>
+                      <h3 className="text-xs font-bold text-navy uppercase tracking-wider">Plan Website Credentials</h3>
+                      <p className="text-[10px] text-slate-400">Mock hosting portal generated under your {planName} tier.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div className="p-3.5 bg-slate-50 border border-slate-150 rounded-xl space-y-2">
+                      <span className="text-[9px] uppercase font-bold text-slate-400 block font-mono">Personal Portfolio Address</span>
+                      <a href={personalWebUrl} target="_blank" rel="noreferrer" className="text-royal font-bold font-mono text-[11.5px] hover:underline block break-all">
+                        {personalWebUrl}
+                      </a>
+                      <span className="text-[9px] text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded font-bold uppercase inline-block">Online</span>
+                    </div>
+
+                    <div className="p-3.5 bg-slate-50 border border-slate-150 rounded-xl space-y-2">
+                      <span className="text-[9px] uppercase font-bold text-slate-400 block font-mono">Web Design Dashboard Login</span>
+                      <div className="space-y-1 text-[10.5px]">
+                        <p><span className="font-semibold text-slate-500">Username:</span> <span className="font-mono font-bold text-navy">{user?.email}</span></p>
+                        <p><span className="font-semibold text-slate-500">Password:</span> <span className="font-mono font-bold text-navy">SS-WebUser-{profile?.student_id.slice(-4)}!</span></p>
+                      </div>
+                      <a href={websiteAdminDashboardUrl} target="_blank" rel="noreferrer" className="text-royal font-bold text-[10px] hover:underline inline-block mt-1 font-mono">
+                        Access Admin Console →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Split layout: Registered Devices Grid & Active Request History */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                {/* Registered Devices Modern UI/UX layout */}
+                <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 space-y-5">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <h4 className="text-xs font-bold text-navy uppercase tracking-wider">Registered Workspace Devices</h4>
+                    <button 
+                      onClick={() => setActiveTab('devices')}
+                      className="text-[10px] font-bold text-royal hover:underline uppercase"
+                    >
+                      + Add New
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {devices.map(dev => {
+                      const hasImages = dev.device_images && dev.device_images.length > 0;
+                      const hasVideo = dev.video_url;
+                      return (
+                        <div key={dev.id} className="border border-slate-200 bg-slate-50/20 rounded-2xl overflow-hidden flex flex-col justify-between hover:shadow-md transition-all group">
+                          
+                          {/* Animated Image Preview Container */}
+                          <div className="h-32 bg-slate-100 relative overflow-hidden flex items-center justify-center">
+                            {hasImages ? (
+                              <motion.img 
+                                src={dev.device_images?.[0]} 
+                                alt={dev.name} 
+                                className="w-full h-full object-cover select-none"
+                                whileHover={{ scale: 1.08 }}
+                                transition={{ type: 'tween', duration: 0.3 }}
+                              />
+                            ) : (
+                              <motion.img 
+                                src={dev.image_url} 
+                                alt={dev.name} 
+                                className="w-full h-full object-cover select-none"
+                                whileHover={{ scale: 1.08 }}
+                                transition={{ type: 'tween', duration: 0.3 }}
+                              />
+                            )}
+
+                            {/* Video Play Indicator */}
+                            {hasVideo && (
+                              <button
+                                onClick={() => setActiveVideoUrl(dev.video_url || null)}
+                                className="absolute inset-0 m-auto w-10 h-10 bg-navy/80 hover:bg-royal text-white rounded-full flex items-center justify-center transition-all cursor-pointer border border-white/20 shadow-lg"
+                                title="Play uploaded video specs"
+                              >
+                                <Play className="w-4.5 h-4.5 fill-current ml-0.5" />
+                              </button>
+                            )}
+
+                            <span className="absolute top-2 right-2 text-[8px] uppercase tracking-widest font-mono font-bold text-white bg-slate-900/60 backdrop-blur px-2 py-0.5 rounded">
+                              {dev.type}
+                            </span>
+                          </div>
+
+                          {/* Details Metadata */}
+                          <div className="p-4 space-y-2 text-left text-xs">
+                            <div>
+                              <span className="font-extrabold text-navy block truncate text-[12px]">{dev.name}</span>
+                              <span className="text-[9px] text-slate-400 font-mono block mt-0.5">Device ID: {dev.id}</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] border-t border-slate-100 pt-2 text-slate-500 font-medium">
+                              <p><span className="text-slate-400 block text-[8.5px]">BRAND</span> {dev.brand}</p>
+                              <p><span className="text-slate-400 block text-[8.5px]">MODEL</span> {dev.model}</p>
+                              <p className="col-span-2 mt-1"><span className="text-slate-400 block text-[8.5px]">OS INSTALLED</span> {dev.operating_system}</p>
+                              <p className="col-span-2"><span className="text-slate-400 block text-[8.5px]">SERIAL CODE</span> <span className="font-mono text-[9px] select-all font-bold text-slate-700">{dev.serial_number}</span></p>
+                            </div>
+
+                            {/* Render custom fields if present */}
+                            {dev.custom_fields && dev.custom_fields.length > 0 && (
+                              <div className="border-t border-slate-100 pt-2 space-y-1 text-[9.5px]">
+                                <span className="text-royal font-mono text-[8px] font-extrabold block uppercase tracking-wider">Custom attributes</span>
+                                {dev.custom_fields.map((f, i) => (
+                                  <p key={i} className="text-slate-600"><span className="font-bold text-slate-450">{f.label}:</span> {f.value}</p>
+                                ))}
+                              </div>
+                            )}
+
+                            <div className="pt-2 flex justify-between items-center border-t border-slate-100/60 mt-1">
+                              <span className="text-[9px] uppercase font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 border border-emerald-100 rounded">
+                                {dev.status}
+                              </span>
+                              
+                              <div className="flex items-center space-x-1.5">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenEditModal(dev);
+                                  }}
+                                  className="p-1 text-slate-400 hover:text-royal hover:bg-slate-100 rounded transition-colors cursor-pointer"
+                                  title="Edit device specifications"
+                                >
+                                  <Sliders className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeletingDevice(dev);
+                                  }}
+                                  className="p-1 text-slate-400 hover:text-red-500 hover:bg-slate-100 rounded transition-colors cursor-pointer"
+                                  title="Delete/deregister device"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+                      );
+                    })}
+                    {devices.length === 0 && (
+                      <div className="col-span-2 text-center py-10 text-slate-400 text-xs">No registered academic devices. Please register one to engage coverage.</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Repair History / Requests */}
+                <div className="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-6 space-y-4 w-full">
+                  <h4 className="text-xs font-bold text-navy uppercase tracking-wider border-b border-slate-100 pb-3">Service Diagnostic Requests</h4>
+                  
+                  <div className="space-y-3">
+                    {filteredTickets.map(ticket => (
+                      <div 
+                        key={ticket.id}
+                        onClick={() => setSelectedTicket(ticket)}
+                        className="p-4 bg-slate-50/40 hover:bg-slate-50 hover:border-royal/30 border border-slate-200/70 rounded-xl flex justify-between items-center transition-all cursor-pointer"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-mono text-[9px] text-slate-400">REQ #{ticket.id}</span>
+                            <span className="bg-royal/5 border border-royal/10 text-royal text-[8.5px] px-1.5 py-0.1 font-bold rounded">
+                              {ticket.category.toUpperCase().replace('_', ' ')}
+                            </span>
+                          </div>
+                          <h5 className="font-bold text-navy text-xs tracking-tight line-clamp-1">{ticket.title}</h5>
+                          <span className="text-[9px] text-slate-400 block">
+                            Requested: {new Date(ticket.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center space-x-3.5 border-l border-slate-200 pl-4 shrink-0">
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase ${getStatusBadgeClass(ticket.status)}`}>
+                            {ticket.status.replace('_', ' ')}
+                          </span>
+                          <ArrowRight className="w-3.5 h-3.5 text-slate-405" />
+                        </div>
+                      </div>
+                    ))}
+                    {filteredTickets.length === 0 && (
+                      <div className="text-center py-8 text-slate-400 text-xs font-mono">No requests in pipeline history.</div>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          )}
+
+          {/* TAB 2: ADD DEVICE FORM */}
+          {activeTab === 'devices' && (
+            <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6">
+              
+              <div className="text-center space-y-2 pb-4 border-b border-slate-100">
+                <div className="w-12 h-12 bg-royal/10 text-royal rounded-xl flex items-center justify-center mx-auto">
+                  <Laptop className="w-6 h-6" />
+                </div>
+                <h2 className="text-lg font-black text-navy uppercase tracking-tight">Register Academic Device</h2>
+                <p className="text-[11px] text-slate-500 max-w-sm mx-auto font-medium">
+                  Enroll devices to diagnostic logs. Your plan limit is {maxDevicesAllowed} device(s) (Currently using {currentDevicesCount}).
+                </p>
+              </div>
+
+              {deviceError && (
+                <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-[10.5px] rounded-xl flex items-start space-x-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{deviceError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleDeviceRegisterSubmit} className="space-y-4 text-xs text-left">
+                
+                {/* Brand Logo & Name */}
                 <div className="space-y-1.5">
-                  <label className="text-[9px] uppercase font-bold text-slate-500 font-mono">Device Nickname</label>
+                  <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Device Nickname *</label>
                   <input
                     type="text"
                     required
                     value={newDeviceName}
                     onChange={(e) => setNewDeviceName(e.target.value)}
-                    placeholder="E.g. Kofi MacBook Pro"
-                    className="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 bg-slate-50/50 focus:outline-[#3B82F6]"
+                    placeholder="E.g. Ama's Study Laptop, HP ZBook"
+                    className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none focus:border-royal transition-all"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Select Dropdown with "Other" Option */}
                   <div className="space-y-1.5">
-                    <label className="text-[9px] uppercase font-bold text-slate-500 font-mono">Hardware Brand</label>
+                    <label className="text-[10px] uppercase font-bold text-slate-455 block font-mono">Hardware Type *</label>
+                    <select
+                      value={newDeviceType}
+                      onChange={(e) => setNewDeviceType(e.target.value)}
+                      className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-white rounded-xl focus:outline-none focus:border-royal appearance-none cursor-pointer"
+                    >
+                      <option value="laptop">Laptop</option>
+                      <option value="desktop">Desktop</option>
+                      <option value="tablet">Tablet</option>
+                      <option value="phone">Smartphone</option>
+                      <option value="other">Other (Specify below)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-455 block font-mono">Laptop Brand *</label>
                     <select
                       value={newDeviceBrand}
                       onChange={(e) => setNewDeviceBrand(e.target.value)}
-                      className="w-full text-xs border border-slate-200 bg-white rounded-xl px-3 py-2.5 focus:outline-[#3B82F6]"
+                      className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-white rounded-xl focus:outline-none"
                     >
-                      <option>Asus</option>
-                      <option>Apple</option>
-                      <option>HP</option>
-                      <option>Dell</option>
-                      <option>Lenovo</option>
+                      <option value="Asus">Asus</option>
+                      <option value="Apple">Apple</option>
+                      <option value="HP">HP</option>
+                      <option value="Dell">Dell</option>
+                      <option value="Lenovo">Lenovo</option>
+                      <option value="Acer">Acer</option>
+                      <option value="other">Other (Specify below)</option>
                     </select>
                   </div>
+                </div>
+
+                {/* Custom Brand or Type textboxes if "Other" is selected */}
+                {(newDeviceType === 'other' || newDeviceBrand === 'other') && (
+                  <div className="grid grid-cols-2 gap-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+                    {newDeviceType === 'other' && (
+                      <div className="space-y-1.5 col-span-1">
+                        <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Device Type *</label>
+                        <input
+                          type="text"
+                          required
+                          value={customType}
+                          onChange={(e) => setCustomType(e.target.value)}
+                          placeholder="e.g. Smart Watch, Raspberry Pi"
+                          className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg"
+                        />
+                      </div>
+                    )}
+
+                    {newDeviceBrand === 'other' && (
+                      <div className="space-y-1.5 col-span-1">
+                        <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Brand *</label>
+                        <input
+                          type="text"
+                          required
+                          value={customBrand}
+                          onChange={(e) => setCustomBrand(e.target.value)}
+                          placeholder="e.g. Samsung, Custom PC"
+                          className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] uppercase font-bold text-slate-500 font-mono">Model Code</label>
+                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Model Code *</label>
                     <input
                       type="text"
                       required
                       value={newDeviceModel}
                       onChange={(e) => setNewDeviceModel(e.target.value)}
-                      placeholder="E.g. UM3402"
-                      className="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 bg-slate-50/50 focus:outline-[#3B82F6]"
+                      placeholder="E.g. UM3402, Macbook Pro"
+                      className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none"
                     />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Operating System *</label>
+                    <select
+                      value={newDeviceOS}
+                      onChange={(e) => setNewDeviceOS(e.target.value)}
+                      className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-white rounded-xl focus:outline-none"
+                    >
+                      <option value="Windows 11">Windows 11</option>
+                      <option value="Windows 10">Windows 10</option>
+                      <option value="macOS Sequoia">macOS Sequoia</option>
+                      <option value="Linux Ubuntu">Linux Ubuntu</option>
+                      <option value="Android OS">Android OS</option>
+                      <option value="iOS Standard">iOS Standard</option>
+                      <option value="other">Other (Specify below)</option>
+                    </select>
                   </div>
                 </div>
 
+                {newDeviceOS === 'other' && (
+                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
+                    <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Operating System *</label>
+                    <input
+                      type="text"
+                      required
+                      value={customOS}
+                      onChange={(e) => setCustomOS(e.target.value)}
+                      placeholder="e.g. ChromeOS, FreeBSD"
+                      className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg"
+                    />
+                  </div>
+                )}
+
                 <div className="space-y-1.5">
-                  <label className="text-[9px] uppercase font-bold text-slate-500 font-mono">Hardware Serial Code</label>
+                  <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Hardware Serial Code / IMEI *</label>
                   <input
                     type="text"
                     required
                     value={newDeviceSN}
                     onChange={(e) => setNewDeviceSN(e.target.value)}
-                    placeholder="E.g. SN-ASUS-82937"
-                    className="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 bg-slate-50/50 focus:outline-[#3B82F6]"
+                    placeholder="E.g. SN-8928372-GH"
+                    className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none"
                   />
+                </div>
+
+                {/* Dynamic Image & Video Upload Section */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+                  <span className="text-[10px] uppercase font-extrabold text-navy font-mono block">Media Attachments</span>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Images Picker */}
+                    <div className="space-y-2">
+                      <label className="text-[9px] uppercase font-bold text-slate-500 block">Device Images * (Choose multiple)</label>
+                      <button
+                        type="button"
+                        onClick={() => imageInputRef.current?.click()}
+                        className="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center space-x-2 text-[11px] font-bold text-slate-700 cursor-pointer"
+                      >
+                        <ImageIcon className="w-4 h-4 text-slate-500" />
+                        <span>{imageLoading ? 'Loading...' : 'Select Images'}</span>
+                      </button>
+                      <input 
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        ref={imageInputRef}
+                        onChange={handleImageUploadChange}
+                        className="hidden"
+                      />
+                    </div>
+
+                    {/* Video Picker */}
+                    <div className="space-y-2">
+                      <label className="text-[9px] uppercase font-bold text-slate-500 block">Device Video File (Optional check)</label>
+                      <button
+                        type="button"
+                        onClick={() => videoInputRef.current?.click()}
+                        className="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center space-x-2 text-[11px] font-bold text-slate-700 cursor-pointer"
+                      >
+                        <Video className="w-4 h-4 text-slate-500" />
+                        <span>{videoLoading ? 'Loading...' : attachedVideo ? 'Video Attached ✓' : 'Select Video'}</span>
+                      </button>
+                      <input 
+                        type="file"
+                        accept="video/*"
+                        ref={videoInputRef}
+                        onChange={handleVideoUploadChange}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Previews grids */}
+                  {attachedImages.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-[9px] uppercase font-bold text-slate-400">Attached Images Thumbnails</p>
+                      <div className="flex flex-wrap gap-2">
+                        {attachedImages.map((src, i) => (
+                          <div key={i} className="w-12 h-12 rounded-lg border border-slate-200 overflow-hidden relative group">
+                            <img src={src} className="w-full h-full object-cover" alt="Attached preview" />
+                            <button
+                              type="button"
+                              onClick={() => setAttachedImages(attachedImages.filter((_, idx) => idx !== i))}
+                              className="absolute inset-0 bg-red-600/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {attachedVideo && (
+                    <div className="space-y-1.5 border-t border-slate-100 pt-2.5">
+                      <p className="text-[9px] uppercase font-bold text-slate-400">Attached Video Preview</p>
+                      <div className="flex items-center space-x-3 bg-white border border-slate-200 p-2 rounded-xl">
+                        <Video className="w-5 h-5 text-royal" />
+                        <span className="font-mono text-[9.5px] text-slate-500 truncate max-w-[180px]">video_asset_triage.mp4</span>
+                        <button
+                          type="button"
+                          onClick={() => setAttachedVideo('')}
+                          className="ml-auto p-1 bg-red-50 hover:bg-red-100 text-red-500 rounded border border-red-100 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+
+                {/* Custom Fields configuration */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                  <span className="text-[10px] uppercase font-extrabold text-navy font-mono block">Custom Field Attributes</span>
+                  
+                  <div className="grid grid-cols-2 gap-3 items-end">
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-slate-500 font-bold block">Label / Spec Title</label>
+                      <input 
+                        type="text"
+                        placeholder="e.g. Battery Capacity, GPU"
+                        value={newFieldLabel}
+                        onChange={(e) => setNewFieldLabel(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1 flex gap-2">
+                      <div className="flex-grow">
+                        <label className="text-[9px] text-slate-500 font-bold block">Value</label>
+                        <input 
+                          type="text"
+                          placeholder="e.g. 5000mAh, NVIDIA RTX"
+                          value={newFieldValue}
+                          onChange={(e) => setNewFieldValue(e.target.value)}
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addCustomField}
+                        className="py-1.5 px-3 bg-navy hover:bg-slate-900 text-white rounded-lg font-bold uppercase cursor-pointer text-center"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
+
+                  {customFields.length > 0 && (
+                    <div className="space-y-1.5 border-t border-slate-100 pt-2.5">
+                      {customFields.map((field, i) => (
+                        <div key={i} className="flex justify-between items-center bg-white border border-slate-150 p-2 rounded-xl text-[10px]">
+                          <span className="font-bold text-navy">{field.label}: <span className="font-normal text-slate-600">{field.value}</span></span>
+                          <button
+                            type="button"
+                            onClick={() => removeCustomField(i)}
+                            className="p-1 text-slate-450 hover:text-red-500 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-[#00183D] hover:bg-navy/90 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
+                  className="w-full py-3.5 bg-navy hover:bg-slate-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-sm"
                 >
-                  Confirm Registration
+                  + Add to Workspace Registry
                 </button>
               </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* MODAL 2: SUBMIT NEW SUPPORT TICKET DIALOG (Thin outlines, no shadows, custom colors & buttons) */}
+            </div>
+          )}
+
+          {/* TAB 3: MAKE SERVICE REQUEST AS A DIRECT VIEW SIDEBAR TAB */}
+          {activeTab === 'make_request' && (
+            <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6 text-left">
+              <div className="border-b border-slate-100 pb-4">
+                <span className="text-[9px] uppercase font-bold text-royal font-mono block">Service Pipeline</span>
+                <h3 className="text-lg font-black text-navy uppercase mt-1">Submit technical diagnostics request</h3>
+                <p className="text-[11px] text-slate-400 mt-0.5">Filter technical request options based on your active plan tier.</p>
+              </div>
+
+              <form onSubmit={handleMakeRequestSubmit} className="space-y-4 text-xs">
+                
+                <div className="space-y-1.5">
+                  <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Select Service Type *</label>
+                  <select
+                    value={reqCategory}
+                    onChange={(e) => setReqCategory(e.target.value as any)}
+                    className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-255 rounded-xl focus:outline-none"
+                  >
+                    {getSelectableRequestServices().map((serv) => (
+                      <option key={serv.value} value={serv.value}>{serv.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Device selection list if Hardware or Software fixes are selected */}
+                {['software', 'diagnostic', 'hardware', 'monthly_maintenance'].includes(reqCategory) && (
+                  <div className="space-y-1.5">
+                    <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Select Registered Device *</label>
+                    <select
+                      required
+                      value={reqDeviceId}
+                      onChange={(e) => setReqDeviceId(e.target.value)}
+                      className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-255 rounded-xl focus:outline-none focus:border-royal"
+                    >
+                      <option value="">-- Choose registered device --</option>
+                      {devices.map((d) => (
+                        <option key={d.id} value={d.id}>{d.name} (ID: {d.id})</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Website specs if website setup requests are selected */}
+                {['website_portfolio', 'website_business'].includes(reqCategory) && (
+                  <div className="p-4 bg-royal/5 border border-royal/10 rounded-2xl space-y-3">
+                    <span className="text-[9.5px] uppercase font-extrabold text-royal font-mono block">Website Setup Specifications</span>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[9px] uppercase font-bold text-slate-500 block font-mono">Business / Brand Name</label>
+                        <input
+                          type="text"
+                          required
+                          value={webBusinessName}
+                          onChange={(e) => setWebBusinessName(e.target.value)}
+                          placeholder="E.g. Kofi's Photography"
+                          className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg focus:outline-none"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[9px] uppercase font-bold text-slate-555 block font-mono">Desired Subdomain</label>
+                        <input
+                          type="text"
+                          required
+                          value={webSubdomain}
+                          onChange={(e) => setWebSubdomain(e.target.value)}
+                          placeholder="e.g. kofiphotos"
+                          className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[9px] uppercase font-bold text-slate-555 block font-mono">Website Concept Description</label>
+                      <textarea
+                        rows={2}
+                        value={webDescription}
+                        onChange={(e) => setWebDescription(e.target.value)}
+                        placeholder="Describe features you want on the website portfolio..."
+                        className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg focus:outline-none resize-none"
+                      />
+                    </div>
+
+                    {reqCategory === 'website_business' && (
+                      <div className="grid grid-cols-2 gap-3 items-center">
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase font-bold text-slate-555 block font-mono">Page count (Max 5)</label>
+                          <input
+                            type="number"
+                            max={5}
+                            min={1}
+                            value={webPagesCount}
+                            onChange={(e) => setWebPagesCount(Number(e.target.value))}
+                            className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg"
+                          />
+                        </div>
+                        <div className="flex items-center space-x-2 pt-4">
+                          <input 
+                            type="checkbox"
+                            checked={webHosting}
+                            onChange={(e) => setWebHosting(e.target.checked)}
+                            className="w-4 h-4 cursor-pointer"
+                          />
+                          <span className="font-semibold text-navy">Hosting & Domain included</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Brief Title of Request *</label>
+                  <input
+                    type="text"
+                    required
+                    value={reqTitle}
+                    onChange={(e) => setReqTitle(e.target.value)}
+                    placeholder="E.g. Install Python IDE, Keyboard faults repair, Business Website draft"
+                    className="w-full text-xs px-3.5 py-2.5 border border-slate-255 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Problem / Requirement Summary Description *</label>
+                  <textarea
+                    rows={3}
+                    required
+                    value={reqDesc}
+                    onChange={(e) => setReqDesc(e.target.value)}
+                    placeholder="Provide descriptions of requested setup details, fault patterns or website styles..."
+                    className="w-full text-xs px-3.5 py-2.5 border border-slate-255 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Urgency SLA</label>
+                    <select
+                      value={reqPriority}
+                      onChange={(e) => setReqPriority(e.target.value as any)}
+                      className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-255 rounded-xl focus:outline-none"
+                    >
+                      <option value="low">Low backlog queue</option>
+                      <option value="medium">Medium tracking</option>
+                      <option value="high">High queue SLA</option>
+                      <option value="urgent">Urgent triage standby</option>
+                    </select>
+                  </div>
+                  <div className="pt-5.5">
+                    <button
+                      type="submit"
+                      className="w-full py-3.5 bg-royal hover:bg-blue-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer text-center"
+                    >
+                      ⚡ Dispatch Request
+                    </button>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+          )}
+
+          {/* TAB 4: PROFILE SETTINGS */}
+          {activeTab === 'profile' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              {/* Profile details and updating coordinates */}
+              <div className="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6">
+                <h3 className="text-xs font-bold text-navy uppercase tracking-wider border-b border-slate-100 pb-3">My Academic Coordinates</h3>
+
+                <form onSubmit={handleUpdateProfileSubmit} className="space-y-4 text-xs font-sans">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Account Email Address</label>
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-mono text-[10.5px] text-slate-500 select-all">
+                      {user?.email}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold text-slate-455 block font-mono">Full Legal Name</label>
+                      <input 
+                        type="text"
+                        required
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-royal focus:bg-white text-slate-800"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold text-slate-455 block font-mono">MoMo Contact Mobile</label>
+                      <input 
+                        type="text"
+                        required
+                        value={editPhone}
+                        onChange={(e) => setEditPhone(e.target.value)}
+                        className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-royal focus:bg-white text-slate-800"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">University Hub</label>
+                    <input 
+                      type="text"
+                      required
+                      value={editUni}
+                      onChange={(e) => setEditUni(e.target.value)}
+                      className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-royal focus:bg-white text-slate-800"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-3 bg-navy hover:bg-slate-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
+                  >
+                    {profileSaved ? 'Updates Logged successfully ✓' : 'Save profile changes'}
+                  </button>
+                </form>
+              </div>
+
+              {/* Plans Upgrade panel */}
+              <div className="lg:col-span-5 bg-white border border-slate-200 rounded-2xl p-6 space-y-6">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="text-xs font-bold text-navy uppercase tracking-wider">Change Protection Plan</h3>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Upgrade or downgrade your semester diagnostics cover.</p>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Basic Plan options */}
+                  <div className={`p-4 border rounded-2xl text-xs space-y-2 transition-all ${planId === 'basic-plan' ? 'border-royal bg-blue-50/20' : 'border-slate-200 bg-white'}`}>
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-navy block text-[12px]">Basic Cover Option</span>
+                      <span className="font-mono text-royal font-bold">GH₵20/sem</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 leading-normal font-medium">Includes basic software setups and diagnostics representation for 1 device.</p>
+                    {planId !== 'basic-plan' ? (
+                      <button 
+                        onClick={() => handleUpgradeDowngrade('basic-plan')}
+                        className="py-1.5 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold rounded-lg uppercase cursor-pointer"
+                      >
+                        Downgrade to Basic
+                      </button>
+                    ) : (
+                      <span className="text-[10px] text-royal font-bold uppercase tracking-wide block pt-1">Active coverage ✓</span>
+                    )}
+                  </div>
+
+                  {/* Premium plan options */}
+                  <div className={`p-4 border rounded-2xl text-xs space-y-2 transition-all ${planId === 'premium-plan' ? 'border-royal bg-blue-50/20' : 'border-slate-200 bg-white'}`}>
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-navy block text-[12px]">Premium Shield Tier</span>
+                      <span className="font-mono text-royal font-bold">GH₵50/sem</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 leading-normal font-medium">Free repair labor representation + free semester personal web developer block.</p>
+                    {planId !== 'premium-plan' ? (
+                      <button 
+                        onClick={() => handleUpgradeDowngrade('premium-plan')}
+                        className="py-1.5 px-3.5 bg-royal text-white hover:bg-blue-600 text-[10px] font-bold rounded-lg uppercase cursor-pointer"
+                      >
+                        Upgrade to Premium
+                      </button>
+                    ) : (
+                      <span className="text-[10px] text-royal font-bold uppercase tracking-wide block pt-1">Active coverage ✓</span>
+                    )}
+                  </div>
+
+                  {/* Bonanza plan options */}
+                  <div className={`p-4 border rounded-2xl text-xs space-y-2 transition-all ${planId === 'bonanza-plan' ? 'border-amber-500 bg-amber-50/10' : 'border-slate-200 bg-white'}`}>
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-amber-900 block text-[12px]">Bonanza Plan 🚀</span>
+                      <span className="font-mono text-amber-600 font-bold">GH₵120/sem</span>
+                    </div>
+                    <p className="text-[10px] text-amber-850 leading-normal font-medium">Up to 3 devices + 5-page business site + free consulting + monthly checks.</p>
+                    {planId !== 'bonanza-plan' ? (
+                      <button 
+                        onClick={() => handleUpgradeDowngrade('bonanza-plan')}
+                        className="py-1.5 px-3.5 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold rounded-lg uppercase cursor-pointer"
+                      >
+                        Upgrade to Bonanza
+                      </button>
+                    ) : (
+                      <span className="text-[10px] text-amber-600 font-bold uppercase tracking-wide block pt-1">Active coverage ✓</span>
+                    )}
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* TAB 5: TRANSACTION & REQUEST HISTORY */}
+          {activeTab === 'history' && (
+            <div className="space-y-6 text-left">
+              
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
+                <h3 className="text-xs font-bold text-navy uppercase tracking-wider border-b border-slate-100 pb-3">Past Requests & receipts</h3>
+                
+                <div className="space-y-3.5 text-xs font-sans">
+                  {tickets.map((t) => (
+                    <div key={t.id} className="p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-mono text-[9px] text-slate-400">#{t.id}</span>
+                          <span className="bg-royal/5 border border-royal/10 text-royal text-[8.5px] px-1.5 py-0.1 font-bold rounded">
+                            {t.category.toUpperCase().replace('_', ' ')}
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-navy text-xs leading-none mt-1.5">{t.title}</h4>
+                        <p className="text-[11px] text-slate-400 leading-relaxed font-medium">{t.description}</p>
+                        <span className="text-[9px] text-slate-400 font-mono block">Filed on: {new Date(t.created_at).toLocaleString()}</span>
+                      </div>
+
+                      <div className="flex items-center space-x-3.5 shrink-0 border-l border-slate-200/80 pl-4">
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase ${getStatusBadgeClass(t.status)}`}>
+                          {t.status}
+                        </span>
+                        {t.receipt_pdf && (
+                          <button
+                            onClick={() => setSelectedRequestForReceipt(t)}
+                            className="p-1.5 bg-white border border-slate-200 text-slate-655 hover:bg-slate-100 rounded-lg flex items-center space-x-1 font-bold uppercase text-[9px] cursor-pointer"
+                          >
+                            <Printer className="w-3 h-3" />
+                            <span>Receipt</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {tickets.length === 0 && (
+                    <p className="text-slate-400 text-center py-6">No request history found.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
+                <h3 className="text-xs font-bold text-navy uppercase tracking-wider border-b border-slate-100 pb-3">Payments & Billing Ledger</h3>
+                
+                <div className="overflow-x-auto text-xs">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                        <th className="p-3">Reference ID</th>
+                        <th className="p-3">Billing Plan</th>
+                        <th className="p-3">Payment Method</th>
+                        <th className="p-3">Amount Paid</th>
+                        <th className="p-3 text-right">Confirmation Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {dbService.getTable<any>('ss_payments')
+                        .filter((p: any) => p.user_id === user?.id)
+                        .map((pay: any, idx: number) => (
+                          <tr key={idx} className="hover:bg-slate-50/50">
+                            <td className="p-3 font-mono font-bold text-royal">{pay.transaction_ref}</td>
+                            <td className="p-3 font-medium capitalize">{pay.subscription_id ? 'Semester Coverage Package' : 'Upgrade Allocation'}</td>
+                            <td className="p-3 text-slate-655">{pay.payment_method}</td>
+                            <td className="p-3 font-bold text-emerald-600">GH₵ {pay.amount}.00</td>
+                            <td className="p-3 text-right text-slate-400 font-mono text-[10px]">{new Date(pay.created_at).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* TAB 6: NOTIFICATIONS */}
+          {activeTab === 'notifications' && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+              <h3 className="text-xs font-bold text-navy uppercase tracking-wider border-b border-slate-100 pb-3">Triage Notifications Alert Log</h3>
+
+              <div className="space-y-3 font-sans text-xs">
+                {notifications.map((notif) => (
+                  <div key={notif.id} className="p-4 bg-slate-50 border border-slate-200/50 rounded-xl flex items-start space-x-3.5">
+                    <div className="mt-0.5 w-6 h-6 rounded bg-royal/10 text-royal flex items-center justify-center shrink-0">
+                      <Bell className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 font-mono block">{new Date(notif.created_at).toLocaleString()}</span>
+                      <h4 className="font-bold text-navy text-xs mt-1">{notif.title}</h4>
+                      <p className="text-[11.5px] text-slate-500 leading-normal mt-0.5">{notif.content}</p>
+                    </div>
+                  </div>
+                ))}
+
+                {notifications.length === 0 && (
+                  <p className="text-slate-400 text-center py-6">All systems cleared. No new alerts.</p>
+                )}
+              </div>
+            </div>
+          )}
+
+        </div>
+
+        <footer className="py-6 border-t border-slate-200 bg-white text-center text-[10px] text-slate-400 font-semibold font-sans tracking-wide">
+          StudentShield HubHQ Legon • Secure System Client Console.
+        </footer>
+      </main>
+
+      {/* Support Conversation chat pane overlay */}
+      {selectedTicket && (
+        <div className="w-80 bg-white border-l border-slate-200 flex flex-col justify-between shrink-0 h-screen sticky top-0 z-30 select-none">
+          <div className="p-4.5 border-b border-slate-200/60 flex items-center justify-between">
+            <div>
+              <span className="text-[8.5px] uppercase font-bold text-slate-400 font-mono block">Support Case Ticket</span>
+              <span className="text-xs font-bold text-navy block truncate max-w-[120px]">{selectedTicket.title}</span>
+            </div>
+            <button 
+              onClick={() => setSelectedTicket(null)} 
+              className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-400 rounded-lg cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="flex-grow p-4 overflow-y-auto space-y-4 bg-slate-50/40 text-xs">
+            <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
+              <span className="text-[9px] uppercase font-bold text-royal block">Issue description</span>
+              <p className="text-[11px] text-slate-605 leading-relaxed">{selectedTicket.description}</p>
+              {selectedTicket.website_details && (
+                <div className="pt-2 border-t border-slate-100 mt-2 space-y-1 text-[9.5px]">
+                  <p className="font-bold text-navy">Website Setup Specifications:</p>
+                  <p><span className="text-slate-400">Business Name:</span> {selectedTicket.website_details.business_name}</p>
+                  <p><span className="text-slate-455">Requested Subdomain:</span> {selectedTicket.website_details.subdomain}</p>
+                  <p><span className="text-slate-455">Page Count:</span> {selectedTicket.website_details.pages_count} pages</p>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3 font-sans">
+              {chatMessages.map((msg, idx) => {
+                const isStaff = msg.message.sender_role === 'admin' || msg.message.sender_role === 'support_agent';
+                return (
+                  <div key={idx} className={`flex items-start space-x-2 max-w-[85%] ${isStaff ? 'mr-auto text-left' : 'ml-auto text-right flex-row-reverse space-x-reverse'}`}>
+                    <div className="w-5 h-5 rounded-full overflow-hidden border flex-shrink-0 bg-slate-200">
+                      <img src={isStaff ? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=150&q=80' : `https://api.dicebear.com/7.x/initials/svg?seed=${profile?.full_name}`} alt="Avatar" className="h-full w-full object-cover" />
+                    </div>
+                    <div className={`p-2.5 rounded-xl text-[10.5px] leading-relaxed ${isStaff ? 'bg-royal text-white' : 'bg-white border border-slate-200 text-slate-700'}`}>
+                      <span className="text-[8.5px] font-bold block mb-1 opacity-75 uppercase">{msg.senderName}</span>
+                      <p className="whitespace-pre-line">{msg.message.content}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <form onSubmit={handleSendChatMessage} className="p-3 border-t border-slate-200 bg-white flex gap-2 font-sans">
+            <input
+              type="text"
+              required
+              placeholder="Send message to Booth..."
+              value={newMsgContent}
+              onChange={(e) => setNewMsgContent(e.target.value)}
+              className="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:border-royal rounded-xl text-slate-800"
+            />
+            <button type="submit" className="px-4.5 bg-navy hover:bg-slate-900 text-white rounded-xl cursor-pointer text-xs font-bold uppercase font-sans">Send</button>
+          </form>
+        </div>
+      )}
+
+      {/* MODAL: MOCK PDF RECEIPT DISPLAY */}
       <AnimatePresence>
-        {showTicketModal && (
+        {selectedRequestForReceipt && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[999] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 text-left font-sans"
+            className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 text-xs select-none"
           >
             <motion.div
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
-              className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 w-full max-w-lg select-none relative"
+              className="bg-white border border-slate-355 rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl text-left"
             >
               <button 
-                onClick={() => setShowTicketModal(false)}
+                onClick={() => setSelectedRequestForReceipt(null)}
                 className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-400 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
 
-              <div className="mb-5">
-                <span className="text-[9px] uppercase font-bold text-royal font-mono">Support Services</span>
-                <h3 className="text-sm font-black text-navy mt-1 uppercase">Submit Diagnostic Ticket</h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">All registered issues are triaged immediately by Kofi / Ato Kwamena on campus.</p>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2 border-b border-slate-100 pb-3">
+                  <Printer className="w-5 h-5 text-royal" />
+                  <span className="font-extrabold text-sm text-navy uppercase tracking-wider font-sans">Print Request Receipt</span>
+                </div>
+
+                {/* Printable receipt content */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[10px] text-slate-750 GHS whitespace-pre-wrap select-all leading-normal max-h-96 overflow-y-auto">
+                  {selectedRequestForReceipt.receipt_pdf}
+                </div>
+
+                {/* Tracking QR */}
+                <div className="bg-white border border-slate-150 p-4 rounded-xl flex flex-col items-center justify-center space-y-3">
+                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider block font-sans">Diagnostic tracking QR</span>
+                  <div className="p-1 border border-slate-100 rounded-lg">
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(selectedRequestForReceipt.tracking_qr || '')}`}
+                      alt="Tracking QR Code"
+                      className="w-32 h-32 object-contain"
+                    />
+                  </div>
+                  <span className="font-mono font-bold text-[10.5px] uppercase tracking-widest text-navy">{selectedRequestForReceipt.tracking_qr}</span>
+                  <p className="text-[8.5px] text-slate-400 text-center font-sans">Technicians scan this QR code on physical hub reception to route your device instantly.</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <button
+                    onClick={() => {
+                      window.print();
+                    }}
+                    className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center flex items-center justify-center space-x-1.5"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Print PDF</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const element = document.createElement("a");
+                      const file = new Blob([selectedRequestForReceipt.receipt_pdf || ''], {type: 'text/plain'});
+                      element.href = URL.createObjectURL(file);
+                      element.download = `StudentShield_Receipt_${selectedRequestForReceipt.id}.txt`;
+                      document.body.appendChild(element);
+                      element.click();
+                      document.body.removeChild(element);
+                      alert('Receipt downloaded successfully!');
+                    }}
+                    className="py-2.5 px-4 bg-royal hover:bg-blue-655 text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center flex items-center justify-center space-x-1.5"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download TXT</span>
+                  </button>
+                </div>
               </div>
 
-              <form onSubmit={handleTicketSubmit} className="space-y-4 text-xs">
-                <div className="space-y-1.5">
-                  <label className="text-[9px] uppercase font-bold text-slate-500 font-mono">Brief issue title</label>
-                  <input
-                    type="text"
-                    required
-                    value={newTicketTitle}
-                    onChange={(e) => setNewTicketTitle(e.target.value)}
-                    placeholder="E.g. Blue Screen crash when opening Visual Studio"
-                    className="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 bg-slate-50/50 focus:outline-[#3B82F6]"
-                  />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* MODERN React Success Modal for device creation */}
+      <AnimatePresence>
+        {showDeviceSuccessModal && lastAddedDevice && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-[999] flex items-center justify-center p-4 text-xs font-sans select-none"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 30 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+              className="bg-white border border-slate-200 rounded-3xl max-w-sm w-full p-6 space-y-5 text-center shadow-2xl relative"
+            >
+              <div className="w-14 h-14 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <Check className="w-8 h-8" />
+              </div>
+
+              <div className="space-y-1.5">
+                <h3 className="text-sm font-black text-navy uppercase tracking-wide">Device Registered</h3>
+                <p className="text-slate-450 text-[10.5px] font-semibold leading-relaxed">
+                  Your device <span className="text-navy font-bold">{lastAddedDevice.name}</span> has been securely logged to the system repository and is active under your protect plan.
+                </p>
+              </div>
+
+              <div className="p-3 bg-slate-50 border border-slate-150 rounded-xl space-y-1.5 text-left font-sans text-[10.5px]">
+                <p><span className="text-slate-450 font-bold block text-[8px]">DEVICE ID GENERATED</span> <span className="font-mono font-bold text-royal select-all">{lastAddedDevice.id}</span></p>
+                <p className="border-t border-slate-100 pt-1.5"><span className="text-slate-450 font-bold block text-[8px]">HARDWARE SERIAL</span> <span className="font-mono text-slate-700">{lastAddedDevice.serial_number}</span></p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowDeviceSuccessModal(false);
+                  setActiveTab('dashboard');
+                }}
+                className="w-full py-3 bg-navy hover:bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer"
+              >
+                Go to Workspace overview
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Video Player Lightbox Popup */}
+      <AnimatePresence>
+        {activeVideoUrl && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4 select-none"
+            onClick={() => setActiveVideoUrl(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-black border border-slate-800 rounded-3xl overflow-hidden max-w-2xl w-full aspect-video relative flex items-center justify-center shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setActiveVideoUrl(null)}
+                className="absolute top-4 right-4 p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors border border-white/10 cursor-pointer z-50"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <video 
+                src={activeVideoUrl} 
+                controls 
+                autoPlay 
+                className="w-full h-full object-contain"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL: EDIT DEVICE SPECIFICATIONS */}
+      <AnimatePresence>
+        {editingDevice && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4 text-xs font-sans select-none overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 sm:p-8 relative shadow-2xl text-left my-8"
+            >
+              <button 
+                onClick={() => setEditingDevice(null)}
+                className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-400 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2 border-b border-slate-100 pb-3">
+                  <Sliders className="w-5 h-5 text-royal" />
+                  <span className="font-extrabold text-sm text-navy uppercase tracking-wider">Edit Device Specifications</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <form onSubmit={handleDeviceUpdateSubmit} className="space-y-4 text-xs">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] uppercase font-bold text-slate-500 font-mono">Issue Category</label>
-                    <select
-                      value={newTicketCat}
-                      onChange={(e) => setNewTicketCat(e.target.value as any)}
-                      className="w-full text-xs border border-slate-200 bg-white rounded-xl px-3 py-2.5 focus:outline-[#3B82F6]"
-                    >
-                      <option value="software">Software Triage</option>
-                      <option value="virus">Virus clean & optim</option>
-                      <option value="diagnostic">Diagnostic Evaluation</option>
-                      <option value="hardware">Hardware Repair</option>
-                    </select>
+                    <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Device Nickname *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editDevName}
+                      onChange={(e) => setEditDevName(e.target.value)}
+                      className="w-full text-xs px-3.5 py-2 border border-slate-200 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none"
+                    />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] uppercase font-bold text-slate-500 font-mono">Priority Urgency</label>
-                    <select
-                      value={newTicketPriority}
-                      onChange={(e) => setNewTicketPriority(e.target.value as any)}
-                      className="w-full text-xs border border-slate-200 bg-white rounded-xl px-3 py-2.5 focus:outline-[#3B82F6]"
-                    >
-                      <option value="low">Low priority backlog</option>
-                      <option value="medium">Medium tracking</option>
-                      <option value="high">High queue SLA</option>
-                      <option value="urgent">Urgent standby</option>
-                    </select>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Hardware Type *</label>
+                      <select
+                        value={editDevType}
+                        onChange={(e) => setEditDevType(e.target.value)}
+                        className="w-full text-xs px-3.5 py-2 border border-slate-200 bg-white rounded-xl focus:outline-none"
+                      >
+                        <option value="laptop">Laptop</option>
+                        <option value="desktop">Desktop</option>
+                        <option value="tablet">Tablet</option>
+                        <option value="phone">Smartphone</option>
+                        <option value="other">Other (Specify below)</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Laptop Brand *</label>
+                      <select
+                        value={editDevBrand}
+                        onChange={(e) => setEditDevBrand(e.target.value)}
+                        className="w-full text-xs px-3.5 py-2 border border-slate-200 bg-white rounded-xl focus:outline-none"
+                      >
+                        <option value="Asus">Asus</option>
+                        <option value="Apple">Apple</option>
+                        <option value="HP">HP</option>
+                        <option value="Dell">Dell</option>
+                        <option value="Lenovo">Lenovo</option>
+                        <option value="Acer">Acer</option>
+                        <option value="other">Other (Specify below)</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[9px] uppercase font-bold text-slate-500 font-mono">Full diagnostic summary notes</label>
-                  <textarea
-                    rows={4}
-                    required
-                    value={newTicketDesc}
-                    onChange={(e) => setNewTicketDesc(e.target.value)}
-                    placeholder="Describe what error appears on your laptop, what program is running, or what keys do not respond..."
-                    className="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 bg-slate-50/50 focus:outline-[#3B82F6] resize-none"
-                  />
-                </div>
+                  {(editDevType === 'other' || editDevBrand === 'other') && (
+                    <div className="grid grid-cols-2 gap-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+                      {editDevType === 'other' && (
+                        <div className="space-y-1.5 col-span-1">
+                          <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Device Type *</label>
+                          <input
+                            type="text"
+                            required
+                            value={editCustomType}
+                            onChange={(e) => setEditCustomType(e.target.value)}
+                            className="w-full text-xs px-3 py-1.5 border border-slate-200 bg-white rounded-lg"
+                          />
+                        </div>
+                      )}
 
+                      {editDevBrand === 'other' && (
+                        <div className="space-y-1.5 col-span-1">
+                          <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Brand *</label>
+                          <input
+                            type="text"
+                            required
+                            value={editCustomBrand}
+                            onChange={(e) => setEditCustomBrand(e.target.value)}
+                            className="w-full text-xs px-3 py-1.5 border border-slate-200 bg-white rounded-lg"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Model Code *</label>
+                      <input
+                        type="text"
+                        required
+                        value={editDevModel}
+                        onChange={(e) => setEditDevModel(e.target.value)}
+                        className="w-full text-xs px-3.5 py-2 border border-slate-200 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Operating System *</label>
+                      <select
+                        value={editDevOS}
+                        onChange={(e) => setEditDevOS(e.target.value)}
+                        className="w-full text-xs px-3.5 py-2 border border-slate-200 bg-white rounded-xl focus:outline-none"
+                      >
+                        <option value="Windows 11">Windows 11</option>
+                        <option value="Windows 10">Windows 10</option>
+                        <option value="macOS Sequoia">macOS Sequoia</option>
+                        <option value="Linux Ubuntu">Linux Ubuntu</option>
+                        <option value="Android OS">Android OS</option>
+                        <option value="iOS Standard">iOS Standard</option>
+                        <option value="other">Other (Specify below)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {editDevOS === 'other' && (
+                    <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
+                      <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Operating System *</label>
+                      <input
+                        type="text"
+                        required
+                        value={editCustomOS}
+                        onChange={(e) => setEditCustomOS(e.target.value)}
+                        className="w-full text-xs px-3 py-1.5 border border-slate-200 bg-white rounded-lg"
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Hardware Serial Code / IMEI *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editDevSN}
+                      onChange={(e) => setEditDevSN(e.target.value)}
+                      className="w-full text-xs px-3.5 py-2 border border-slate-200 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none"
+                    />
+                  </div>
+
+                  {/* Media attachments */}
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+                    <span className="text-[10px] uppercase font-extrabold text-navy font-mono block">Edit Media Attachments</span>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <span className="text-[9px] uppercase font-bold text-slate-500 block">Add Images</span>
+                        <input type="file" multiple accept="image/*" onChange={handleEditImageUploadChange} className="w-full text-[10px] text-slate-500" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <span className="text-[9px] uppercase font-bold text-slate-500 block">Replace Video</span>
+                        <input type="file" accept="video/*" onChange={handleEditVideoUploadChange} className="w-full text-[10px] text-slate-500" />
+                      </div>
+                    </div>
+                    {editAttachedImages.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {editAttachedImages.map((src, i) => (
+                          <div key={i} className="w-10 h-10 rounded border border-slate-200 overflow-hidden relative group">
+                            <img src={src} className="w-full h-full object-cover" alt="preview" />
+                            <button type="button" onClick={() => setEditAttachedImages(editAttachedImages.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-600/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer"><Trash2 className="w-3 h-3" /></button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setEditingDevice(null)}
+                      className="py-3 bg-slate-100 hover:bg-slate-200 text-slate-805 rounded-xl font-bold uppercase cursor-pointer text-center"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="py-3 bg-navy hover:bg-slate-900 text-white rounded-xl font-bold uppercase cursor-pointer text-center"
+                    >
+                      Save changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL: DELETE DEVICE CONFIRMATION */}
+      <AnimatePresence>
+        {deletingDevice && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4 text-xs font-sans select-none"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white border border-slate-200 rounded-3xl max-w-sm w-full p-6 space-y-5 text-center shadow-2xl relative text-left"
+            >
+              <div className="w-14 h-14 bg-red-50 border border-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <AlertTriangle className="w-8 h-8" />
+              </div>
+
+              <div className="space-y-1.5 text-center">
+                <h3 className="text-sm font-black text-navy uppercase tracking-wide">Deregister Device?</h3>
+                <p className="text-slate-500 text-[10.5px] leading-relaxed font-semibold">
+                  Are you sure you want to remove <span className="text-navy font-bold">{deletingDevice.name}</span>? This action is permanent and will suspend all active diagnostics and logs for this device ID.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <button
-                  type="submit"
-                  className="w-full py-3.5 bg-[#00183D] hover:bg-navy/90 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
+                  onClick={() => setDeletingDevice(null)}
+                  className="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-805 rounded-xl font-bold uppercase cursor-pointer text-center"
                 >
-                  Queue diagnostic ticket
+                  Cancel
                 </button>
-              </form>
+                <button
+                  onClick={handleDeviceDeleteSubmit}
+                  className="py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold uppercase cursor-pointer text-center"
+                >
+                  Delete Device
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

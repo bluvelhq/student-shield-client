@@ -27,10 +27,19 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
   const { login, register, navigate, viewState } = useApp();
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
-  const [university, setUniversity] = useState('University of Ghana (Legon)');
+  const [university, setUniversity] = useState('');
   const [studentId, setStudentId] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  
+  const [institutionsList, setInstitutionsList] = useState<string[]>([]);
+  React.useEffect(() => {
+    const list = dbService.getInstitutions().map(i => i.name);
+    setInstitutionsList(list);
+    if (list.length > 0) {
+      setUniversity(list[0]);
+    }
+  }, []);
   
   // Optional device fields
   const [showDeviceFields, setShowDeviceFields] = useState(false);
@@ -43,8 +52,8 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
   const [loading, setLoading] = useState(false);
 
   const selectedPlanId = viewState?.selectPlanId || 'basic-plan';
-  const planName = selectedPlanId === 'premium-plan' ? 'Premium Shield Cover' : 'Basic Cover Option';
-  const planPrice = selectedPlanId === 'premium-plan' ? 'GH₵50' : 'GH₵20';
+  const planName = selectedPlanId === 'bonanza-plan' ? 'Bonanza Plan Cover' : (selectedPlanId === 'premium-plan' ? 'Premium Shield Cover' : 'Basic Cover Option');
+  const planPrice = selectedPlanId === 'bonanza-plan' ? 'GH₵120' : (selectedPlanId === 'premium-plan' ? 'GH₵50' : 'GH₵20');
 
   const handleAutoFill = async (role: 'student' | 'admin') => {
     if (role === 'student') {
@@ -140,7 +149,7 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
 
         const registeredUserId = regData.user.id;
         const pendingSubId = regData.subscription.id;
-        const finalPrice = selectedPlanId === 'premium-plan' ? 50 : 20;
+        const finalPrice = selectedPlanId === 'bonanza-plan' ? 120 : (selectedPlanId === 'premium-plan' ? 50 : 20);
 
         // Sync local client session in localStorage so that navigation loads authenticated stats
         dbService.loginSession(regData.user, regData.profile);
@@ -215,7 +224,7 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
             });
           }
 
-          const finalPrice = selectedPlanId === 'premium-plan' ? 50 : 20;
+          const finalPrice = selectedPlanId === 'bonanza-plan' ? 120 : (selectedPlanId === 'premium-plan' ? 50 : 20);
           const pendingSubId = `sub-${Math.random().toString(36).substring(2, 9)}`;
           const ref = `REF-SIM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
           const checkoutMockUrl = `${window.location.origin}?mock_checkout=1&reference=${ref}&amount=${finalPrice}&subId=${pendingSubId}&userId=${res.user.id}&planId=${selectedPlanId}`;
@@ -336,9 +345,11 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
                   <select
                     value={university}
                     onChange={(e) => setUniversity(e.target.value)}
-                    className="w-full text-xs px-3 py-2 border border-slate-200 bg-slate-50 rounded-xl text-slate-800 focus:outline-none focus:border-royal"
+                    className="w-full text-xs px-3 py-2 border border-slate-200 bg-slate-50 rounded-xl text-slate-800 focus:outline-none focus:border-royal cursor-pointer"
                   >
-                    <option>University of Ghana (Legon)</option>
+                    {institutionsList.map(inst => (
+                      <option key={inst} value={inst}>{inst}</option>
+                    ))}
                   </select>
                 </div>
 

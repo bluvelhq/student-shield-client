@@ -52,10 +52,6 @@ function MainLayout() {
   const [mockDetails, setMockDetails] = useState<any>(null);
 
   useEffect(() => {
-    if (window.location.pathname === '/admin' || window.location.pathname.startsWith('/admin/')) {
-      navigate('admin');
-    }
-
     const params = new URLSearchParams(window.location.search);
     const mockCheckout = params.get('mock_checkout');
     const paystackVerify = params.get('paystack_verify');
@@ -79,52 +75,20 @@ function MainLayout() {
 
       if (subId && userId) {
         setVerifying(true);
-        fetch('/api/payments/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            reference,
+        setTimeout(() => {
+          dbService.activateSubscription(
+            subId,
             userId,
-            subscriptionId: subId,
-            planId,
-            amount,
-          })
-        })
-          .then(res => {
-            if (!res.ok) throw new Error('OFFLINE_FALLBACK');
-            const contentType = res.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-              return res.json();
-            }
-            throw new Error('OFFLINE_FALLBACK');
-          })
-          .then(data => {
-            if (data && data.success) {
-              refreshData();
-              window.history.replaceState({}, document.title, window.location.pathname);
-              navigate('dashboard');
-            } else {
-              alert('Paystack secure verification rejected this transaction.');
-            }
-          })
-          .catch(err => {
-            console.warn('Verify endpoint fetch failed, falling back to local simulation activation:', err);
-            // Local activation fallback
-            dbService.activateSubscription(
-              subId,
-              userId,
-              planId || 'basic-plan',
-              Number(amount) || 20,
-              reference || `REF-SIM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-              'MTN Mobile Money'
-            );
-            refreshData();
-            window.history.replaceState({}, document.title, window.location.pathname);
-            navigate('dashboard');
-          })
-          .finally(() => {
-            setVerifying(false);
-          });
+            planId || 'basic-plan',
+            Number(amount) || 20,
+            reference || `REF-SIM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
+            'MTN Mobile Money'
+          );
+          refreshData();
+          window.history.replaceState({}, document.title, window.location.pathname);
+          navigate('dashboard');
+          setVerifying(false);
+        }, 800);
       }
     }
   }, []);
@@ -135,50 +99,7 @@ function MainLayout() {
     setShowMockCheckout(false);
 
     if (success) {
-      try {
-        const resp = await fetch('/api/payments/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            reference: mockDetails.reference,
-            userId: mockDetails.userId,
-            subscriptionId: mockDetails.subId,
-            planId: mockDetails.planId,
-            amount: mockDetails.amount
-          })
-        });
-
-        let verifiedOnServer = false;
-        if (resp.ok) {
-          const contentType = resp.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            const body = await resp.json();
-            if (body && body.success) {
-              verifiedOnServer = true;
-            }
-          }
-        }
-
-        if (verifiedOnServer) {
-          // Update local client cache of database and notify
-          dbService.createNotification(
-            mockDetails.userId,
-            'Shield Cover ACTIVE',
-            `Payment verification checked green under test transaction reference: ${mockDetails.reference}`,
-            'success'
-          );
-          refreshData();
-          window.history.replaceState({}, document.title, window.location.pathname);
-          navigate('dashboard');
-          setVerifying(false);
-          return;
-        } else {
-          throw new Error('OFFLINE_FALLBACK');
-        }
-      } catch (err) {
-        console.warn("Simulation verify endpoint failed, falling back to local database simulation:", err);
-        
-        // Local fallback activation
+      setTimeout(() => {
         dbService.activateSubscription(
           mockDetails.subId,
           mockDetails.userId,
@@ -191,8 +112,8 @@ function MainLayout() {
         window.history.replaceState({}, document.title, window.location.pathname);
         navigate('dashboard');
         setVerifying(false);
-        return;
-      }
+      }, 800);
+      return;
     }
 
     // Cancel / Exit
@@ -213,15 +134,34 @@ function MainLayout() {
             className="flex-1"
           >
             <LandingHero />
-            <LandingHowItWorks />
-            <LandingFeatures />
-            <PricingGrid />
             <LandingStats />
             <LandingTestimonials />
+          </motion.div>
+        );
+
+      case 'how-it-works':
+        return (
+          <motion.div key="how-it-works" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="pt-24 pb-16">
+            <LandingHowItWorks />
+            <LandingFeatures />
+          </motion.div>
+        );
+
+      case 'plans':
+      case 'pricing':
+        return (
+          <motion.div key="plans" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="pt-24 pb-16">
+            <PricingGrid />
+          </motion.div>
+        );
+
+      case 'faq':
+        return (
+          <motion.div key="faq" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="pt-24 pb-16">
             <LandingFAQ />
           </motion.div>
         );
-      
+
       case 'about':
         return (
           <motion.div key="about" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
@@ -233,13 +173,6 @@ function MainLayout() {
         return (
           <motion.div key="services" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <ServicesPage />
-          </motion.div>
-        );
-
-      case 'pricing':
-        return (
-          <motion.div key="pricing" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-            <PricingGrid />
           </motion.div>
         );
 
@@ -312,9 +245,11 @@ function MainLayout() {
     }
   };
 
+  const isDashboardOrAdmin = activeView === 'dashboard' || activeView === 'admin';
+
   return (
     <div className="min-h-screen flex flex-col justify-between bg-white text-slate-800 antialiased font-sans select-none">
-      <Navbar />
+      {!isDashboardOrAdmin && <Navbar />}
       
       {/* Immersive secure payment loading portal */}
       {verifying && (
@@ -395,7 +330,7 @@ function MainLayout() {
           {renderView()}
         </AnimatePresence>
       </main>
-      <Footer />
+      {!isDashboardOrAdmin && <Footer />}
     </div>
   );
 }

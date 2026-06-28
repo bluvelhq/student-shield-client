@@ -15,7 +15,8 @@ import {
   Notification, 
   BlogPost, 
   FAQ, 
-  ActivityLog 
+  ActivityLog,
+  Institution
 } from '../types';
 
 const DEFAULT_PLANS: Plan[] = [
@@ -24,14 +25,13 @@ const DEFAULT_PLANS: Plan[] = [
     name: 'Basic Cover',
     price: 20,
     billing_cycle: 'semester',
-    description: 'Essential software support and virus removal for student laptops.',
+    description: 'Essential software support and fault diagnosis for one academic device.',
+    max_devices: 1,
+    status: 'active',
     features: [
-      'Basic Software Troubleshooting',
-      'Virus & Malware Removal',
-      'System Optimization',
-      'Office Setup Assistance',
-      'Next-Biz-Day Diagnostics',
-      'Email & Chat Ticket Support'
+      'Software installation for the semester (1 registered device)',
+      'Free diagnosis for hardware faults',
+      'Repair coordination'
     ]
   },
   {
@@ -39,15 +39,30 @@ const DEFAULT_PLANS: Plan[] = [
     name: 'Premium Shield',
     price: 50,
     billing_cycle: 'semester',
-    description: 'Full-coverage protection including deep diagnostics and priority hardware repair routing.',
+    description: 'Priority hardware labor coverage and personal web building package.',
+    max_devices: 1,
+    status: 'active',
     features: [
-      'All Basic Cover Features',
-      'Windows/macOS Clean Installation',
-      'Priority Support (Under 2 hours)',
-      'Hardware Repair Management & Routing',
-      'Physical Dust Cleaning & Thermal Refresh',
-      'Dedicated Diagnostic Portal',
-      'Active Anti-Virus Subscription License'
+      'All Basic Cover features included',
+      'Free technician repair labor always',
+      'Free portfolio or personal website per semester'
+    ]
+  },
+  {
+    id: 'bonanza-plan',
+    name: 'Bonanza Plan',
+    price: 120,
+    billing_cycle: 'semester',
+    description: 'All-inclusive organizational protection with multiple devices and custom business web setups.',
+    max_devices: 3,
+    status: 'active',
+    features: [
+      'All Basic & Premium features included',
+      'Business website setup (up to 5 pages)',
+      'Free tech consultations for the semester',
+      'Domain and hosting support',
+      'Monthly maintenance and health checks',
+      'Up to three registered devices covered'
     ]
   }
 ];
@@ -144,9 +159,23 @@ However, we find that 85% of underperforming legacy notebooks have two massive b
 
 class StudentShieldDB {
   private initLocalStorage() {
-    if (!localStorage.getItem('ss_initialized')) {
+    if (!localStorage.getItem('ss_institutions')) {
+      const defaultInstitutions: Institution[] = [
+        { id: 'inst-ug', name: 'University of Ghana (Legon)', short_name: 'UG', location: 'Accra', created_at: new Date().toISOString() },
+        { id: 'inst-knust', name: 'KNUST', short_name: 'KNUST', location: 'Kumasi', created_at: new Date().toISOString() },
+        { id: 'inst-ashesi', name: 'Ashesi University', short_name: 'Ashesi', location: 'Berekuso', created_at: new Date().toISOString() }
+      ];
+      localStorage.setItem('ss_institutions', JSON.stringify(defaultInstitutions));
+    }
+
+    const plansStr = localStorage.getItem('ss_plans');
+    const hasBonanza = plansStr && plansStr.includes('bonanza-plan');
+
+    if (!localStorage.getItem('ss_initialized') || !hasBonanza) {
       const users: User[] = [
         { id: 'usr-student-1', email: 'student@university.edu', role: 'student', created_at: new Date().toISOString() },
+        { id: 'usr-student-2', email: 'knust@university.edu', role: 'student', created_at: new Date().toISOString() },
+        { id: 'usr-student-3', email: 'ashesi@university.edu', role: 'student', created_at: new Date().toISOString() },
         { id: 'usr-support-1', email: 'support@studentshield.com', role: 'support_agent', created_at: new Date().toISOString() },
         { id: 'usr-admin-1', email: 'admin@studentshield.com', role: 'admin', created_at: new Date().toISOString() }
       ];
@@ -160,6 +189,26 @@ class StudentShieldDB {
           student_id: 'UG-10928374',
           phone: '+233 24 412 3456',
           avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80',
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 'prof-student-2',
+          user_id: 'usr-student-2',
+          full_name: 'Kofi Boateng Mensah',
+          university: 'KNUST',
+          student_id: 'KN-9923812',
+          phone: '+233 27 555 8899',
+          avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 'prof-student-3',
+          user_id: 'usr-student-3',
+          full_name: 'Abena Serwaa Osei',
+          university: 'Ashesi University',
+          student_id: 'AS-881237',
+          phone: '+233 20 888 7766',
+          avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
           created_at: new Date().toISOString()
         },
         {
@@ -210,6 +259,32 @@ class StudentShieldDB {
           image_url: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=300&q=80',
           status: 'unprotected',
           created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'dev-3',
+          user_id: 'usr-student-2',
+          name: 'HP Pavilion 15',
+          type: 'laptop',
+          brand: 'HP',
+          model: '15-eg2000',
+          serial_number: 'SN-HP-883921-X',
+          operating_system: 'Windows 11 Home',
+          image_url: 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80',
+          status: 'active',
+          created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'dev-4',
+          user_id: 'usr-student-3',
+          name: 'MacBook Air M2',
+          type: 'laptop',
+          brand: 'Apple',
+          model: 'A2681',
+          serial_number: 'SN-APPLE-M2-8812',
+          operating_system: 'macOS Sonoma',
+          image_url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=300&q=80',
+          status: 'active',
+          created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
         }
       ];
 
@@ -222,6 +297,24 @@ class StudentShieldDB {
           start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
           end_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
           created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'sub-2',
+          user_id: 'usr-student-2',
+          plan_id: 'basic-plan',
+          status: 'active',
+          start_date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+          end_date: new Date(Date.now() + 110 * 24 * 60 * 60 * 1000).toISOString(),
+          created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'sub-3',
+          user_id: 'usr-student-3',
+          plan_id: 'bonanza-plan',
+          status: 'active',
+          start_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          end_date: new Date(Date.now() + 115 * 24 * 60 * 60 * 1000).toISOString(),
+          created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
         }
       ];
 
@@ -236,6 +329,28 @@ class StudentShieldDB {
           payment_method: 'Mobile Money (MTN)',
           transaction_ref: 'TXN-MM-892837482',
           created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'pay-2',
+          user_id: 'usr-student-2',
+          subscription_id: 'sub-2',
+          amount: 20,
+          currency: 'GHS',
+          status: 'successful',
+          payment_method: 'Mobile Money (Telecel)',
+          transaction_ref: 'TXN-MM-123456789',
+          created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'pay-3',
+          user_id: 'usr-student-3',
+          subscription_id: 'sub-3',
+          amount: 120,
+          currency: 'GHS',
+          status: 'successful',
+          payment_method: 'Mobile Money (AT)',
+          transaction_ref: 'TXN-MM-987654321',
+          created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
         }
       ];
 
@@ -451,6 +566,7 @@ class StudentShieldDB {
     university: string;
     studentId: string;
     phone: string;
+    gender?: string;
     role?: 'student' | 'admin';
   }): { user: User; profile: Profile } {
     const users = this.getTable<User>('ss_users');
@@ -471,6 +587,7 @@ class StudentShieldDB {
       university: data.university,
       student_id: data.studentId || `TBD-${Math.floor(100000 + Math.random() * 900000)}`,
       phone: data.phone,
+      gender: data.gender || 'Not specified',
       avatar_url: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(data.fullName)}`,
       created_at: new Date().toISOString()
     };
@@ -544,12 +661,15 @@ class StudentShieldDB {
 
   public registerDevice(data: {
     name: string;
-    type: 'laptop' | 'desktop' | 'tablet' | 'phone' | 'other';
+    type: string;
     brand: string;
     model: string;
     serialNumber: string;
     operatingSystem: string;
     image_url?: string;
+    video_url?: string;
+    device_images?: string[];
+    custom_fields?: { label: string; value: string }[];
   }): Device | null {
     const session = this.getCurrentUser();
     if (!session) return null;
@@ -566,6 +686,9 @@ class StudentShieldDB {
       operating_system: data.operatingSystem,
       status: 'active',
       image_url: data.image_url || this.getDeviceFallbackImage(data.type),
+      video_url: data.video_url,
+      device_images: data.device_images,
+      custom_fields: data.custom_fields,
       created_at: new Date().toISOString()
     };
 
@@ -575,20 +698,39 @@ class StudentShieldDB {
     this.createActivityLog(session.user.id, 'Device Registration', `Added ${data.name} to diagnostics dashboard.`);
     this.createNotification(session.user.id, 'Device Registered', `${data.name} is now registered in our system repository.`, 'success');
 
-    // Sync to backend Server if online
-    this.apiFetch('/api/devices', {
-      method: 'POST',
-      body: JSON.stringify({
-        userId: session.user.id,
-        brand: data.brand,
-        model: data.model,
-        serialNumber: data.serialNumber,
-        purchaseYear: new Date().getFullYear(),
-        imageUrl: data.image_url
-      })
-    });
+
 
     return newDevice;
+  }
+
+  public updateDevice(deviceId: string, data: Partial<Device>): boolean {
+    const devices = this.getTable<Device>('ss_devices');
+    const idx = devices.findIndex(d => d.id === deviceId);
+    if (idx !== -1) {
+      devices[idx] = { ...devices[idx], ...data };
+      this.setTable('ss_devices', devices);
+      
+      this.createActivityLog(devices[idx].user_id, 'Device Update', `Updated specs for device ${devices[idx].name}`);
+      this.createNotification(devices[idx].user_id, 'Device Details Updated', `Your device specifications for ${devices[idx].name} were successfully adjusted.`, 'info');
+      return true;
+    }
+    return false;
+  }
+
+  public deleteDevice(deviceId: string): boolean {
+    const devices = this.getTable<Device>('ss_devices');
+    const initialLen = devices.length;
+    const targetDevice = devices.find(d => d.id === deviceId);
+    const filtered = devices.filter(d => d.id !== deviceId);
+    if (filtered.length < initialLen) {
+      this.setTable('ss_devices', filtered);
+      if (targetDevice) {
+        this.createActivityLog(targetDevice.user_id, 'Device Removal', `Removed device ${targetDevice.name} from logs.`);
+        this.createNotification(targetDevice.user_id, 'Device De-registered', `Your device ${targetDevice.name} has been removed from coverage logs.`, 'warning');
+      }
+      return true;
+    }
+    return false;
   }
 
   private getDeviceFallbackImage(type: string): string {
@@ -626,14 +768,15 @@ class StudentShieldDB {
     if (!session) return null;
 
     const subs = this.getTable<Subscription>('ss_subscriptions');
-    return subs.find(s => s.user_id === session.user.id && s.status === 'active') || null;
+    return subs.find(s => s.user_id === session.user.id && (s.status === 'active' || s.status === 'suspended')) || null;
   }
 
   public purchasePlan(planId: string, paymentMethod: string): { subscription: Subscription; payment: Payment } | null {
     const session = this.getCurrentUser();
     if (!session) return null;
 
-    const plan = DEFAULT_PLANS.find(p => p.id === planId);
+    const plans = this.getPlans();
+    const plan = plans.find(p => p.id === planId);
     if (!plan) return null;
 
     const subs = this.getTable<Subscription>('ss_subscriptions');
@@ -1064,6 +1207,213 @@ class StudentShieldDB {
       };
       return { payment: pay, profile: prof };
     }).sort((a,b) => new Date(b.payment.created_at).getTime() - new Date(a.payment.created_at).getTime());
+  }
+
+  // Dynamic Plans Management
+  public getPlans(): Plan[] {
+    return this.getTable<Plan>('ss_plans');
+  }
+
+  public addPlan(plan: Plan): void {
+    const plans = this.getTable<Plan>('ss_plans');
+    plans.push({
+      ...plan,
+      billing_cycle: 'semester',
+      status: 'active'
+    });
+    this.setTable('ss_plans', plans);
+  }
+
+  public updateSubscriptionStatus(subId: string, status: Subscription['status']): void {
+    const subs = this.getTable<Subscription>('ss_subscriptions');
+    const idx = subs.findIndex(s => s.id === subId);
+    if (idx !== -1) {
+      subs[idx].status = status;
+      this.setTable('ss_subscriptions', subs);
+      
+      this.createNotification(
+        subs[idx].user_id,
+        'Coverage Status Update',
+        `Your StudentShield protection subscription has been set to: ${status.toUpperCase()}`,
+        status === 'active' ? 'success' : 'warning'
+      );
+      this.createActivityLog(subs[idx].user_id, 'Plan Status Change', `Subscription status updated to ${status}`);
+    }
+  }
+
+  public deactivateInstitutionSubscribers(universityName: string): number {
+    const profiles = this.getTable<Profile>('ss_profiles');
+    const subs = this.getTable<Subscription>('ss_subscriptions');
+    
+    // Find all profiles matching this university
+    const targetProfiles = profiles.filter(p => p.university.toLowerCase() === universityName.toLowerCase());
+    const targetUserIds = new Set(targetProfiles.map(p => p.user_id));
+    
+    let count = 0;
+    const updatedSubs = subs.map(s => {
+      if (targetUserIds.has(s.user_id) && s.status === 'active') {
+        count++;
+        return { ...s, status: 'suspended' as const };
+      }
+      return s;
+    });
+    
+    this.setTable('ss_subscriptions', updatedSubs);
+    
+    // Notify all affected users
+    targetProfiles.forEach(p => {
+      this.createNotification(
+        p.user_id,
+        'Institution Coverage Suspended',
+        `Due to institutional administrative action, all subscriptions for ${universityName} have been suspended.`,
+        'error'
+      );
+      this.createActivityLog(p.user_id, 'Institutional Suspension', `Plan suspended due to bulk deactivation for ${universityName}`);
+    });
+    
+    return count;
+  }
+
+  public expireInstitutionSubscribers(universityName: string): number {
+    const profiles = this.getTable<Profile>('ss_profiles');
+    const subs = this.getTable<Subscription>('ss_subscriptions');
+    
+    const targetProfiles = profiles.filter(p => p.university.toLowerCase() === universityName.toLowerCase());
+    const targetUserIds = new Set(targetProfiles.map(p => p.user_id));
+    
+    let count = 0;
+    const updatedSubs = subs.map(s => {
+      if (targetUserIds.has(s.user_id) && s.status === 'active') {
+        count++;
+        return { ...s, status: 'expired' as const };
+      }
+      return s;
+    });
+    
+    this.setTable('ss_subscriptions', updatedSubs);
+    
+    targetProfiles.forEach(p => {
+      this.createNotification(
+        p.user_id,
+        'Institution Coverage Expired',
+        `Due to the end of the academic semester, all StudentShield subscriptions for ${universityName} have expired.`,
+        'warning'
+      );
+      this.createActivityLog(p.user_id, 'Institutional Expiry', `Plan expired due to bulk semester deactivation for ${universityName}`);
+    });
+    
+    return count;
+  }
+
+  public createServiceRequest(data: {
+    deviceId?: string;
+    title: string;
+    description: string;
+    category: SupportTicket['category'];
+    priority: SupportTicket['priority'];
+    websiteDetails?: SupportTicket['website_details'];
+  }): SupportTicket | null {
+    const session = this.getCurrentUser();
+    if (!session) return null;
+
+    const tickets = this.getTable<SupportTicket>('ss_tickets');
+    const newId = `req-${Math.random().toString(36).substring(2, 9)}`;
+    const trackingQr = `SS-TRACK-${newId.toUpperCase()}`;
+    
+    const activeSub = this.getSubscription();
+    const plans = this.getPlans();
+    const plan = plans.find(p => p.id === activeSub?.plan_id);
+    const planName = plan ? plan.name : 'Basic Cover';
+    const amountPaid = plan ? plan.price : 20;
+
+    const receiptContent = `
+=============================================
+         STUDENTSHIELD RECEIPT & COVERAGE
+=============================================
+Request ID: ${newId}
+Date: ${new Date().toLocaleString()}
+Subscriber Name: ${session.profile.full_name}
+Student ID: ${session.profile.student_id}
+Institution: ${session.profile.university}
+Plan Level: ${planName}
+Billing Fee: GH₵ ${amountPaid}.00 (PAID)
+Service Type: ${data.category.toUpperCase().replace('_', ' ')}
+Device Selection ID: ${data.deviceId || 'N/A'}
+Description: ${data.description}
+---------------------------------------------
+QR TRACKING CODE: ${trackingQr}
+=============================================
+Thank you for shielding your device with us!
+    `.trim();
+
+    const newRequest: SupportTicket = {
+      id: newId,
+      user_id: session.user.id,
+      device_id: data.deviceId,
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      priority: data.priority,
+      status: 'open',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      website_details: data.websiteDetails,
+      receipt_pdf: receiptContent,
+      tracking_qr: trackingQr
+    };
+
+    tickets.push(newRequest);
+    this.setTable('ss_tickets', tickets);
+
+    // Initial message
+    const messages = this.getTable<Message>('ss_messages');
+    messages.push({
+      id: `msg-${Math.random().toString(36).substring(2, 9)}`,
+      ticket_id: newRequest.id,
+      sender_id: session.user.id,
+      sender_role: 'student',
+      content: `Hello support, I have filed an issue about: "${data.title}".\n\nFull Diagnostic Summary: ${data.description}${data.websiteDetails ? `\n\nWebsite Details:\nBusiness Name: ${data.websiteDetails.business_name || 'N/A'}\nDesired Subdomain: ${data.websiteDetails.subdomain || 'N/A'}\nPages: ${data.websiteDetails.pages_count || 'N/A'}` : ''}`,
+      created_at: new Date().toISOString()
+    });
+    this.setTable('ss_messages', messages);
+
+    this.createActivityLog(session.user.id, 'Service Request', `Created Request #${newRequest.id}`);
+    this.createNotification(session.user.id, 'Request Submitted', `Request #${newRequest.id} created successfully and placed in triage queue. PDF receipt has been generated.`, 'success');
+
+    return newRequest;
+  }
+
+  // Institution CRUD helpers
+  public getInstitutions(): Institution[] {
+    return this.getTable<Institution>('ss_institutions') || [];
+  }
+
+  public addInstitution(inst: Omit<Institution, 'id' | 'created_at'>): void {
+    const list = this.getInstitutions();
+    const newInst: Institution = {
+      ...inst,
+      id: `inst-${Math.random().toString(36).substring(2, 9)}`,
+      created_at: new Date().toISOString()
+    };
+    list.push(newInst);
+    this.setTable('ss_institutions', list);
+  }
+
+  public updateInstitution(id: string, name: string, short_name: string, location: string): void {
+    const list = this.getInstitutions();
+    const idx = list.findIndex(i => i.id === id);
+    if (idx !== -1) {
+      list[idx].name = name;
+      list[idx].short_name = short_name;
+      list[idx].location = location;
+      this.setTable('ss_institutions', list);
+    }
+  }
+
+  public deleteInstitution(id: string): void {
+    const list = this.getInstitutions();
+    const updated = list.filter(i => i.id !== id);
+    this.setTable('ss_institutions', updated);
   }
 }
 

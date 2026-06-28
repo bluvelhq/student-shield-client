@@ -17,6 +17,7 @@ export interface Profile {
   university: string;
   student_id: string;
   phone: string;
+  gender?: string;
   avatar_url?: string;
   created_at: string;
 }
@@ -25,12 +26,15 @@ export interface Device {
   id: string;
   user_id: string;
   name: string; // e.g. "MacBook Pro 14\""
-  type: 'laptop' | 'desktop' | 'tablet' | 'phone' | 'other';
+  type: string; // supports laptop, desktop, tablet, phone, or custom inputs
   brand: string;
   model: string;
   serial_number: string;
   operating_system: string;
   image_url?: string;
+  video_url?: string;
+  device_images?: string[];
+  custom_fields?: { label: string; value: string }[];
   status: 'active' | 'under_repair' | 'diagnosing' | 'resolved' | 'unprotected';
   created_at: string;
 }
@@ -42,13 +46,15 @@ export interface Plan {
   billing_cycle: 'semester';
   features: string[];
   description: string;
+  max_devices?: number;
+  status?: 'active' | 'inactive';
 }
 
 export interface Subscription {
   id: string;
   user_id: string;
   plan_id: string;
-  status: 'active' | 'expired' | 'cancelled' | 'pending';
+  status: 'active' | 'expired' | 'cancelled' | 'pending' | 'suspended';
   start_date: string;
   end_date: string;
   created_at: string;
@@ -72,11 +78,26 @@ export interface SupportTicket {
   device_id?: string;
   title: string;
   description: string;
-  category: 'software' | 'hardware' | 'virus' | 'network' | 'diagnostic' | 'other';
+  category: 'software' | 'hardware' | 'virus' | 'network' | 'diagnostic' | 'other' | 'website_portfolio' | 'website_business' | 'tech_consultation' | 'domain_hosting' | 'monthly_maintenance';
   priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: 'open' | 'in_progress' | 'waiting_on_user' | 'resolved' | 'closed';
+  status: 'open' | 'in_progress' | 'waiting_on_user' | 'resolved' | 'closed' | 'delivered';
   created_at: string;
   updated_at: string;
+  website_details?: {
+    business_name?: string;
+    subdomain?: string;
+    description?: string;
+    pages_count?: number;
+    hosting_required?: boolean;
+  };
+  receipt_pdf?: string;
+  tracking_qr?: string;
+  credentials?: {
+    username?: string;
+    password?: string;
+    website_url?: string;
+    dashboard_url?: string;
+  };
 }
 
 export interface Message {
@@ -125,5 +146,13 @@ export interface ActivityLog {
   action: string;
   details: string;
   ip_address?: string;
+  created_at: string;
+}
+
+export interface Institution {
+  id: string;
+  name: string;
+  short_name: string;
+  location: string;
   created_at: string;
 }
