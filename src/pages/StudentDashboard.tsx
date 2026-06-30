@@ -21,7 +21,7 @@ import { Device, SupportTicket, Message } from '../types';
 export const StudentDashboard: React.FC = () => {
   const { 
     user, profile, devices, tickets, subscription, 
-    refreshData, logout, updateProfile, notifications 
+    refreshData, logout, updateProfile, notifications, showToast
   } = useApp();
 
   // Sidebar active tab
@@ -30,6 +30,8 @@ export const StudentDashboard: React.FC = () => {
 
   // Dialog & Modal states
   const [selectedRequestForReceipt, setSelectedRequestForReceipt] = useState<SupportTicket | null>(null);
+  const [showAddDeviceModal, setShowAddDeviceModal] = useState(false);
+  const [showAddRequestModal, setShowAddRequestModal] = useState(false);
   
   // Custom Modern Success Modal for Device Addition
   const [showDeviceSuccessModal, setShowDeviceSuccessModal] = useState(false);
@@ -235,7 +237,7 @@ export const StudentDashboard: React.FC = () => {
     if (!files) return;
     setEditImageLoading(true);
 
-    const loadPromises = Array.from(files).map((file) => {
+    const loadPromises = Array.from(files).map((file: any) => {
       return new Promise<string>((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -277,7 +279,7 @@ export const StudentDashboard: React.FC = () => {
     if (!files) return;
     setImageLoading(true);
 
-    const loadPromises = Array.from(files).map((file) => {
+    const loadPromises = Array.from(files).map((file: any) => {
       return new Promise<string>((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -376,6 +378,7 @@ export const StudentDashboard: React.FC = () => {
         setCustomFields([]);
 
         refreshData();
+        setShowAddDeviceModal(false);
         setShowDeviceSuccessModal(true);
       }
     }
@@ -388,10 +391,10 @@ export const StudentDashboard: React.FC = () => {
       { value: 'diagnostic', label: 'Hardware Fault Diagnosis', minPlan: 'basic-plan' },
       { value: 'other', label: 'Repair Coordination & Assistance', minPlan: 'basic-plan' },
       { value: 'hardware', label: 'Hardware Labor Repair (Free Labor)', minPlan: 'premium-plan' },
-      { value: 'website_portfolio', label: 'Free Portfolio / Personal Website Request', minPlan: 'premium-plan' },
-      { value: 'website_business', label: '5-Page Business Website Setup', minPlan: 'bonanza-plan' },
+      // { value: 'website_portfolio', label: 'Free Portfolio / Personal Website Request', minPlan: 'premium-plan' },
+      // { value: 'website_business', label: '5-Page Business Website Setup', minPlan: 'bonanza-plan' },
       { value: 'tech_consultation', label: 'Free Tech Consultation Session', minPlan: 'bonanza-plan' },
-      { value: 'domain_hosting', label: 'Domain & Hosting Support setup', minPlan: 'bonanza-plan' },
+      // { value: 'domain_hosting', label: 'Domain & Hosting Support setup', minPlan: 'bonanza-plan' },
       { value: 'monthly_maintenance', label: 'Monthly Maintenance & System Checkup', minPlan: 'bonanza-plan' },
     ];
 
@@ -447,6 +450,7 @@ export const StudentDashboard: React.FC = () => {
       setWebDescription('');
 
       // Auto-show receipt
+      setShowAddRequestModal(false);
       setSelectedRequestForReceipt(requestObj);
       setActiveTab('dashboard');
     }
@@ -522,7 +526,7 @@ export const StudentDashboard: React.FC = () => {
               className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'devices' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
             >
               <Laptop className="w-4 h-4" />
-              <span>Add Device</span>
+              <span>Devices</span>
               <span className="ml-auto bg-slate-800 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold text-slate-350">{currentDevicesCount}/{maxDevicesAllowed}</span>
             </button>
 
@@ -531,7 +535,7 @@ export const StudentDashboard: React.FC = () => {
               className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'make_request' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
             >
               <Sliders className="w-4 h-4" />
-              <span>Make Service Request</span>
+              <span>Requests</span>
             </button>
 
             <button 
@@ -634,7 +638,7 @@ export const StudentDashboard: React.FC = () => {
               className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'devices' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
             >
               <Laptop className="w-4 h-4" />
-              <span>Add Device</span>
+              <span>Devices</span>
               <span className="ml-auto bg-slate-800 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold text-slate-350">{currentDevicesCount}/{maxDevicesAllowed}</span>
             </button>
 
@@ -643,7 +647,7 @@ export const StudentDashboard: React.FC = () => {
               className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'make_request' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
             >
               <Sliders className="w-4 h-4" />
-              <span>Make Service Request</span>
+              <span>Requests</span>
             </button>
 
             <button 
@@ -854,8 +858,8 @@ export const StudentDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Website Credentials Block for Premium/Bonanza Web Hosting */}
-              {(isPremium || isBonanza) && (
+              {/* Website Credentials Block for Premium/Bonanza Web Hosting commented out */}
+              {/* {(isPremium || isBonanza) && (
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 text-left space-y-4">
                   <div className="flex items-center space-x-2 border-b border-slate-100 pb-2.5">
                     <Smartphone className="w-5 h-5 text-royal" />
@@ -886,7 +890,7 @@ export const StudentDashboard: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Split layout: Registered Devices Grid & Active Request History */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -1052,478 +1056,217 @@ export const StudentDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 2: ADD DEVICE FORM */}
+          {/* TAB 2: DEVICES CATALOG */}
           {activeTab === 'devices' && (
-            <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6">
-              
-              <div className="text-center space-y-2 pb-4 border-b border-slate-100">
-                <div className="w-12 h-12 bg-royal/10 text-royal rounded-xl flex items-center justify-center mx-auto">
-                  <Laptop className="w-6 h-6" />
+            <div className="space-y-6 animate-fade-in text-left">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-4">
+                <div>
+                  <h2 className="text-xl font-black text-navy uppercase tracking-tight">Enrolled Devices</h2>
+                  <p className="text-xs text-slate-400 mt-0.5 font-semibold font-sans">
+                    Your active coverage allows up to {maxDevicesAllowed} device(s) (Currently using {currentDevicesCount}).
+                  </p>
                 </div>
-                <h2 className="text-lg font-black text-navy uppercase tracking-tight">Register Academic Device</h2>
-                <p className="text-[11px] text-slate-500 max-w-sm mx-auto font-medium">
-                  Enroll devices to diagnostic logs. Your plan limit is {maxDevicesAllowed} device(s) (Currently using {currentDevicesCount}).
-                </p>
+                <button
+                  onClick={() => setShowAddDeviceModal(true)}
+                  disabled={currentDevicesCount >= maxDevicesAllowed}
+                  className="px-4 py-2.5 bg-royal hover:bg-royal/90 disabled:opacity-50 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 shadow-md shadow-royal/10 border-0"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Register Device</span>
+                </button>
               </div>
 
-              {deviceError && (
-                <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-[10.5px] rounded-xl flex items-start space-x-2">
-                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span>{deviceError}</span>
+              {devices.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {devices.map(dev => {
+                    const hasImages = dev.device_images && dev.device_images.length > 0;
+                    const hasVideo = dev.video_url;
+                    return (
+                      <div key={dev.id} className="bg-white border border-slate-200 rounded-3xl overflow-hidden flex flex-col justify-between hover:shadow-lg transition-all group">
+                        
+                        {/* Animated Image Preview Container */}
+                        <div className="h-40 bg-slate-100 relative overflow-hidden flex items-center justify-center">
+                          {hasImages ? (
+                            <motion.img 
+                              src={dev.device_images?.[0]} 
+                              alt={dev.name} 
+                              className="w-full h-full object-cover select-none"
+                              whileHover={{ scale: 1.08 }}
+                              transition={{ type: 'tween', duration: 0.3 }}
+                            />
+                          ) : (
+                            <motion.img 
+                              src={dev.image_url} 
+                              alt={dev.name} 
+                              className="w-full h-full object-cover select-none"
+                              whileHover={{ scale: 1.08 }}
+                              transition={{ type: 'tween', duration: 0.3 }}
+                            />
+                          )}
+
+                          {hasVideo && (
+                            <button
+                              onClick={() => setActiveVideoUrl(dev.video_url || null)}
+                              className="absolute inset-0 m-auto w-10 h-10 bg-navy/80 hover:bg-royal text-white rounded-full flex items-center justify-center transition-all cursor-pointer border border-white/20 shadow-lg"
+                              title="Play uploaded video specs"
+                            >
+                              <Play className="w-4.5 h-4.5 fill-current ml-0.5" />
+                            </button>
+                          )}
+
+                          <span className="absolute top-3 right-3 text-[8px] uppercase tracking-widest font-mono font-bold text-white bg-slate-900/60 backdrop-blur px-2.5 py-0.5 rounded-full">
+                            {dev.type}
+                          </span>
+                        </div>
+
+                        {/* Details Metadata */}
+                        <div className="p-5 space-y-3.5 text-left text-xs flex-grow flex flex-col justify-between">
+                          <div className="space-y-2">
+                            <div>
+                              <span className="font-extrabold text-navy block truncate text-[13px]">{dev.name}</span>
+                              <span className="text-[9px] text-slate-400 font-mono block mt-0.5">Device ID: {dev.id}</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 text-[10px] border-t border-slate-100 pt-2.5 text-slate-500 font-medium font-sans">
+                              <p><span className="text-slate-400 block text-[8px] font-mono">BRAND</span> {dev.brand}</p>
+                              <p><span className="text-slate-400 block text-[8px] font-mono">MODEL</span> {dev.model}</p>
+                              <p className="col-span-2 mt-0.5"><span className="text-slate-400 block text-[8px] font-mono">OS INSTALLED</span> {dev.operating_system}</p>
+                              <p className="col-span-2"><span className="text-slate-400 block text-[8px] font-mono">SERIAL CODE</span> <span className="font-mono text-[9.5px] select-all font-bold text-slate-700">{dev.serial_number}</span></p>
+                            </div>
+
+                            {dev.custom_fields && dev.custom_fields.length > 0 && (
+                              <div className="border-t border-slate-100 pt-2.5 space-y-1 text-[9.5px]">
+                                <span className="text-royal font-mono text-[8px] font-extrabold block uppercase tracking-wider">Custom attributes</span>
+                                {dev.custom_fields.map((f, i) => (
+                                  <p key={i} className="text-slate-600"><span className="font-bold text-slate-450">{f.label}:</span> {f.value}</p>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="pt-3.5 flex justify-between items-center border-t border-slate-100">
+                            <span className="text-[9px] uppercase font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 border border-emerald-100 rounded">
+                              {dev.status}
+                            </span>
+                            
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenEditModal(dev);
+                                }}
+                                className="p-1.5 text-slate-400 hover:text-royal hover:bg-slate-100 rounded-lg transition-colors border border-transparent hover:border-slate-200 cursor-pointer"
+                                title="Edit device specifications"
+                              >
+                                <Sliders className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeletingDevice(dev);
+                                }}
+                                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-slate-100 rounded-lg transition-colors border border-transparent hover:border-slate-200 cursor-pointer"
+                                title="Delete/deregister device"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-20 bg-white border border-slate-200 rounded-3xl p-6 flex flex-col items-center justify-center space-y-3">
+                  <Laptop className="w-12 h-12 text-slate-300 mx-auto animate-bounce" />
+                  <h4 className="font-bold text-navy text-sm uppercase tracking-wide">No Registered Devices</h4>
+                  <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed font-semibold">
+                    You haven't registered any devices for campus coverage yet. Register your device now to log diagnostics.
+                  </p>
+                  <button
+                    onClick={() => setShowAddDeviceModal(true)}
+                    className="py-2.5 px-4 bg-royal hover:bg-royal/90 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer border-0"
+                  >
+                    + Register Device Now
+                  </button>
                 </div>
               )}
-
-              <form onSubmit={handleDeviceRegisterSubmit} className="space-y-4 text-xs text-left">
-                
-                {/* Brand Logo & Name */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Device Nickname *</label>
-                  <input
-                    type="text"
-                    required
-                    value={newDeviceName}
-                    onChange={(e) => setNewDeviceName(e.target.value)}
-                    placeholder="E.g. Ama's Study Laptop, HP ZBook"
-                    className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none focus:border-royal transition-all"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Select Dropdown with "Other" Option */}
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-455 block font-mono">Hardware Type *</label>
-                    <select
-                      value={newDeviceType}
-                      onChange={(e) => setNewDeviceType(e.target.value)}
-                      className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-white rounded-xl focus:outline-none focus:border-royal appearance-none cursor-pointer"
-                    >
-                      <option value="laptop">Laptop</option>
-                      <option value="desktop">Desktop</option>
-                      <option value="tablet">Tablet</option>
-                      <option value="phone">Smartphone</option>
-                      <option value="other">Other (Specify below)</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-455 block font-mono">Laptop Brand *</label>
-                    <select
-                      value={newDeviceBrand}
-                      onChange={(e) => setNewDeviceBrand(e.target.value)}
-                      className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-white rounded-xl focus:outline-none"
-                    >
-                      <option value="Asus">Asus</option>
-                      <option value="Apple">Apple</option>
-                      <option value="HP">HP</option>
-                      <option value="Dell">Dell</option>
-                      <option value="Lenovo">Lenovo</option>
-                      <option value="Acer">Acer</option>
-                      <option value="other">Other (Specify below)</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Custom Brand or Type textboxes if "Other" is selected */}
-                {(newDeviceType === 'other' || newDeviceBrand === 'other') && (
-                  <div className="grid grid-cols-2 gap-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
-                    {newDeviceType === 'other' && (
-                      <div className="space-y-1.5 col-span-1">
-                        <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Device Type *</label>
-                        <input
-                          type="text"
-                          required
-                          value={customType}
-                          onChange={(e) => setCustomType(e.target.value)}
-                          placeholder="e.g. Smart Watch, Raspberry Pi"
-                          className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg"
-                        />
-                      </div>
-                    )}
-
-                    {newDeviceBrand === 'other' && (
-                      <div className="space-y-1.5 col-span-1">
-                        <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Brand *</label>
-                        <input
-                          type="text"
-                          required
-                          value={customBrand}
-                          onChange={(e) => setCustomBrand(e.target.value)}
-                          placeholder="e.g. Samsung, Custom PC"
-                          className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg"
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Model Code *</label>
-                    <input
-                      type="text"
-                      required
-                      value={newDeviceModel}
-                      onChange={(e) => setNewDeviceModel(e.target.value)}
-                      placeholder="E.g. UM3402, Macbook Pro"
-                      className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Operating System *</label>
-                    <select
-                      value={newDeviceOS}
-                      onChange={(e) => setNewDeviceOS(e.target.value)}
-                      className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-white rounded-xl focus:outline-none"
-                    >
-                      <option value="Windows 11">Windows 11</option>
-                      <option value="Windows 10">Windows 10</option>
-                      <option value="macOS Sequoia">macOS Sequoia</option>
-                      <option value="Linux Ubuntu">Linux Ubuntu</option>
-                      <option value="Android OS">Android OS</option>
-                      <option value="iOS Standard">iOS Standard</option>
-                      <option value="other">Other (Specify below)</option>
-                    </select>
-                  </div>
-                </div>
-
-                {newDeviceOS === 'other' && (
-                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
-                    <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Operating System *</label>
-                    <input
-                      type="text"
-                      required
-                      value={customOS}
-                      onChange={(e) => setCustomOS(e.target.value)}
-                      placeholder="e.g. ChromeOS, FreeBSD"
-                      className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg"
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Hardware Serial Code / IMEI *</label>
-                  <input
-                    type="text"
-                    required
-                    value={newDeviceSN}
-                    onChange={(e) => setNewDeviceSN(e.target.value)}
-                    placeholder="E.g. SN-8928372-GH"
-                    className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none"
-                  />
-                </div>
-
-                {/* Dynamic Image & Video Upload Section */}
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
-                  <span className="text-[10px] uppercase font-extrabold text-navy font-mono block">Media Attachments</span>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Images Picker */}
-                    <div className="space-y-2">
-                      <label className="text-[9px] uppercase font-bold text-slate-500 block">Device Images * (Choose multiple)</label>
-                      <button
-                        type="button"
-                        onClick={() => imageInputRef.current?.click()}
-                        className="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center space-x-2 text-[11px] font-bold text-slate-700 cursor-pointer"
-                      >
-                        <ImageIcon className="w-4 h-4 text-slate-500" />
-                        <span>{imageLoading ? 'Loading...' : 'Select Images'}</span>
-                      </button>
-                      <input 
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        ref={imageInputRef}
-                        onChange={handleImageUploadChange}
-                        className="hidden"
-                      />
-                    </div>
-
-                    {/* Video Picker */}
-                    <div className="space-y-2">
-                      <label className="text-[9px] uppercase font-bold text-slate-500 block">Device Video File (Optional check)</label>
-                      <button
-                        type="button"
-                        onClick={() => videoInputRef.current?.click()}
-                        className="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center space-x-2 text-[11px] font-bold text-slate-700 cursor-pointer"
-                      >
-                        <Video className="w-4 h-4 text-slate-500" />
-                        <span>{videoLoading ? 'Loading...' : attachedVideo ? 'Video Attached ✓' : 'Select Video'}</span>
-                      </button>
-                      <input 
-                        type="file"
-                        accept="video/*"
-                        ref={videoInputRef}
-                        onChange={handleVideoUploadChange}
-                        className="hidden"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Previews grids */}
-                  {attachedImages.length > 0 && (
-                    <div className="space-y-1.5">
-                      <p className="text-[9px] uppercase font-bold text-slate-400">Attached Images Thumbnails</p>
-                      <div className="flex flex-wrap gap-2">
-                        {attachedImages.map((src, i) => (
-                          <div key={i} className="w-12 h-12 rounded-lg border border-slate-200 overflow-hidden relative group">
-                            <img src={src} className="w-full h-full object-cover" alt="Attached preview" />
-                            <button
-                              type="button"
-                              onClick={() => setAttachedImages(attachedImages.filter((_, idx) => idx !== i))}
-                              className="absolute inset-0 bg-red-600/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {attachedVideo && (
-                    <div className="space-y-1.5 border-t border-slate-100 pt-2.5">
-                      <p className="text-[9px] uppercase font-bold text-slate-400">Attached Video Preview</p>
-                      <div className="flex items-center space-x-3 bg-white border border-slate-200 p-2 rounded-xl">
-                        <Video className="w-5 h-5 text-royal" />
-                        <span className="font-mono text-[9.5px] text-slate-500 truncate max-w-[180px]">video_asset_triage.mp4</span>
-                        <button
-                          type="button"
-                          onClick={() => setAttachedVideo('')}
-                          className="ml-auto p-1 bg-red-50 hover:bg-red-100 text-red-500 rounded border border-red-100 cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                </div>
-
-                {/* Custom Fields configuration */}
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
-                  <span className="text-[10px] uppercase font-extrabold text-navy font-mono block">Custom Field Attributes</span>
-                  
-                  <div className="grid grid-cols-2 gap-3 items-end">
-                    <div className="space-y-1">
-                      <label className="text-[9px] text-slate-500 font-bold block">Label / Spec Title</label>
-                      <input 
-                        type="text"
-                        placeholder="e.g. Battery Capacity, GPU"
-                        value={newFieldLabel}
-                        onChange={(e) => setNewFieldLabel(e.target.value)}
-                        className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none"
-                      />
-                    </div>
-                    <div className="space-y-1 flex gap-2">
-                      <div className="flex-grow">
-                        <label className="text-[9px] text-slate-500 font-bold block">Value</label>
-                        <input 
-                          type="text"
-                          placeholder="e.g. 5000mAh, NVIDIA RTX"
-                          value={newFieldValue}
-                          onChange={(e) => setNewFieldValue(e.target.value)}
-                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 focus:outline-none"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={addCustomField}
-                        className="py-1.5 px-3 bg-navy hover:bg-slate-900 text-white rounded-lg font-bold uppercase cursor-pointer text-center"
-                      >
-                        Add
-                      </button>
-                    </div>
-                  </div>
-
-                  {customFields.length > 0 && (
-                    <div className="space-y-1.5 border-t border-slate-100 pt-2.5">
-                      {customFields.map((field, i) => (
-                        <div key={i} className="flex justify-between items-center bg-white border border-slate-150 p-2 rounded-xl text-[10px]">
-                          <span className="font-bold text-navy">{field.label}: <span className="font-normal text-slate-600">{field.value}</span></span>
-                          <button
-                            type="button"
-                            onClick={() => removeCustomField(i)}
-                            className="p-1 text-slate-450 hover:text-red-500 cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3.5 bg-navy hover:bg-slate-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-sm"
-                >
-                  + Add to Workspace Registry
-                </button>
-              </form>
-
             </div>
           )}
 
-          {/* TAB 3: MAKE SERVICE REQUEST AS A DIRECT VIEW SIDEBAR TAB */}
+           {/* TAB 3: SERVICE REQUESTS LIST */}
           {activeTab === 'make_request' && (
-            <div className="max-w-xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6 text-left">
-              <div className="border-b border-slate-100 pb-4">
-                <span className="text-[9px] uppercase font-bold text-royal font-mono block">Service Pipeline</span>
-                <h3 className="text-lg font-black text-navy uppercase mt-1">Submit technical diagnostics request</h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">Filter technical request options based on your active plan tier.</p>
+            <div className="space-y-6 animate-fade-in text-left">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-4">
+                <div>
+                  <h2 className="text-xl font-black text-navy uppercase tracking-tight">Technical Service Requests</h2>
+                  <p className="text-xs text-slate-400 mt-0.5 font-semibold font-sans">
+                    Submit and track active diagnostic repairs with campus Booth technicians.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowAddRequestModal(true)}
+                  disabled={subscription?.status === 'suspended'}
+                  className="px-4 py-2.5 bg-royal hover:bg-royal/90 disabled:opacity-50 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 shadow-md shadow-royal/10 border-0"
+                >
+                  <PlusCircle className="w-4.5 h-4.5" />
+                  <span>Submit Request</span>
+                </button>
               </div>
 
-              <form onSubmit={handleMakeRequestSubmit} className="space-y-4 text-xs">
-                
-                <div className="space-y-1.5">
-                  <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Select Service Type *</label>
-                  <select
-                    value={reqCategory}
-                    onChange={(e) => setReqCategory(e.target.value as any)}
-                    className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-255 rounded-xl focus:outline-none"
+              {tickets.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {tickets.map(ticket => (
+                    <div 
+                      key={ticket.id}
+                      onClick={() => setSelectedTicket(ticket)}
+                      className="bg-white border border-slate-200 hover:border-royal/30 p-5 rounded-3xl flex flex-col justify-between items-start transition-all cursor-pointer hover:shadow-md text-left space-y-4"
+                    >
+                      <div className="space-y-2 w-full">
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono text-[9.5px] text-slate-400">REQ #{ticket.id}</span>
+                          <span className="bg-royal/5 border border-royal/10 text-royal text-[9px] px-2 py-0.5 font-bold rounded-full uppercase">
+                            {ticket.category.toUpperCase().replace('_', ' ')}
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-navy text-[13px] leading-tight block line-clamp-1">{ticket.title}</h4>
+                        <p className="text-[11.5px] text-slate-550 leading-relaxed line-clamp-2">{ticket.description}</p>
+                        <span className="text-[9.5px] text-slate-400 block mt-1.5 font-sans font-medium">
+                          Submitted: {new Date(ticket.created_at).toLocaleString()}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between w-full border-t border-slate-100 pt-3">
+                        <span className={`text-[9.5px] font-bold px-2.5 py-0.5 rounded uppercase ${getStatusBadgeClass(ticket.status)}`}>
+                          {ticket.status.replace('_', ' ')}
+                        </span>
+                        
+                        <div className="flex items-center space-x-2 text-[10px] font-bold text-royal uppercase tracking-wider">
+                          <span>View Logs</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-20 bg-white border border-slate-200 rounded-3xl p-6 flex flex-col items-center justify-center space-y-3">
+                  <FileText className="w-12 h-12 text-slate-300 mx-auto" />
+                  <h4 className="font-bold text-navy text-sm uppercase tracking-wide">No Service Requests</h4>
+                  <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed font-semibold">
+                    You haven't submitted any diagnostics request tickets yet. Submit one if your device experiences system crashes.
+                  </p>
+                  <button
+                    onClick={() => setShowAddRequestModal(true)}
+                    disabled={subscription?.status === 'suspended'}
+                    className="py-2.5 px-4 bg-royal hover:bg-royal/90 disabled:opacity-50 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer shadow-md shadow-royal/10 border-0"
                   >
-                    {getSelectableRequestServices().map((serv) => (
-                      <option key={serv.value} value={serv.value}>{serv.label}</option>
-                    ))}
-                  </select>
+                    + Submit Request Now
+                  </button>
                 </div>
-
-                {/* Device selection list if Hardware or Software fixes are selected */}
-                {['software', 'diagnostic', 'hardware', 'monthly_maintenance'].includes(reqCategory) && (
-                  <div className="space-y-1.5">
-                    <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Select Registered Device *</label>
-                    <select
-                      required
-                      value={reqDeviceId}
-                      onChange={(e) => setReqDeviceId(e.target.value)}
-                      className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-255 rounded-xl focus:outline-none focus:border-royal"
-                    >
-                      <option value="">-- Choose registered device --</option>
-                      {devices.map((d) => (
-                        <option key={d.id} value={d.id}>{d.name} (ID: {d.id})</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {/* Website specs if website setup requests are selected */}
-                {['website_portfolio', 'website_business'].includes(reqCategory) && (
-                  <div className="p-4 bg-royal/5 border border-royal/10 rounded-2xl space-y-3">
-                    <span className="text-[9.5px] uppercase font-extrabold text-royal font-mono block">Website Setup Specifications</span>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <label className="text-[9px] uppercase font-bold text-slate-500 block font-mono">Business / Brand Name</label>
-                        <input
-                          type="text"
-                          required
-                          value={webBusinessName}
-                          onChange={(e) => setWebBusinessName(e.target.value)}
-                          placeholder="E.g. Kofi's Photography"
-                          className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg focus:outline-none"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[9px] uppercase font-bold text-slate-555 block font-mono">Desired Subdomain</label>
-                        <input
-                          type="text"
-                          required
-                          value={webSubdomain}
-                          onChange={(e) => setWebSubdomain(e.target.value)}
-                          placeholder="e.g. kofiphotos"
-                          className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg focus:outline-none"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[9px] uppercase font-bold text-slate-555 block font-mono">Website Concept Description</label>
-                      <textarea
-                        rows={2}
-                        value={webDescription}
-                        onChange={(e) => setWebDescription(e.target.value)}
-                        placeholder="Describe features you want on the website portfolio..."
-                        className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg focus:outline-none resize-none"
-                      />
-                    </div>
-
-                    {reqCategory === 'website_business' && (
-                      <div className="grid grid-cols-2 gap-3 items-center">
-                        <div className="space-y-1">
-                          <label className="text-[9px] uppercase font-bold text-slate-555 block font-mono">Page count (Max 5)</label>
-                          <input
-                            type="number"
-                            max={5}
-                            min={1}
-                            value={webPagesCount}
-                            onChange={(e) => setWebPagesCount(Number(e.target.value))}
-                            className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg"
-                          />
-                        </div>
-                        <div className="flex items-center space-x-2 pt-4">
-                          <input 
-                            type="checkbox"
-                            checked={webHosting}
-                            onChange={(e) => setWebHosting(e.target.checked)}
-                            className="w-4 h-4 cursor-pointer"
-                          />
-                          <span className="font-semibold text-navy">Hosting & Domain included</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="space-y-1.5">
-                  <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Brief Title of Request *</label>
-                  <input
-                    type="text"
-                    required
-                    value={reqTitle}
-                    onChange={(e) => setReqTitle(e.target.value)}
-                    placeholder="E.g. Install Python IDE, Keyboard faults repair, Business Website draft"
-                    className="w-full text-xs px-3.5 py-2.5 border border-slate-255 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Problem / Requirement Summary Description *</label>
-                  <textarea
-                    rows={3}
-                    required
-                    value={reqDesc}
-                    onChange={(e) => setReqDesc(e.target.value)}
-                    placeholder="Provide descriptions of requested setup details, fault patterns or website styles..."
-                    className="w-full text-xs px-3.5 py-2.5 border border-slate-255 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none resize-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Urgency SLA</label>
-                    <select
-                      value={reqPriority}
-                      onChange={(e) => setReqPriority(e.target.value as any)}
-                      className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-255 rounded-xl focus:outline-none"
-                    >
-                      <option value="low">Low backlog queue</option>
-                      <option value="medium">Medium tracking</option>
-                      <option value="high">High queue SLA</option>
-                      <option value="urgent">Urgent triage standby</option>
-                    </select>
-                  </div>
-                  <div className="pt-5.5">
-                    <button
-                      type="submit"
-                      className="w-full py-3.5 bg-royal hover:bg-blue-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer text-center"
-                    >
-                      ⚡ Dispatch Request
-                    </button>
-                  </div>
-                </div>
-
-              </form>
+              )}
             </div>
           )}
 
@@ -1533,7 +1276,7 @@ export const StudentDashboard: React.FC = () => {
               
               {/* Profile details and updating coordinates */}
               <div className="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6">
-                <h3 className="text-xs font-bold text-navy uppercase tracking-wider border-b border-slate-100 pb-3">My Academic Coordinates</h3>
+                <h3 className="text-xs font-bold text-navy uppercase tracking-wider border-b border-slate-100 pb-3">My Profile Details</h3>
 
                 <form onSubmit={handleUpdateProfileSubmit} className="space-y-4 text-xs font-sans">
                   <div className="space-y-1.5">
@@ -1680,18 +1423,38 @@ export const StudentDashboard: React.FC = () => {
                         <span className="text-[9px] text-slate-400 font-mono block">Filed on: {new Date(t.created_at).toLocaleString()}</span>
                       </div>
 
-                      <div className="flex items-center space-x-3.5 shrink-0 border-l border-slate-200/80 pl-4">
+                      <div className="flex items-center space-x-2 shrink-0 border-l border-slate-200/80 pl-4 flex-wrap gap-y-2">
                         <span className={`text-[9px] font-bold px-2 py-0.5 rounded uppercase ${getStatusBadgeClass(t.status)}`}>
                           {t.status}
                         </span>
                         {t.receipt_pdf && (
-                          <button
-                            onClick={() => setSelectedRequestForReceipt(t)}
-                            className="p-1.5 bg-white border border-slate-200 text-slate-655 hover:bg-slate-100 rounded-lg flex items-center space-x-1 font-bold uppercase text-[9px] cursor-pointer"
-                          >
-                            <Printer className="w-3 h-3" />
-                            <span>Receipt</span>
-                          </button>
+                          <>
+                            <button
+                              onClick={() => setSelectedRequestForReceipt(t)}
+                              className="p-1.5 bg-white border border-slate-200 text-royal hover:bg-slate-50 rounded-lg flex items-center space-x-1 font-bold uppercase text-[9px] cursor-pointer"
+                              title="View Receipt & QR Code"
+                            >
+                              <QrCode className="w-3.5 h-3.5" />
+                              <span>QR Code</span>
+                            </button>
+                            <button
+                              onClick={() => {
+                                const element = document.createElement("a");
+                                const file = new Blob([t.receipt_pdf || ''], {type: 'text/plain'});
+                                element.href = URL.createObjectURL(file);
+                                element.download = `StudentShield_Receipt_${t.id}.txt`;
+                                document.body.appendChild(element);
+                                element.click();
+                                document.body.removeChild(element);
+                                showToast('Ticket receipt downloaded successfully!', 'success');
+                              }}
+                              className="p-1.5 bg-white border border-slate-200 text-emerald-700 hover:bg-slate-50 rounded-lg flex items-center space-x-1 font-bold uppercase text-[9px] cursor-pointer"
+                              title="Download Ticket"
+                            >
+                              <Download className="w-3 h-3" />
+                              <span>Download</span>
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -1790,14 +1553,15 @@ export const StudentDashboard: React.FC = () => {
             <div className="p-3 bg-white border border-slate-200 rounded-xl space-y-1">
               <span className="text-[9px] uppercase font-bold text-royal block">Issue description</span>
               <p className="text-[11px] text-slate-605 leading-relaxed">{selectedTicket.description}</p>
-              {selectedTicket.website_details && (
+              {/* website_details rendering commented out */}
+              {/* {selectedTicket.website_details && (
                 <div className="pt-2 border-t border-slate-100 mt-2 space-y-1 text-[9.5px]">
                   <p className="font-bold text-navy">Website Setup Specifications:</p>
                   <p><span className="text-slate-400">Business Name:</span> {selectedTicket.website_details.business_name}</p>
                   <p><span className="text-slate-455">Requested Subdomain:</span> {selectedTicket.website_details.subdomain}</p>
                   <p><span className="text-slate-455">Page Count:</span> {selectedTicket.website_details.pages_count} pages</p>
                 </div>
-              )}
+              )} */}
             </div>
 
             <div className="space-y-3 font-sans">
@@ -1867,16 +1631,23 @@ export const StudentDashboard: React.FC = () => {
 
                 {/* Tracking QR */}
                 <div className="bg-white border border-slate-150 p-4 rounded-xl flex flex-col items-center justify-center space-y-3">
-                  <span className="text-[9px] uppercase font-bold text-slate-400 tracking-wider block font-sans">Diagnostic tracking QR</span>
+                  <span className="text-[9px] uppercase font-bold text-slate-450 tracking-wider block font-sans">Diagnostic tracking QR</span>
                   <div className="p-1 border border-slate-100 rounded-lg">
                     <img 
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(selectedRequestForReceipt.tracking_qr || '')}`}
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(window.location.origin + '/request-details?id=' + selectedRequestForReceipt.id)}`}
                       alt="Tracking QR Code"
                       className="w-32 h-32 object-contain"
                     />
                   </div>
-                  <span className="font-mono font-bold text-[10.5px] uppercase tracking-widest text-navy">{selectedRequestForReceipt.tracking_qr}</span>
-                  <p className="text-[8.5px] text-slate-400 text-center font-sans">Technicians scan this QR code on physical hub reception to route your device instantly.</p>
+                  <a 
+                    href={`/request-details?id=${selectedRequestForReceipt.id}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono font-bold text-[10.5px] uppercase tracking-widest text-royal hover:underline"
+                  >
+                    View Public Tracking Page
+                  </a>
+                  <p className="text-[8.5px] text-slate-400 text-center font-sans">Technicians scan this QR code on physical hub reception to route your device instantly without logging in.</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-2">
@@ -1898,7 +1669,7 @@ export const StudentDashboard: React.FC = () => {
                       document.body.appendChild(element);
                       element.click();
                       document.body.removeChild(element);
-                      alert('Receipt downloaded successfully!');
+                      showToast('Receipt downloaded successfully!', 'success');
                     }}
                     className="py-2.5 px-4 bg-royal hover:bg-blue-655 text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center flex items-center justify-center space-x-1.5"
                   >
@@ -2239,6 +2010,470 @@ export const StudentDashboard: React.FC = () => {
                   Delete Device
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL: ADD DEVICE FORM */}
+      <AnimatePresence>
+        {showAddDeviceModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4 text-xs font-sans select-none overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 sm:p-8 relative shadow-2xl text-left my-8"
+            >
+              <button 
+                onClick={() => setShowAddDeviceModal(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-400 cursor-pointer border-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="text-center space-y-2 pb-4 border-b border-slate-100">
+                <div className="w-12 h-12 bg-royal/10 text-royal rounded-xl flex items-center justify-center mx-auto">
+                  <Laptop className="w-6 h-6" />
+                </div>
+                <h2 className="text-lg font-black text-navy uppercase tracking-tight">Register Academic Device</h2>
+                <p className="text-[11px] text-slate-550 max-w-sm mx-auto font-medium">
+                  Enroll devices to diagnostic logs. Your plan limit is {maxDevicesAllowed} device(s) (Currently using {currentDevicesCount}).
+                </p>
+              </div>
+
+              {deviceError && (
+                <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-[10.5px] rounded-xl flex items-start space-x-2 my-3">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{deviceError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleDeviceRegisterSubmit} className="space-y-4 text-xs text-left mt-4">
+                
+                {/* Brand Logo & Name */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Device Nickname *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newDeviceName}
+                    onChange={(e) => setNewDeviceName(e.target.value)}
+                    placeholder="E.g. Ama's Study Laptop, HP ZBook"
+                    className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none focus:border-royal transition-all"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Select Dropdown with "Other" Option */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-455 block font-mono">Hardware Type *</label>
+                    <select
+                      value={newDeviceType}
+                      onChange={(e) => setNewDeviceType(e.target.value)}
+                      className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-white rounded-xl focus:outline-none focus:border-royal appearance-none cursor-pointer"
+                    >
+                      <option value="laptop">Laptop</option>
+                      <option value="desktop">Desktop</option>
+                      <option value="tablet">Tablet</option>
+                      <option value="phone">Smartphone</option>
+                      <option value="other">Other (Specify below)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-455 block font-mono">Laptop Brand *</label>
+                    <select
+                      value={newDeviceBrand}
+                      onChange={(e) => setNewDeviceBrand(e.target.value)}
+                      className="w-full text-xs px-3.5 py-2.5 border border-slate-250 bg-white rounded-xl focus:outline-none"
+                    >
+                      <option value="Asus">Asus</option>
+                      <option value="Apple">Apple</option>
+                      <option value="HP">HP</option>
+                      <option value="Dell">Dell</option>
+                      <option value="Lenovo">Lenovo</option>
+                      <option value="Acer">Acer</option>
+                      <option value="other">Other (Specify below)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Custom Brand or Type textboxes if "Other" is selected */}
+                {(newDeviceType === 'other' || newDeviceBrand === 'other') && (
+                  <div className="grid grid-cols-2 gap-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
+                    {newDeviceType === 'other' && (
+                      <div className="space-y-1.5 col-span-1">
+                        <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Device Type *</label>
+                        <input
+                          type="text"
+                          required
+                          value={customType}
+                          onChange={(e) => setCustomType(e.target.value)}
+                          placeholder="e.g. Smart Watch, Raspberry Pi"
+                          className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg"
+                        />
+                      </div>
+                    )}
+
+                    {newDeviceBrand === 'other' && (
+                      <div className="space-y-1.5 col-span-1">
+                        <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Brand *</label>
+                        <input
+                          type="text"
+                          required
+                          value={customBrand}
+                          onChange={(e) => setCustomBrand(e.target.value)}
+                          placeholder="e.g. Samsung, Custom PC"
+                          className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-455 block font-mono">Model Code *</label>
+                    <input
+                      type="text"
+                      required
+                      value={newDeviceModel}
+                      onChange={(e) => setNewDeviceModel(e.target.value)}
+                      placeholder="E.g. UM3402, Macbook Pro"
+                      className="w-full text-xs px-3.5 py-2.5 border border-slate-255 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-455 block font-mono">Operating System *</label>
+                    <select
+                      value={newDeviceOS}
+                      onChange={(e) => setNewDeviceOS(e.target.value)}
+                      className="w-full text-xs px-3.5 py-2.5 border border-slate-255 bg-white rounded-xl focus:outline-none"
+                    >
+                      <option value="Windows 11">Windows 11</option>
+                      <option value="Windows 10">Windows 10</option>
+                      <option value="macOS Sequoia">macOS Sequoia</option>
+                      <option value="Linux Ubuntu">Linux Ubuntu</option>
+                      <option value="Android OS">Android OS</option>
+                      <option value="iOS Standard">iOS Standard</option>
+                      <option value="other">Other (Specify below)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {newDeviceOS === 'other' && (
+                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
+                    <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Operating System *</label>
+                    <input
+                      type="text"
+                      required
+                      value={customOS}
+                      onChange={(e) => setCustomOS(e.target.value)}
+                      placeholder="e.g. ChromeOS, FreeBSD"
+                      className="w-full text-xs px-3 py-2 border border-slate-200 bg-white rounded-lg"
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase font-bold text-slate-455 block font-mono">Hardware Serial Code / IMEI *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newDeviceSN}
+                    onChange={(e) => setNewDeviceSN(e.target.value)}
+                    placeholder="E.g. SN-8928372-GH"
+                    className="w-full text-xs px-3.5 py-2.5 border border-slate-255 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none"
+                  />
+                </div>
+
+                {/* Dynamic Image & Video Upload Section */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+                  <span className="text-[10px] uppercase font-extrabold text-navy font-mono block">Media Attachments</span>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Images Picker */}
+                    <div className="space-y-2">
+                      <label className="text-[9px] uppercase font-bold text-slate-500 block">Device Images * (Choose multiple)</label>
+                      <button
+                        type="button"
+                        onClick={() => imageInputRef.current?.click()}
+                        className="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center space-x-2 text-[11px] font-bold text-slate-705 cursor-pointer"
+                      >
+                        <ImageIcon className="w-4 h-4 text-slate-505" />
+                        <span>{imageLoading ? 'Loading...' : 'Select Images'}</span>
+                      </button>
+                      <input 
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        ref={imageInputRef}
+                        onChange={handleImageUploadChange}
+                        className="hidden"
+                      />
+                    </div>
+
+                    {/* Video Picker */}
+                    <div className="space-y-2">
+                      <label className="text-[9px] uppercase font-bold text-slate-500 block">Device Video File (Optional check)</label>
+                      <button
+                        type="button"
+                        onClick={() => videoInputRef.current?.click()}
+                        className="w-full py-2.5 px-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center space-x-2 text-[11px] font-bold text-slate-705 cursor-pointer"
+                      >
+                        <Video className="w-4 h-4 text-slate-505" />
+                        <span>{videoLoading ? 'Loading...' : attachedVideo ? 'Video Attached ✓' : 'Select Video'}</span>
+                      </button>
+                      <input 
+                        type="file"
+                        accept="video/*"
+                        ref={videoInputRef}
+                        onChange={handleVideoUploadChange}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Previews grids */}
+                  {attachedImages.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-[9px] uppercase font-bold text-slate-400">Attached Images Thumbnails</p>
+                      <div className="flex flex-wrap gap-2">
+                        {attachedImages.map((src, i) => (
+                          <div key={i} className="w-12 h-12 rounded-lg border border-slate-200 overflow-hidden relative group">
+                            <img src={src} className="w-full h-full object-cover" alt="Attached preview" />
+                            <button
+                              type="button"
+                              onClick={() => setAttachedImages(attachedImages.filter((_, idx) => idx !== i))}
+                              className="absolute inset-0 bg-red-655/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {attachedVideo && (
+                    <div className="space-y-1.5 border-t border-slate-105 pt-2.5">
+                      <p className="text-[9px] uppercase font-bold text-slate-400">Attached Video Preview</p>
+                      <div className="flex items-center space-x-3 bg-white border border-slate-200 p-2 rounded-xl">
+                        <Video className="w-5 h-5 text-royal" />
+                        <span className="font-mono text-[9.5px] text-slate-500 truncate max-w-[180px]">video_asset_triage.mp4</span>
+                        <button
+                          type="button"
+                          onClick={() => setAttachedVideo('')}
+                          className="ml-auto p-1 bg-red-50 hover:bg-red-100 text-red-500 rounded border border-red-100 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+
+                {/* Custom Fields configuration */}
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                  <span className="text-[10px] uppercase font-extrabold text-navy font-mono block">Custom Field Attributes</span>
+                  
+                  <div className="grid grid-cols-2 gap-3 items-end">
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-slate-500 font-bold block">Label / Spec Title</label>
+                      <input 
+                        type="text"
+                        placeholder="e.g. Battery Capacity, GPU"
+                        value={newFieldLabel}
+                        onChange={(e) => setNewFieldLabel(e.target.value)}
+                        className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-805 focus:outline-none font-sans"
+                      />
+                    </div>
+                    <div className="space-y-1 flex gap-2">
+                      <div className="flex-grow">
+                        <label className="text-[9px] text-slate-500 font-bold block">Value</label>
+                        <input 
+                          type="text"
+                          placeholder="e.g. 5000mAh, NVIDIA RTX"
+                          value={newFieldValue}
+                          onChange={(e) => setNewFieldValue(e.target.value)}
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-805 focus:outline-none font-sans"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addCustomField}
+                        className="py-1.5 px-3 bg-navy hover:bg-slate-900 text-white rounded-lg font-bold uppercase cursor-pointer text-center border-0"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
+
+                  {customFields.length > 0 && (
+                    <div className="space-y-1.5 border-t border-slate-105 pt-2.5">
+                      {customFields.map((field, i) => (
+                        <div key={i} className="flex justify-between items-center bg-white border border-slate-150 p-2 rounded-xl text-[10px] font-sans">
+                          <span className="font-bold text-navy">{field.label}: <span className="font-normal text-slate-655">{field.value}</span></span>
+                          <button
+                            type="button"
+                            onClick={() => removeCustomField(i)}
+                            className="p-1 text-slate-450 hover:text-red-500 cursor-pointer border-0 bg-transparent"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex space-x-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddDeviceModal(false)}
+                    className="w-1/3 py-3 bg-slate-100 hover:bg-slate-200 text-slate-805 rounded-xl font-bold uppercase tracking-wider cursor-pointer border-0 text-center"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-grow py-3 bg-navy hover:bg-slate-900 text-white font-bold uppercase tracking-wider rounded-xl cursor-pointer border-0 text-center"
+                  >
+                    Confirm Register
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL: SUBMIT TECHNICAL DIAGNOSTICS REQUEST */}
+      <AnimatePresence>
+        {showAddRequestModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4 text-xs font-sans select-none overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 15 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 15 }}
+              className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 sm:p-8 relative shadow-2xl text-left my-8"
+            >
+              <button 
+                onClick={() => setShowAddRequestModal(false)}
+                className="absolute top-4 right-4 p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-400 cursor-pointer border-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="border-b border-slate-100 pb-4">
+                <span className="text-[9px] uppercase font-bold text-royal font-mono block">Service Pipeline</span>
+                <h3 className="text-lg font-black text-navy uppercase mt-1">Submit technical diagnostics request</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Filter technical request options based on your active plan tier.</p>
+              </div>
+
+              <form onSubmit={handleMakeRequestSubmit} className="space-y-4 text-xs mt-4">
+                
+                <div className="space-y-1.5">
+                  <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Select Service Type *</label>
+                  <select
+                    value={reqCategory}
+                    onChange={(e) => setReqCategory(e.target.value as any)}
+                    className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-255 rounded-xl focus:outline-none"
+                  >
+                    {getSelectableRequestServices().map((serv) => (
+                      <option key={serv.value} value={serv.value}>{serv.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Device selection list if Hardware or Software fixes are selected */}
+                {['software', 'diagnostic', 'hardware', 'monthly_maintenance'].includes(reqCategory) && (
+                  <div className="space-y-1.5">
+                    <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Select Registered Device *</label>
+                    <select
+                      required
+                      value={reqDeviceId}
+                      onChange={(e) => setReqDeviceId(e.target.value)}
+                      className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-255 rounded-xl focus:outline-none focus:border-royal"
+                    >
+                      <option value="">-- Choose registered device --</option>
+                      {devices.map((d) => (
+                        <option key={d.id} value={d.id}>{d.name} (ID: {d.id})</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <label className="text-[9.5px] uppercase font-bold text-slate-455 block font-mono">Request Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={reqTitle}
+                    onChange={(e) => setReqTitle(e.target.value)}
+                    placeholder="E.g. Install Python IDE, Keyboard faults repair"
+                    className="w-full text-xs px-3.5 py-2.5 border border-slate-255 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9.5px] uppercase font-bold text-slate-455 block font-mono">Explain your issue *</label>
+                  <textarea
+                    rows={4}
+                    required
+                    value={reqDesc}
+                    onChange={(e) => setReqDesc(e.target.value)}
+                    placeholder="Provide descriptions of requested setup details or device fault patterns..."
+                    className="w-full text-xs px-3.5 py-2.5 border border-slate-255 bg-slate-50/50 rounded-xl focus:bg-white focus:outline-none resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[9.5px] uppercase font-bold text-slate-455 block font-mono">Urgency Level</label>
+                    <select
+                      value={reqPriority}
+                      onChange={(e) => setReqPriority(e.target.value as any)}
+                      className="w-full text-xs px-3.5 py-2.5 bg-white border border-slate-255 rounded-xl focus:outline-none"
+                    >
+                      <option value="low">Low Urgency</option>
+                      <option value="medium">Medium Urgency</option>
+                      <option value="high">High Urgency</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </div>
+                  
+                  <div className="flex gap-2.5 pt-5.5">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddRequestModal(false)}
+                      className="w-1/2 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-805 rounded-xl font-bold uppercase tracking-wider cursor-pointer border-0 text-center"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-grow py-3.5 bg-royal hover:bg-blue-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border-0 text-center"
+                    >
+                      Submit Request
+                    </button>
+                  </div>
+                </div>
+
+              </form>
             </motion.div>
           </motion.div>
         )}

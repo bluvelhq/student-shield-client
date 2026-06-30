@@ -26,6 +26,7 @@ import { AuthPages } from './pages/AuthPages';
 import { InsurePage } from './pages/InsurePage';
 import { StudentDashboard } from './pages/StudentDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { RequestDetailsPage } from './pages/RequestDetailsPage';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Shield, Coins, CheckCircle, XCircle } from 'lucide-react';
 
@@ -233,6 +234,13 @@ function MainLayout() {
             <AdminGuard>
               <AdminDashboard />
             </AdminGuard>
+          </motion.div>
+        );
+
+      case 'request-details':
+        return (
+          <motion.div key="request-details" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="pt-24 pb-16">
+            <RequestDetailsPage />
           </motion.div>
         );
 

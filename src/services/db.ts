@@ -39,13 +39,13 @@ const DEFAULT_PLANS: Plan[] = [
     name: 'Premium Shield',
     price: 50,
     billing_cycle: 'semester',
-    description: 'Priority hardware labor coverage and personal web building package.',
+    description: 'Priority hardware labor coverage and personal support package.',
     max_devices: 1,
     status: 'active',
     features: [
       'All Basic Cover features included',
       'Free technician repair labor always',
-      'Free portfolio or personal website per semester'
+      'Priority response and dedicated support queue'
     ]
   },
   {
@@ -53,14 +53,12 @@ const DEFAULT_PLANS: Plan[] = [
     name: 'Bonanza Plan',
     price: 120,
     billing_cycle: 'semester',
-    description: 'All-inclusive organizational protection with multiple devices and custom business web setups.',
+    description: 'All-inclusive organizational protection with multiple devices and custom maintenance.',
     max_devices: 3,
     status: 'active',
     features: [
       'All Basic & Premium features included',
-      'Business website setup (up to 5 pages)',
       'Free tech consultations for the semester',
-      'Domain and hosting support',
       'Monthly maintenance and health checks',
       'Up to three registered devices covered'
     ]
@@ -475,7 +473,27 @@ class StudentShieldDB {
 
   constructor() {
     this.initLocalStorage();
+    try {
+      const plansStr = localStorage.getItem('ss_plans');
+      if (plansStr) {
+        const parsed = JSON.parse(plansStr);
+        let updated = false;
+        const verified = parsed.map((p: any) => {
+          if (p.status !== 'active') {
+            p.status = 'active';
+            updated = true;
+          }
+          return p;
+        });
+        if (updated) {
+          localStorage.setItem('ss_plans', JSON.stringify(verified));
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
   }
+
 
   // Generic Getter/Setter helpers
   public getTable<T>(key: string): T[] {
@@ -1224,6 +1242,15 @@ class StudentShieldDB {
     this.setTable('ss_plans', plans);
   }
 
+  public updatePlan(planId: string, updatedPlan: Partial<Plan>): void {
+    const plans = this.getTable<Plan>('ss_plans');
+    const idx = plans.findIndex(p => p.id === planId);
+    if (idx !== -1) {
+      plans[idx] = { ...plans[idx], ...updatedPlan };
+      this.setTable('ss_plans', plans);
+    }
+  }
+
   public updateSubscriptionStatus(subId: string, status: Subscription['status']): void {
     const subs = this.getTable<Subscription>('ss_subscriptions');
     const idx = subs.findIndex(s => s.id === subId);
@@ -1414,6 +1441,35 @@ Thank you for shielding your device with us!
     const list = this.getInstitutions();
     const updated = list.filter(i => i.id !== id);
     this.setTable('ss_institutions', updated);
+  }
+
+  public getPublicRequestDetails(requestId: string): { 
+    ticket: SupportTicket; 
+    profile: Profile; 
+    device?: Device; 
+    messages: { message: Message; senderName: string; senderAvatar?: string }[] 
+  } | null {
+    const tickets = this.getTable<SupportTicket>('ss_tickets');
+    const ticket = tickets.find(t => t.id === requestId);
+    if (!ticket) return null;
+
+    const profiles = this.getTable<Profile>('ss_profiles');
+    const profile = profiles.find(p => p.user_id === ticket.user_id) || {
+      id: `prof-${ticket.user_id}`,
+      user_id: ticket.user_id,
+      full_name: 'Student User',
+      university: 'Unknown School',
+      student_id: 'N/A',
+      phone: 'N/A',
+      created_at: ticket.created_at
+    };
+
+    const devices = this.getTable<Device>('ss_devices');
+    const device = devices.find(d => d.id === ticket.device_id);
+
+    const messages = this.getTicketMessages(ticket.id);
+
+    return { ticket, profile, device, messages };
   }
 }
 

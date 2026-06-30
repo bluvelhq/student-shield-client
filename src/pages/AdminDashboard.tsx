@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Device, SupportTicket, Message, Profile, User, Payment, Plan, Institution } from '../types';
 
 export const AdminDashboard: React.FC = () => {
-  const { user, profile, logout, refreshData } = useApp();
+  const { user, profile, logout, refreshData, showToast } = useApp();
   const isAgent = user?.role === 'support_agent';
 
   // Left sidebar navigation
@@ -60,6 +60,7 @@ export const AdminDashboard: React.FC = () => {
   const [newPlanBenefits, setNewPlanBenefits] = useState('');
   const [newPlanDevices, setNewPlanDevices] = useState(1);
   const [newPlanError, setNewPlanError] = useState('');
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
 
   // Support ticket filter criteria
   const [ticketPriorityFilter, setTicketPriorityFilter] = useState<string>('all');
@@ -138,7 +139,14 @@ export const AdminDashboard: React.FC = () => {
         }
       });
     }
-    alert(`Subscriber status updated to ${nextStatus.toUpperCase()}`);
+    showToast(`Subscriber status updated to ${nextStatus.toUpperCase()}`, 'success');
+  };
+
+  const togglePlanStatus = (planId: string, currentStatus?: 'active' | 'inactive') => {
+    const nextStatus = currentStatus === 'inactive' ? 'active' : 'inactive';
+    dbService.updatePlan(planId, { status: nextStatus });
+    loadAdminData();
+    showToast(`Plan status updated to ${nextStatus.toUpperCase()}`, 'success');
   };
 
   const executeCohortDeactivate = () => {
@@ -153,6 +161,26 @@ export const AdminDashboard: React.FC = () => {
     loadAdminData();
     setCohortMsg(`Success: Expired ${count} active subscribers from ${targetUniCohort}.`);
     setTimeout(() => setCohortMsg(''), 5000);
+  };
+
+  const handleCancelEditPlan = () => {
+    setEditingPlanId(null);
+    setNewPlanId('');
+    setNewPlanName('');
+    setNewPlanFee(30);
+    setNewPlanDesc('');
+    setNewPlanBenefits('');
+    setNewPlanDevices(1);
+  };
+
+  const handleEditPlan = (plan: Plan) => {
+    setEditingPlanId(plan.id);
+    setNewPlanId(plan.id);
+    setNewPlanName(plan.name);
+    setNewPlanFee(plan.price);
+    setNewPlanDesc(plan.description);
+    setNewPlanBenefits((plan.features || []).join('\n'));
+    setNewPlanDevices(plan.max_devices || 1);
   };
 
   const handlePlanCreationSubmit = (e: React.FormEvent) => {
@@ -172,14 +200,23 @@ export const AdminDashboard: React.FC = () => {
     const targetPlan: Plan = {
       id: newPlanId,
       name: newPlanName,
-      fee: newPlanFee,
+      price: newPlanFee,
+      billing_cycle: 'semester',
       description: newPlanDesc,
-      benefits: benefitList,
+      features: benefitList,
       max_devices: newPlanDevices,
       status: 'active'
     };
 
-    dbService.addPlan(targetPlan);
+    if (editingPlanId) {
+      dbService.updatePlan(editingPlanId, targetPlan);
+      setEditingPlanId(null);
+      alert(`Plan [${newPlanName}] updated successfully inside localized memory!`);
+    } else {
+      dbService.addPlan(targetPlan);
+      alert(`Dynamic cover plan [${newPlanName}] generated successfully inside localized memory!`);
+    }
+
     setNewPlanId('');
     setNewPlanName('');
     setNewPlanFee(30);
@@ -187,7 +224,6 @@ export const AdminDashboard: React.FC = () => {
     setNewPlanBenefits('');
     setNewPlanDevices(1);
     loadAdminData();
-    alert(`Dynamic cover plan [${newPlanName}] generated successfully inside localized memory!`);
   };
 
   const handleSaveInstitution = (e: React.FormEvent) => {
@@ -823,6 +859,18 @@ export const AdminDashboard: React.FC = () => {
                                   </a>
                                 </div>
                                 <div>
+                                  <span className="text-slate-400 block text-[9.5px]">Email Address</span>
+                                  <span className="font-bold text-navy block mt-0.5 font-mono">{ticketUser?.user?.email || 'N/A'}</span>
+                                </div>
+                                <div>
+                                  <span className="text-slate-400 block text-[9.5px]">University Hub</span>
+                                  <span className="font-bold text-navy block mt-0.5">{ticketUser?.profile?.university || 'N/A'}</span>
+                                </div>
+                                <div>
+                                  <span className="text-slate-400 block text-[9.5px]">Student ID</span>
+                                  <span className="font-bold text-navy block mt-0.5 font-mono">{ticketUser?.profile?.student_id || 'N/A'}</span>
+                                </div>
+                                <div>
                                   <span className="text-slate-400 block text-[9.5px]">Priority Level</span>
                                   <span className="font-bold text-navy block mt-0.5 uppercase font-mono">{adminFocusTicket.priority}</span>
                                 </div>
@@ -835,6 +883,41 @@ export const AdminDashboard: React.FC = () => {
                               </div>
                             </div>
 
+                            {/* Device Details Block */}
+                            {(() => {
+                              const device = allDevices.find(d => d.id === adminFocusTicket.device_id);
+                              return device ? (
+                                <div className="bg-white border border-slate-100 shadow-sm p-5 rounded-2xl space-y-4">
+                                  <h5 className="font-extrabold text-[#00183D] text-[12px] border-b border-slate-100 pb-2 flex items-center space-x-2">
+                                    <Laptop className="w-4 h-4 text-royal" />
+                                    <span>Associated Device Details</span>
+                                  </h5>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                      <span className="text-slate-400 block text-[9.5px]">Device Name</span>
+                                      <span className="font-bold text-navy block mt-0.5">{device.name}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-slate-400 block text-[9.5px]">Brand & Model</span>
+                                      <span className="font-bold text-navy block mt-0.5">{device.brand} {device.model}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-slate-400 block text-[9.5px]">Serial Number</span>
+                                      <span className="font-bold text-navy block mt-0.5 font-mono">{device.serial_number || 'N/A'}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-slate-400 block text-[9.5px]">Operating System</span>
+                                      <span className="font-bold text-navy block mt-0.5">{device.operating_system || 'N/A'}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="bg-white border border-slate-100 shadow-sm p-5 rounded-2xl text-slate-400 italic">
+                                  No registered device details associated with this request.
+                                </div>
+                              );
+                            })()}
+
                             <div className="bg-white border border-slate-100 shadow-sm p-5 rounded-2xl space-y-3">
                               <h5 className="font-extrabold text-[#00183D] text-[12px] border-b border-slate-100 pb-2 flex items-center space-x-2">
                                 <FileText className="w-4 h-4 text-royal" />
@@ -843,7 +926,8 @@ export const AdminDashboard: React.FC = () => {
                               <p className="text-slate-655 font-medium leading-relaxed whitespace-pre-line">{adminFocusTicket.description}</p>
                             </div>
 
-                            {adminFocusTicket.website_details && (
+                            {/* website_details layout display commented out */}
+                            {/* {adminFocusTicket.website_details && (
                               <div className="bg-white border border-slate-100 shadow-sm p-5 rounded-2xl space-y-3">
                                 <h5 className="font-extrabold text-[#00183D] text-[12px] border-b border-slate-100 pb-2 flex items-center space-x-2">
                                   <Laptop className="w-4 h-4 text-royal" />
@@ -856,12 +940,12 @@ export const AdminDashboard: React.FC = () => {
                                   <p><span className="text-slate-450 font-bold block text-[9.5px]">Hosting Support:</span> {adminFocusTicket.website_details.hosting_required ? 'Yes' : 'No'}</p>
                                 </div>
                               </div>
-                            )}
+                            )} */}
 
                             <div className="p-4 bg-royal/5 border border-royal/10 text-royal rounded-2xl font-medium leading-relaxed text-[11px] flex items-start space-x-2">
                               <span className="text-base mt-0.5">📞</span>
                               <p>
-                                <strong>Technician Coordination:</strong> Call the subscriber directly at <a href={`tel:${subscriberPhone}`} className="font-mono font-bold underline hover:text-royal/80">{subscriberPhone}</a> to arrange device drop-off at your campus support hub or coordinate repair coordination details. Update the status above to reflect changes.
+                                <strong>Technician Coordination:</strong> Call the subscriber directly at <a href={`tel:${subscriberPhone}`} className="font-mono font-bold underline hover:text-royal/80">{subscriberPhone}</a> to arrange device drop-off at your campus support hub or coordinate repair details. Update the status above to reflect changes.
                               </p>
                             </div>
                           </div>
@@ -881,105 +965,191 @@ export const AdminDashboard: React.FC = () => {
 
             </div>
           )}
-
-          {/* TAB 4: PLAN CREATION FORM BUILDER */}
+          {/* TAB 4: PLAN CREATION & MANAGEMENT */}
           {activeTab === 'plan_creation' && (
-            <div className="max-w-xl mx-auto bg-white border border-slate-100 shadow-sm rounded-2xl p-6 sm:p-8 space-y-6 text-left">
-              <div className="text-center space-y-2 pb-4 border-b border-slate-100">
-                <div className="w-12 h-12 bg-royal/10 text-royal rounded-xl flex items-center justify-center mx-auto border border-royal/20">
-                  <Layers className="w-6 h-6" />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              {/* Left Form: Plan Design Builder */}
+              <div className="lg:col-span-5 bg-white border border-slate-100 shadow-sm rounded-2xl p-6 sm:p-8 space-y-6 text-left">
+                <div className="text-center space-y-2 pb-4 border-b border-slate-100">
+                  <div className="w-12 h-12 bg-royal/10 text-royal rounded-xl flex items-center justify-center mx-auto border border-royal/20">
+                    <Layers className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-black text-[#00183D] uppercase tracking-tight">
+                    {editingPlanId ? 'Update Protection Plan' : 'Plan Design Builder'}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                    {editingPlanId ? 'Modify existing cover specifications and pricing.' : 'Create dynamic protection structures that write to memory records.'}
+                  </p>
                 </div>
-                <h3 className="text-lg font-black text-[#00183D] uppercase tracking-tight">Plan design builder</h3>
-                <p className="text-[11px] text-slate-500 max-w-sm mx-auto">Create dynamic protection structures that write to memory records.</p>
+
+                {newPlanError && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-[10.5px] rounded-xl flex items-start space-x-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>{newPlanError}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handlePlanCreationSubmit} className="space-y-4 text-xs font-sans">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Plan Unique ID *</label>
+                      <input
+                        type="text"
+                        required
+                        disabled={!!editingPlanId}
+                        value={newPlanId}
+                        onChange={(e) => setNewPlanId(e.target.value)}
+                        placeholder="e.g. basic-plan, mega-shield"
+                        className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none disabled:opacity-50"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Plan Display Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={newPlanName}
+                        onChange={(e) => setNewPlanName(e.target.value)}
+                        placeholder="e.g. Mega Shield Cover"
+                        className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Semester Fee (GH₵) *</label>
+                      <input
+                        type="number"
+                        required
+                        value={newPlanFee}
+                        onChange={(e) => setNewPlanFee(Number(e.target.value))}
+                        className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Device limit Allocation *</label>
+                      <input
+                        type="number"
+                        required
+                        value={newPlanDevices}
+                        onChange={(e) => setNewPlanDevices(Number(e.target.value))}
+                        className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Cover Summary description *</label>
+                    <input
+                      type="text"
+                      required
+                      value={newPlanDesc}
+                      onChange={(e) => setNewPlanDesc(e.target.value)}
+                      placeholder="Describe plan protections summary in a short phrase..."
+                      className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Plan Benefits (One per line) *</label>
+                    <textarea
+                      rows={4}
+                      required
+                      value={newPlanBenefits}
+                      onChange={(e) => setNewPlanBenefits(e.target.value)}
+                      placeholder="Free system updates&#10;Free diagnosis&#10;Labor free coordination"
+                      className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white resize-none font-mono"
+                    />
+                  </div>
+
+                  <div className="flex space-x-3">
+                    <button
+                      type="submit"
+                      className="flex-grow py-3.5 bg-royal hover:bg-royal/90 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer shadow-md shadow-royal/10 hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 text-center"
+                    >
+                      {editingPlanId ? '⚡ Update Plan Specs' : '⚡ Assemble Cover Option'}
+                    </button>
+                    {editingPlanId && (
+                      <button
+                        type="button"
+                        onClick={handleCancelEditPlan}
+                        className="py-3.5 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer transition-all duration-200 text-center border-0"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </form>
               </div>
 
-              {newPlanError && (
-                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-[10.5px] rounded-xl flex items-start space-x-2">
-                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span>{newPlanError}</span>
-                </div>
-              )}
-
-              <form onSubmit={handlePlanCreationSubmit} className="space-y-4 text-xs font-sans">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Plan Unique ID *</label>
-                    <input
-                      type="text"
-                      required
-                      value={newPlanId}
-                      onChange={(e) => setNewPlanId(e.target.value)}
-                      placeholder="e.g. basic-plan, mega-shield"
-                      className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Plan Display Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={newPlanName}
-                      onChange={(e) => setNewPlanName(e.target.value)}
-                      placeholder="e.g. Mega Shield Cover"
-                      className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none"
-                    />
-                  </div>
+              {/* Right List: Existing Protection Plans */}
+              <div className="lg:col-span-7 bg-white border border-slate-100 shadow-sm rounded-2xl p-6 sm:p-8 space-y-6 text-left hover:shadow-md transition-shadow duration-300">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="text-sm font-extrabold text-navy uppercase tracking-wider">Active Semester Plans</h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Existing coverage tiers available for student subscription.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Semester Fee (GH₵) *</label>
-                    <input
-                      type="number"
-                      required
-                      value={newPlanFee}
-                      onChange={(e) => setNewPlanFee(Number(e.target.value))}
-                      className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Device limit Allocation *</label>
-                    <input
-                      type="number"
-                      required
-                      value={newPlanDevices}
-                      onChange={(e) => setNewPlanDevices(Number(e.target.value))}
-                      className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none"
-                    />
-                  </div>
-                </div>
+                <div className="space-y-4">
+                  {dbService.getPlans().map((plan) => (
+                    <div 
+                      key={plan.id} 
+                      className="p-5 border border-slate-100 rounded-2xl bg-slate-50/40 hover:border-royal/30 transition-all duration-200 relative group flex flex-col justify-between"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-extrabold text-sm text-[#00183D] block">{plan.name}</span>
+                            <span className={`text-[8px] uppercase font-bold font-mono px-2 py-0.5 rounded-full ${
+                              plan.status === 'inactive' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                            }`}>
+                              {plan.status || 'active'}
+                            </span>
+                          </div>
+                          <span className="text-[9.5px] uppercase font-mono font-extrabold px-2.5 py-0.5 bg-royal/5 border border-royal/10 text-royal rounded-full">
+                            GH₵ {plan.price}
+                          </span>
+                        </div>
+                        <p className="text-[11.5px] text-slate-550 leading-relaxed font-medium">{plan.description}</p>
+                        <div className="space-y-1.5 pt-2 border-t border-slate-100/50">
+                          <span className="text-[8.5px] font-black uppercase tracking-wider text-slate-405 font-mono block">Plan features:</span>
+                          <ul className="space-y-1 text-[10.5px] text-slate-600 font-medium">
+                            {(plan.features || []).map((feat, fIdx) => (
+                              <li key={fIdx} className="flex items-center space-x-1.5">
+                                <span className="w-1.5 h-1.5 bg-royal rounded-full shrink-0" />
+                                <span>{feat}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Cover Summary description *</label>
-                  <input
-                    type="text"
-                    required
-                    value={newPlanDesc}
-                    onChange={(e) => setNewPlanDesc(e.target.value)}
-                    placeholder="Describe plan protections summary in a short phrase..."
-                    className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white"
-                  />
+                      <div className="pt-4 flex items-center justify-between border-t border-slate-100/50 mt-4">
+                        <span className="text-[10px] text-slate-405 font-mono">Max Devices: <strong>{plan.max_devices || 1}</strong></span>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => togglePlanStatus(plan.id, plan.status)}
+                            className={`py-1.5 px-3 rounded-xl text-[10.5px] font-bold border transition-colors cursor-pointer ${
+                              plan.status === 'inactive' 
+                                ? 'bg-emerald-55 text-emerald-700 border-emerald-200 hover:bg-emerald-100 border-0' 
+                                : 'bg-rose-55 text-rose-700 border-rose-200 hover:bg-rose-100 border-0'
+                            }`}
+                          >
+                            {plan.status === 'inactive' ? 'Activate Plan' : 'Suspend Plan'}
+                          </button>
+                          <button
+                            onClick={() => handleEditPlan(plan)}
+                            className="py-1.5 px-3.5 bg-white border border-slate-205 rounded-xl text-[10.5px] font-bold text-royal hover:bg-royal hover:text-white hover:border-royal transition-all duration-200 cursor-pointer shadow-sm shadow-royal/5"
+                          >
+                            Edit Details
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Plan Benefits (One per line) *</label>
-                  <textarea
-                    rows={4}
-                    required
-                    value={newPlanBenefits}
-                    onChange={(e) => setNewPlanBenefits(e.target.value)}
-                    placeholder="Free system updates&#10;Free diagnosis&#10;Labor free coordination"
-                    className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white resize-none font-mono"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3.5 bg-royal hover:bg-royal/90 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer shadow-md shadow-royal/10 hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200"
-                >
-                  ⚡ Assemble Cover Option
-                </button>
-              </form>
+              </div>
 
             </div>
           )}

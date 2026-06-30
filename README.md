@@ -56,3 +56,14 @@ npm run dev
 ```
 
 *StudentShield incorporates standard defensive coding practices, guaranteeing **Zero TypeScript compilation warnings, zero linter errors, and 100% responsive fluid layouts**.*
+
+
+Secret Code / Service ID: SHIELD-STUDENT (Case-insensitive)
+Entering this dummy secret code in the student login screen will automatically authenticate you and log you in under the mock student profile for Emmanuel Boateng Mills (student@university.edu).
+
+Admin Secret Code / Service ID: SS-TECH-01 (Admin) or SS-AGENT-01 (Support Agent)
+Entering these service IDs in the admin login screen will automatically authenticate you and log you in under the respective administrative profiles.
+
+Admin User (Role: ADMIN): SS-TECH-01
+Support Agent (Role: SUPPORT_AGENT): SS-AGENT-01
+Primary Student (Role: SUBSCRIBER): UG-10928374

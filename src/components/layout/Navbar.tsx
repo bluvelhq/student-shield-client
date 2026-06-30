@@ -117,7 +117,17 @@ export const Navbar: React.FC = () => {
   };
 
   // Determine navbar styles based on active scroll state and route view
-  const isMainPage = ["landing", "about", "contact"].includes(activeView);
+  const isMainPage = [
+    "landing",
+    "about",
+    "contact",
+    "how-it-works",
+    "plans",
+    "faq",
+    "services",
+    "blog",
+    "help-center"
+  ].includes(activeView);
   const isDarkBg = isScrolled || !isMainPage;
 
   return (

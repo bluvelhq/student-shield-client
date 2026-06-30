@@ -28,10 +28,7 @@ export const PricingGrid: React.FC = () => {
     { name: 'Free diagnosis for hardware faults', basic: true, premium: true, bonanza: true },
     { name: 'Repair coordination & transport support', basic: true, premium: true, bonanza: true },
     { name: 'Free technician repair labor fees', basic: false, premium: true, bonanza: true },
-    { name: 'Free portfolio or personal website per semester', basic: false, premium: true, bonanza: true },
-    { name: 'Business website setup (up to 5 pages)', basic: false, premium: false, bonanza: true },
     { name: 'Free tech consultations for the semester', basic: false, premium: false, bonanza: true },
-    { name: 'Domain & hosting support setup', basic: false, premium: false, bonanza: true },
     { name: 'Monthly maintenance and health checks', basic: false, premium: false, bonanza: true },
     { name: 'Max registered academic devices covered', basic: '1 device', premium: '1 device', bonanza: 'Up to 3 devices' }
   ];
@@ -61,7 +58,7 @@ export const PricingGrid: React.FC = () => {
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="border border-slate-200 p-6 sm:p-8 rounded-2xl bg-white relative flex flex-col justify-between text-left hover:shadow-lg transition-all h-full"
+            className="border border-slate-200 p-6 sm:p-8 rounded-2xl bg-white relative flex flex-col justify-between text-left hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 h-full cursor-pointer"
           >
             <div>
               <div className="bg-slate-50 p-6 sm:p-8 rounded-xl border border-slate-200/50 mb-8 relative">
@@ -105,10 +102,6 @@ export const PricingGrid: React.FC = () => {
                   <X className="w-4 h-4 text-slate-300 mt-0.5 shrink-0" />
                   <span className="font-medium text-slate-450">No free labor for hardware repairs</span>
                 </li>
-                <li className="flex items-start space-x-3">
-                  <X className="w-4 h-4 text-slate-300 mt-0.5 shrink-0" />
-                  <span className="font-medium text-slate-450">No free website builder portfolio</span>
-                </li>
               </ul>
             </div>
           </motion.div>
@@ -118,7 +111,7 @@ export const PricingGrid: React.FC = () => {
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="border border-slate-200 p-6 sm:p-8 rounded-[2.5rem] bg-white relative flex flex-col justify-between text-left hover:scale-[1.01] transition-all h-full shadow-none"
+            className="border border-slate-200 p-6 sm:p-8 rounded-[2.5rem] bg-white relative flex flex-col justify-between text-left hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 h-full shadow-none cursor-pointer"
           >
             <div>
               <div className="bg-linear-to-br from-[#E2EAFD] via-[#E8EBFF] to-[#FAF9F6] border border-royal/10 p-6 sm:p-7 rounded-4xl mb-8 relative">
@@ -134,7 +127,7 @@ export const PricingGrid: React.FC = () => {
                 </div>
 
                 <p className="text-xs sm:text-[13px] text-slate-500 font-semibold font-sans mb-6 leading-relaxed">
-                  Free repair labor + free personal portfolio website.
+                  Free repair labor + priority support.
                 </p>
 
                 <button
@@ -156,11 +149,7 @@ export const PricingGrid: React.FC = () => {
                 </li>
                 <li className="flex items-start space-x-3">
                   <Check className="w-4 h-4 text-royal mt-0.5 shrink-0" />
-                  <span className="font-medium">Free portfolio / personal website</span>
-                </li>
-                <li className="flex items-start space-x-3">
-                  <X className="w-4 h-4 text-slate-300 mt-0.5 shrink-0" />
-                  <span className="font-medium text-slate-450">No business web configuration</span>
+                  <span className="font-medium">Priority response queue</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <X className="w-4 h-4 text-slate-300 mt-0.5 shrink-0" />
@@ -175,7 +164,7 @@ export const PricingGrid: React.FC = () => {
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="border border-amber-300 p-6 sm:p-8 rounded-[2.5rem] bg-gradient-to-b from-[#FFFDF6] to-[#FFFDF9] relative flex flex-col justify-between text-left hover:scale-[1.01] transition-all h-full shadow-md"
+            className="border border-amber-300 p-6 sm:p-8 rounded-[2.5rem] bg-gradient-to-b from-[#FFFDF6] to-[#FFFDF9] relative flex flex-col justify-between text-left hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 h-full shadow-md cursor-pointer"
           >
             <div>
               <div className="bg-linear-to-br from-[#FFF5D1] via-[#FFF8E7] to-[#FAF9F6] border border-amber-200 p-6 sm:p-7 rounded-4xl mb-8 relative">
@@ -191,7 +180,7 @@ export const PricingGrid: React.FC = () => {
                 </div>
 
                 <p className="text-xs sm:text-[13px] text-amber-900 font-semibold font-sans mb-6 leading-relaxed">
-                  Ultimate cover: 3 devices + Business Web + Hosting.
+                  Ultimate cover: 3 devices + dedicated maintenance.
                 </p>
 
                 <button
@@ -209,15 +198,7 @@ export const PricingGrid: React.FC = () => {
                 </li>
                 <li className="flex items-start space-x-3">
                   <Check className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                  <span className="font-medium">Business Website setup (up to 5 pages)</span>
-                </li>
-                <li className="flex items-start space-x-3">
-                  <Check className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
                   <span className="font-medium">Free tech consultations all semester</span>
-                </li>
-                <li className="flex items-start space-x-3">
-                  <Check className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-                  <span className="font-medium">Domain & hosting support assistance</span>
                 </li>
                 <li className="flex items-start space-x-3">
                   <Check className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />

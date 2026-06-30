@@ -70,15 +70,48 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
     setSuccessMsg('');
     setLoading(true);
 
-    if (type === 'login' || type === 'admin-login') {
-      try {
-        const success = await login(email, password);
-        if (!success) {
-          setErrorMsg('Academic verification failed. No account exists with these credentials.');
+    if (type === 'login') {
+      if (email.trim().toUpperCase() === 'SHIELD-STUDENT') {
+        try {
+          const success = await login('student@university.edu');
+          if (!success) {
+            setErrorMsg('Secret code validated, but student profile could not be found.');
+            setLoading(false);
+          }
+        } catch (err) {
+          setErrorMsg('Authentication error. Please try again.');
           setLoading(false);
         }
-      } catch (err: any) {
-        setErrorMsg('Login authentication error. Please try again.');
+      } else {
+        setErrorMsg('Invalid secret code. Please use the dummy code: SHIELD-STUDENT.');
+        setLoading(false);
+      }
+    } else if (type === 'admin-login') {
+      const code = email.trim().toUpperCase();
+      if (code === 'SS-TECH-01' || code === 'ADMIN') {
+        try {
+          const success = await login('admin@studentshield.com');
+          if (!success) {
+            setErrorMsg('Secret code validated, but administrator profile could not be found.');
+            setLoading(false);
+          }
+        } catch (err) {
+          setErrorMsg('Authentication error. Please try again.');
+          setLoading(false);
+        }
+      } else if (code === 'SS-AGENT-01' || code === 'SUPPORT') {
+        try {
+          const success = await login('support@studentshield.com');
+          if (!success) {
+            setErrorMsg('Secret code validated, but support agent profile could not be found.');
+            setLoading(false);
+          }
+        } catch (err) {
+          setErrorMsg('Authentication error. Please try again.');
+          setLoading(false);
+        }
+      } else {
+        setErrorMsg('Invalid admin secret code. Please use: SS-TECH-01 or SS-AGENT-01.');
         setLoading(false);
       }
     } else if (type === 'forgot-password') {
@@ -273,7 +306,7 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
             </h2>
             <p className="text-[11px] text-slate-500 mt-0.5 font-sans">
               {type === 'login' && 'Integrate with university diagnostic resources.'}
-              {type === 'admin-login' && 'Enter admin credentials to authenticate root privileges.'}
+              {type === 'admin-login' && 'Enter admin secret code to authenticate root privileges.'}
               {type === 'register' && 'Enter your coordinates to prepare secure payment protection.'}
               {type === 'forgot-password' && 'Enter your academic email address below.'}
             </p>
@@ -434,42 +467,44 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
             )}
 
             {type === 'admin-login' ? (
-              <>
-                <div className="space-y-1 font-sans">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Admin Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                    <input
-                      type="text"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="admin@studentshield.com"
-                      className="w-full text-xs pl-9 pr-3 py-2 border border-slate-200 bg-slate-50/50 rounded-none text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all"
-                    />
-                  </div>
+              <div className="space-y-1 font-sans">
+                <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Admin Secret Code / Service ID</label>
+                <div className="relative font-sans">
+                  <Lock className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter Admin Service ID"
+                    className="w-full text-xs pl-9 pr-3 py-2 border border-slate-200 bg-slate-50/50 text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all rounded-none"
+                  />
                 </div>
-
-                <div className="space-y-1 font-sans">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                    <input
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full text-xs pl-9 pr-3 py-2 border border-slate-200 bg-slate-50/50 rounded-none text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all"
-                    />
-                  </div>
+                <div className="text-[10px] text-slate-500 mt-1 font-sans">
+                  For testing, use: <strong className="text-royal font-mono font-bold select-all">SS-TECH-01</strong> (Admin) or <strong className="text-royal font-mono font-bold select-all">SS-AGENT-01</strong> (Support)
                 </div>
-              </>
+              </div>
+            ) : type === 'login' ? (
+              <div className="space-y-1 font-sans">
+                <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Secret Code</label>
+                <div className="relative font-sans">
+                  <Lock className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter Secret Code"
+                    className="w-full text-xs pl-9 pr-3 py-2 border border-slate-200 bg-slate-50/50 text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all rounded-none"
+                  />
+                </div>
+                <div className="text-[10px] text-slate-500 mt-1 font-sans">
+                  For testing, use dummy code: <strong className="text-royal font-mono font-bold select-all">SHIELD-STUDENT</strong>
+                </div>
+              </div>
             ) : (
               <div className="space-y-1 font-sans">
-                <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">
-                  {type === 'login' ? 'Email / Phone number' : 'Academic Email'}
-                </label>
+                <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Academic Email</label>
                 <div className="relative font-sans">
                   <Mail className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
                   <input
@@ -477,8 +512,8 @@ export const AuthPages: React.FC<{ type: 'login' | 'register' | 'forgot-password
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder={type === 'login' ? "student@university.edu or +233..." : "student@university.edu"}
-                    className={`w-full text-xs pl-9 pr-3 py-2 border border-slate-200 bg-slate-50/50 text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all ${type === 'login' ? 'rounded-none' : 'rounded-xl'}`}
+                    placeholder="student@university.edu"
+                    className="w-full text-xs pl-9 pr-3 py-2 border border-slate-200 bg-slate-50/50 text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all rounded-xl"
                   />
                 </div>
               </div>

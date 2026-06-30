@@ -98,7 +98,7 @@ export const AboutPage: React.FC = () => {
         <div className="mb-24 text-center select-none">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Mission Card */}
-            <div className="bg-gradient-to-br from-royal/5 to-royal/10 border border-royal/20 p-8 rounded-2xl space-y-4 hover:border-royal/40 hover:shadow-lg transition-all duration-300">
+            <div className="bg-gradient-to-br from-royal/5 to-royal/10 border border-royal/20 p-8 rounded-2xl space-y-4 hover:border-royal/40 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer">
               <div className="w-12 h-12 rounded-full bg-royal/15 flex items-center justify-center mx-auto text-royal mb-2">
                 <span className="text-lg font-bold">🎯</span>
               </div>
@@ -111,7 +111,7 @@ export const AboutPage: React.FC = () => {
             </div>
 
             {/* Vision Card */}
-            <div className="bg-gradient-to-br from-golden/5 to-golden/10 border border-golden/30 p-8 rounded-2xl space-y-4 hover:border-golden/50 hover:shadow-lg transition-all duration-300">
+            <div className="bg-gradient-to-br from-golden/5 to-golden/10 border border-golden/30 p-8 rounded-2xl space-y-4 hover:border-golden/50 hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer">
               <div className="w-12 h-12 rounded-full bg-golden/15 flex items-center justify-center mx-auto text-golden mb-2">
                 <span className="text-lg font-bold">✨</span>
               </div>
@@ -135,7 +135,7 @@ export const AboutPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* VALUE 1: AFFORDABILITY */}
-            <div className="bg-white border border-slate-100 p-8 text-left rounded-lg transition-all space-y-4">
+            <div className="bg-white border border-slate-100 p-8 text-left rounded-2xl hover:border-royal/20 hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 cursor-pointer space-y-4">
               <div className="w-10 h-10 rounded-lg border border-royal/20 bg-royal/5 flex items-center justify-center text-royal">
                 <CreditCard className="w-5 h-5 flex-shrink-0" />
               </div>
@@ -148,7 +148,7 @@ export const AboutPage: React.FC = () => {
             </div>
 
             {/* VALUE 2: SAFETY */}
-            <div className="bg-white border border-slate-100 p-8 text-left rounded-lg transition-all space-y-4">
+            <div className="bg-white border border-slate-100 p-8 text-left rounded-2xl hover:border-royal/20 hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 cursor-pointer space-y-4">
               <div className="w-10 h-10 rounded-lg border border-royal/20 bg-royal/5 flex items-center justify-center text-royal">
                 <Shield className="w-5 h-5 flex-shrink-0" />
               </div>
@@ -161,7 +161,7 @@ export const AboutPage: React.FC = () => {
             </div>
 
             {/* VALUE 3: TECH CARE / DEVICE WELLNESS */}
-            <div className="bg-white border border-slate-100 p-8 text-left rounded-lg transition-all space-y-4">
+            <div className="bg-white border border-slate-100 p-8 text-left rounded-2xl hover:border-royal/20 hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 cursor-pointer space-y-4">
               <div className="w-10 h-10 rounded-lg border border-royal/20 bg-royal/5 flex items-center justify-center text-royal">
                 <Heart className="w-5 h-5 flex-shrink-0" />
               </div>
@@ -174,7 +174,7 @@ export const AboutPage: React.FC = () => {
             </div>
 
             {/* VALUE 4: INNOVATION */}
-            <div className="bg-white border border-slate-100 p-8 text-left rounded-lg transition-all space-y-4">
+            <div className="bg-white border border-slate-100 p-8 text-left rounded-2xl hover:border-royal/20 hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 cursor-pointer space-y-4">
               <div className="w-10 h-10 rounded-lg border border-royal/20 bg-royal/5 flex items-center justify-center text-royal">
                 <Lightbulb className="w-5 h-5 flex-shrink-0" />
               </div>
@@ -228,13 +228,13 @@ export const AboutPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {team.map((t, idx) => (
               <CometCard key={idx} className="h-full">
-                <div className="bg-white border border-slate-200/45 p-0 rounded-none overflow-hidden hover:border-royal transition-all text-left flex flex-col justify-between h-full bg-cover shadow-none">
-                  {/* Large cropped image box inspired by the vertical crisp profiles in PayNext right layout */}
+                <div className="bg-white border border-slate-200/45 p-0 rounded-2xl overflow-hidden hover:border-royal transition-all text-left flex flex-col justify-between h-full bg-cover shadow-none hover:-translate-y-1.5 hover:shadow-2xl duration-350 cursor-pointer group">
+                  {/* Large cropped image box inspired by the vertical profiles */}
                   <div className="w-full aspect-[4/5] bg-slate-50 border-b border-slate-200/30 overflow-hidden relative">
                     <img 
                       src={t.avatar} 
                       alt={t.name} 
-                      className="w-full h-full object-cover filter brightness-95" 
+                      className="w-full h-full object-cover filter brightness-95 transition-transform duration-500 group-hover:scale-105 group-hover:translate-y-[-2px]" 
                       referrerPolicy="no-referrer" 
                     />
                   </div>
@@ -472,7 +472,7 @@ export const ServicesPage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {services.map((s, idx) => (
-            <div key={idx} className="bg-white border border-slate-100 p-8 rounded-2xl shadow-none relative text-left">
+            <div key={idx} className="bg-white border border-slate-100 p-8 rounded-2xl shadow-none relative text-left hover:border-royal/35 hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 cursor-pointer">
               <span className="absolute top-6 right-6 bg-royal/10 text-royal font-mono font-bold text-[9px] px-2 py-0.5 rounded border border-royal/20 uppercase">
                 {s.badge}
               </span>
@@ -497,7 +497,9 @@ export const ServicesPage: React.FC = () => {
       </div>
     </div>
   );
-};// =========================================================================
+};
+
+// =========================================================================
 // CONTACT PAGE
 // =========================================================================
 export const ContactPage: React.FC = () => {
@@ -520,100 +522,92 @@ export const ContactPage: React.FC = () => {
   return (
     <div className="selection:bg-royal selection:text-white bg-white font-sans min-h-screen text-slate-800 pb-24 overflow-hidden leading-relaxed">
       
-      {/* 1. HERO GRADIENT HEADER - Clean White Block with interactive background grid */}
-      <div className="relative pt-36 pb-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-100 text-center">
-        {/* Background Ripple Effect - styled beautifully for light clean layout */}
+      {/* 1. HERO HEADER - Clean White Block with interactive background grid */}
+      <div className="relative pt-36 pb-20 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-100 text-center text-[#00183D]">
+        {/* Background Ripple Effect */}
         <div className="absolute inset-0 w-full h-full opacity-100 pointer-events-auto z-0 overflow-hidden [--cell-border-color:rgba(37,99,235,0.12)] [--cell-fill-color:rgba(37,99,235,0.003)]">
           <BackgroundRippleEffect rows={9} cols={35} cellSize={60} />
         </div>
 
-        {/* Floating background decorative dots like in the inspiration image */}
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 rounded-full bg-royal/40 animate-pulse pointer-events-none" />
-        <div className="absolute top-2/3 right-1/4 w-1.5 h-1.5 rounded-full bg-royal/30 animate-pulse pointer-events-none" />
-        <div className="absolute bottom-1/3 left-1/12 w-2 h-2 rounded-full bg-royal/40 pointer-events-none" />
-        <div className="absolute top-1/3 right-12 w-2.5 h-2.5 rounded-full bg-royal/40 pointer-events-none" />
+        {/* Floating background decorative dots with animations */}
+        <motion.div animate={{ y: [-10, 10, -10] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/4 left-1/4 w-2 h-2 rounded-full bg-royal/40 pointer-events-none" />
+        <motion.div animate={{ y: [10, -10, 10] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="absolute top-2/3 right-1/4 w-1.5 h-1.5 rounded-full bg-royal/30 pointer-events-none" />
+        <motion.div animate={{ x: [-10, 10, -10] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-1/3 left-1/12 w-2 h-2 rounded-full bg-royal/40 pointer-events-none" />
+        <motion.div animate={{ x: [10, -10, 10] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 2 }} className="absolute top-1/3 right-12 w-2.5 h-2.5 rounded-full bg-royal/40 pointer-events-none" />
 
-        <div className="max-w-4xl mx-auto relative z-10 space-y-3.5 select-none text-center">
-          <h1 className="text-4xl sm:text-5xl md:text-6.5xl font-black tracking-tight leading-none text-navy font-sans max-w-3xl mx-auto">
-            Contact Us
+        <div className="max-w-4xl mx-auto relative z-10 space-y-4 select-none text-center">
+          <span className="bg-royal/10 border border-royal/20 text-royal text-[10px] font-bold font-mono px-3.5 py-1.5 rounded-full uppercase tracking-widest inline-block">
+            CAMPUS HELP CENTER
+          </span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-none text-[#00183D] font-sans max-w-3xl mx-auto">
+            Get in Touch
           </h1>
-          <div className="flex items-center justify-center space-x-2 text-xs font-bold text-slate-400 font-sans mt-2.5">
-            <span className="hover:text-royal cursor-pointer">Home</span>
-            <span>&gt;</span>
-            <span className="text-royal font-extrabold font-sans">Contact</span>
-          </div>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed font-sans font-medium">
+            Have questions about coverage, repairs, or campus booths? Drop us a line and let's get your device shielded.
+          </p>
         </div>
       </div>
 
-      {/* Primary body section limits */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 relative z-10">
+      {/* Primary Container */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 relative z-20">
         
-        {/* Contact Layout Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start mb-20">
+        {/* Main Grid Wrapper */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-20">
           
-          {/* Left Column: Get In Touch solid card */}
-          <div className="lg:col-span-5 bg-royal text-white p-8 sm:p-10 rounded-none shadow-none flex flex-col justify-between text-left relative overflow-hidden group">
-            {/* Subtle decor dots/waves */}
-            <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/5 rounded-full pointer-events-none group-hover:scale-110 transition-transform duration-500" />
-            <div className="absolute -bottom-16 -left-16 w-36 h-36 bg-white/5 rounded-full pointer-events-none" />
+          {/* Left Block: Contact Channels Widget (Glassmorphic Deep Navy card) */}
+          <div className="lg:col-span-5 bg-[#0b162c] text-white p-8 sm:p-10 rounded-3xl shadow-2xl flex flex-col justify-between text-left relative overflow-hidden border border-white/[0.05] hover:-translate-y-1.5 hover:shadow-royal/10 transition-all duration-300 cursor-pointer">
+            <div className="absolute -top-12 -right-12 w-40 h-40 bg-royal/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -bottom-20 -left-20 w-44 h-44 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
 
             <div className="space-y-8 relative z-10">
-              <div>
-                <h3 className="text-3xl font-black tracking-tight leading-none text-white font-sans">
-                  Get In Touch
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black tracking-tight text-white font-sans">
+                  Support Channels
                 </h3>
-                <p className="text-xs sm:text-sm text-blue-100/80 mt-4 leading-relaxed font-sans font-medium">
-                  Feel free to contact us with any questions, contact our team and let's schedule a call.
+                <p className="text-xs text-slate-400 leading-relaxed font-sans font-medium">
+                  We run physical support locations and lines across campus university hubs.
                 </p>
               </div>
 
-              {/* Decorative divider */}
-              <div className="border-t border-white/20 w-full" />
+              <div className="border-t border-white/[0.08] w-full" />
 
-              {/* Contact channel lists */}
-              <div className="space-y-6">
+              <div className="space-y-6 font-sans">
                 
-                {/* Channel 1: Call us */}
-                <div className="flex items-start space-x-4">
-                  <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-white flex-shrink-0 border border-white/10">
+                {/* Call Channel */}
+                <div className="flex items-start space-x-4 group">
+                  <div className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-royal flex-shrink-0 group-hover:bg-royal group-hover:text-white transition-all duration-300">
                     <Phone className="w-4.5 h-4.5" />
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase tracking-wider text-blue-100/70 font-mono block">Call us</span>
-                    <a href="tel:+233244123456" className="text-sm font-bold text-white block hover:underline mt-0.5">
+                    <span className="text-[9px] uppercase tracking-wider text-slate-400 font-mono block">Direct Helpline</span>
+                    <a href="tel:+233244123456" className="text-xs sm:text-sm font-extrabold text-white block hover:text-royal transition-colors mt-0.5 font-mono">
                       +233-244-123-456
-                    </a>
-                    <a href="tel:+233201234567" className="text-sm font-bold text-white block hover:underline">
-                      +233-201-234-567
                     </a>
                   </div>
                 </div>
 
-                {/* Channel 2: Email us */}
-                <div className="flex items-start space-x-4">
-                  <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-white flex-shrink-0 border border-white/10">
+                {/* Email Channel */}
+                <div className="flex items-start space-x-4 group">
+                  <div className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-royal flex-shrink-0 group-hover:bg-royal group-hover:text-white transition-all duration-300">
                     <Mail className="w-4.5 h-4.5" />
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase tracking-wider text-blue-100/70 font-mono block">Email us</span>
-                    <a href="mailto:support@studentshield.gh" className="text-sm font-bold text-white block hover:underline mt-0.5">
+                    <span className="text-[9px] uppercase tracking-wider text-slate-400 font-mono block">Academic Email</span>
+                    <a href="mailto:support@studentshield.gh" className="text-xs sm:text-sm font-extrabold text-white block hover:text-royal transition-colors mt-0.5 font-mono">
                       support@studentshield.gh
-                    </a>
-                    <a href="mailto:info@studentshield.gh" className="text-sm font-bold text-white block hover:underline">
-                      info@studentshield.gh
                     </a>
                   </div>
                 </div>
 
-                {/* Channel 3: Office Address */}
-                <div className="flex items-start space-x-4">
-                  <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-white flex-shrink-0 border border-white/10">
+                {/* Address Channel */}
+                <div className="flex items-start space-x-4 group">
+                  <div className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-royal flex-shrink-0 group-hover:bg-royal group-hover:text-white transition-all duration-300">
                     <MapPin className="w-4.5 h-4.5" />
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase tracking-wider text-blue-100/70 font-mono block">Office address</span>
-                    <p className="text-sm font-bold text-white leading-snug mt-0.5">
-                      SRC Tech Hub Booth, University Avenue, Legon Campus, Accra, Ghana.
+                    <span className="text-[9px] uppercase tracking-wider text-slate-400 font-mono block">Main Campus Booth</span>
+                    <p className="text-xs sm:text-sm font-bold text-white leading-snug mt-0.5 font-sans">
+                      Central Balme Library Booth, University Avenue, Legon, Accra.
                     </p>
                   </div>
                 </div>
@@ -621,71 +615,66 @@ export const ContactPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Bottom brand token */}
-            <div className="pt-10 select-none relative z-10 text-[10px] text-blue-200/55 tracking-wider font-mono font-bold uppercase">
-              StudentShield Technical Systems
+            <div className="pt-10 select-none relative z-10 text-[9px] text-white/30 tracking-widest font-mono font-bold uppercase border-t border-white/[0.05] mt-8">
+              🔒 Shielded Care Guarantee
             </div>
           </div>
 
-          {/* Right Column: Send us a message form */}
-          <div className="lg:col-span-7 flex flex-col justify-center text-left">
+          {/* Right Block: Message Form (Glassmorphic Light card) */}
+          <div className="lg:col-span-7 bg-white border border-slate-200/60 p-8 sm:p-10 rounded-3xl shadow-2xl flex flex-col justify-center text-left hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 cursor-pointer">
             <div>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-royal font-bold block">
-                Contact Us
+              <span className="text-[10px] uppercase tracking-widest text-royal font-extrabold block">
+                SEND MESSAGE
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-navy font-sans tracking-tight mt-1 mb-3">
+              <h2 className="text-2xl sm:text-3xl font-black text-navy font-sans tracking-tight mt-1 mb-3">
                 Send us a message
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-sans font-medium mb-10">
-                If you have any questions about membership or usage, please fill out the form and our team will get back to you within 24 hours.
+              <p className="text-xs text-slate-500 leading-relaxed font-sans font-medium mb-8">
+                Got a question? Submit the form details and our triage support specialists will respond within 24 hours.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               
-              {/* Name field */}
               <div className="space-y-1">
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Enter your full name"
-                  className="w-full text-xs font-medium border border-slate-200 focus:border-royal bg-white px-4 py-3.5 focus:outline-none transition-all duration-300 placeholder:text-slate-400 font-sans shadow-none rounded-none"
+                  placeholder="Your Full Name"
+                  className="w-full text-xs font-medium border border-slate-200 hover:border-slate-300 focus:border-royal bg-slate-50/50 px-4 py-3.5 focus:bg-white focus:outline-none transition-all duration-300 placeholder:text-slate-400 font-sans shadow-inner rounded-xl"
                 />
               </div>
 
-              {/* Email field */}
               <div className="space-y-1">
                 <input
                   type="email"
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="Enter your email"
-                  className="w-full text-xs font-medium border border-slate-200 focus:border-royal bg-white px-4 py-3.5 focus:outline-none transition-all duration-300 placeholder:text-slate-400 font-sans shadow-none rounded-none"
+                  placeholder="Your Email Address"
+                  className="w-full text-xs font-medium border border-slate-200 hover:border-slate-300 focus:border-royal bg-slate-50/50 px-4 py-3.5 focus:bg-white focus:outline-none transition-all duration-300 placeholder:text-slate-400 font-sans shadow-inner rounded-xl"
                 />
               </div>
 
-              {/* Message field */}
               <div className="space-y-1">
                 <textarea
-                  rows={5}
+                  rows={4}
                   required
                   value={formData.msg}
                   onChange={(e) => setFormData({ ...formData, msg: e.target.value })}
-                  placeholder="Write us your question here..."
-                  className="w-full text-xs font-medium border border-slate-200 focus:border-royal bg-white px-4 py-4 focus:outline-none transition-all duration-300 placeholder:text-slate-400 font-sans resize-none shadow-none rounded-none"
+                  placeholder="Write your request details or query here..."
+                  className="w-full text-xs font-medium border border-slate-200 hover:border-slate-300 focus:border-royal bg-slate-50/50 px-4 py-3.5 focus:bg-white focus:outline-none transition-all duration-300 placeholder:text-slate-400 font-sans resize-none shadow-inner rounded-xl"
                 />
               </div>
 
-              {/* Submit button - aligned with design principles */}
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="px-8 py-3.5 bg-royal text-white text-[11px] font-extrabold tracking-widest uppercase transition-all shadow-none hover:bg-royal/90 flex items-center space-x-2.5 cursor-pointer rounded-none animate-none"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-royal text-white text-xs font-extrabold tracking-widest uppercase transition-all shadow-md hover:bg-blue-700 active:scale-[0.98] cursor-pointer rounded-xl"
                 >
-                  <span>Send Message</span>
+                  Send Message
                 </button>
               </div>
 
@@ -697,52 +686,52 @@ export const ContactPage: React.FC = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="mt-6 p-4 bg-emerald-50 border border-emerald-100 rounded-none text-emerald-800 text-xs flex items-center space-x-2.5 relative z-10"
+                  className="mt-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-800 text-xs flex items-center space-x-2.5 relative z-10"
                 >
                   <CheckCircle className="w-5 h-5 flex-shrink-0 text-emerald-600" />
-                  <span className="font-semibold">Your message has been sent successfully. We'll reply within 24 hours!</span>
+                  <span className="font-semibold">Message dispatched successfully. We'll reply within 24 hours!</span>
                 </motion.div>
               )}
             </AnimatePresence>
-            </div>
-
           </div>
 
-          {/* 3. CAMPUS HQ BOOTH LOCATIONS & OPERATING HOURS (Keep existing rich content but make it match beautifully!) */}
-          <div className="border-t border-slate-200/80 pt-16">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch text-left">
+        </div>
+
+        {/* 3. CAMPUS BOOTH & MAPS */}
+        <div className="border-t border-slate-200/60 pt-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch text-left">
             
-            {/* Campus Booth Info Card */}
-            <div className="bg-white border border-slate-200/50 p-8 rounded-none flex flex-col justify-between space-y-5">
-              <div>
-                <span className="text-[9px] uppercase tracking-wider text-royal font-bold block mb-1">HQ Desk</span>
+            {/* HQ Desk Info */}
+            <div className="bg-white border border-slate-200/50 p-8 rounded-3xl flex flex-col justify-between space-y-6 hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 cursor-pointer">
+              <div className="space-y-2">
+                <span className="text-[9px] uppercase tracking-wider text-royal font-extrabold block">BOOTHS LOCATION</span>
                 <h3 className="text-xl font-extrabold text-navy font-sans tracking-tight">Main Campus Library Desk</h3>
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                  Our core support desk sits directly in the University Central Library. Student members can walk right up to process hardware swaps and priority queues.
+                <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                  Drop by our central support desk inside the Central Balme Library. Students can check diagnostic status and consult with technical advisors in person.
                 </p>
               </div>
 
-              <div className="space-y-4 pt-2 text-xs text-slate-600 border-t border-slate-100">
+              <div className="space-y-4 pt-4 text-xs text-slate-650 border-t border-slate-100 font-sans">
                 <div className="flex items-start space-x-3">
                   <MapPin className="w-4 h-4 text-royal mt-0.5 flex-shrink-0" />
                   <div>
-                    <span className="font-bold text-navy block">Main Central Library</span>
-                    <span className="text-slate-500 block">Ground floor left-wing booth 2. Lego Campus, Accra.</span>
+                    <span className="font-bold text-navy block">Central Balme Library</span>
+                    <span className="text-slate-500 block">Ground floor left-wing booth 2. Legon Campus, Accra.</span>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-3">
                   <Calendar className="w-4 h-4 text-royal mt-0.5 flex-shrink-0" />
                   <div>
-                    <span className="font-bold text-navy block">Desk Hours</span>
+                    <span className="font-bold text-navy block">Operating Hours</span>
                     <span className="text-slate-500 block">Monday to Saturday (8:00 AM — 5:00 PM)</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Integrated Google Maps View */}
-            <div className="border border-slate-200/80 rounded-none relative overflow-hidden h-full min-h-[280px]">
+            {/* Google Maps view */}
+            <div className="border border-slate-200/60 rounded-3xl overflow-hidden h-full min-h-[280px] shadow-sm hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 cursor-pointer">
               <iframe 
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.6698942202685!2d-0.18731792518388484!3d5.651737494329241!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x11eecf84db091011%3A0xe54e6e666a7b7914!2sBalme%20Library!5e0!3m2!1sen!2sgh!4v1718928000000!5m2!1sen!2sgh" 
                 width="100%" 
@@ -757,7 +746,6 @@ export const ContactPage: React.FC = () => {
 
           </div>
         </div>
-
       </div>
     </div>
   );

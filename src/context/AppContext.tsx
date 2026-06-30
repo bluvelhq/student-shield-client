@@ -6,6 +6,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { dbService } from '../services/db';
 import { User, Profile, Device, SupportTicket, Subscription, Notification } from '../types';
+import { CheckCircle, AlertTriangle, X, Info } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+
+export interface ToastMessage {
+  id: string;
+  message: string;
+  type: 'success' | 'warning' | 'error' | 'info';
+}
 
 interface AppContextType {
   activeView: string;
@@ -22,6 +30,7 @@ interface AppContextType {
   register: (data: { email: string; fullName: string; university: string; studentId: string; phone: string; role?: 'student' | 'admin' }) => void | Promise<void>;
   logout: () => void;
   updateProfile: (fullName: string, phone: string, university: string) => boolean;
+  showToast: (message: string, type?: 'success' | 'warning' | 'error' | 'info') => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -61,6 +70,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return 'dashboard';
       case '/admin':
         return 'admin';
+      case '/request-details':
+        return 'request-details';
       default:
         return 'landing';
     }
@@ -77,6 +88,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [activeView, setActiveView] = useState<string>(() => viewFromPath(window.location.pathname));
   const [viewState, setViewState] = useState<any>(null);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
   
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -172,6 +184,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return false;
   };
 
+  const showToast = (message: string, type: 'success' | 'warning' | 'error' | 'info' = 'success') => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 4000);
+  };
+
   return (
     <AppContext.Provider value={{
       activeView,
@@ -187,9 +207,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       login,
       register,
       logout,
-      updateProfile
+      updateProfile,
+      showToast
     }}>
       {children}
+
+      {/* Dynamic site-wide Toast Notifications */}
+      <div className="fixed bottom-5 right-5 z-[99999] flex flex-col space-y-3 max-w-sm pointer-events-none select-none">
+        <AnimatePresence>
+          {toasts.map((t) => (
+            <motion.div
+              key={t.id}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95, transition: { duration: 0.15 } }}
+              className={`p-3.5 rounded-2xl shadow-xl flex items-start space-x-3 pointer-events-auto border bg-white/95 backdrop-blur max-w-xs ${
+                t.type === 'success' ? 'border-emerald-100 bg-emerald-50/95 text-emerald-905' :
+                t.type === 'error' ? 'border-rose-100 bg-rose-50/95 text-rose-905' :
+                t.type === 'warning' ? 'border-amber-100 bg-amber-50/95 text-amber-905' :
+                'border-blue-100 bg-blue-50/95 text-blue-905'
+              }`}
+            >
+              {t.type === 'success' && <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />}
+              {t.type === 'error' && <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />}
+              {t.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />}
+              {t.type === 'info' && <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />}
+              
+              <div className="flex-grow text-[10.5px] font-sans font-bold tracking-normal leading-normal pr-1 text-slate-800">
+                {t.message}
+              </div>
+              
+              <button 
+                onClick={() => setToasts(prev => prev.filter(item => item.id !== t.id))}
+                className="text-slate-400 hover:text-slate-700 shrink-0 mt-0.5 cursor-pointer border-0 bg-transparent"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
     </AppContext.Provider>
   );
 };
