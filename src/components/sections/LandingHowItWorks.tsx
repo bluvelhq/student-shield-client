@@ -98,11 +98,11 @@ export const LandingHowItWorks: React.FC = () => {
         
         {/* Title Section */}
         <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
-          <div className="inline-flex items-center space-x-2 bg-royal/10 border border-royal/20 rounded-full px-4 py-1.5 text-xs text-royal font-extrabold uppercase tracking-widest font-mono">
+          <div className="inline-flex items-center space-x-2 bg-royal/10 border border-royal/20 rounded-full px-4 py-1.5 text-xs text-royal font-semibold uppercase tracking-widest font-mono">
             <div className="w-1.5 h-1.5 rounded-full bg-royal animate-pulse" />
             <span>HOW IT WORKS</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-navy leading-tight">
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-navy leading-tight">
             Three Steps. Zero Hassle.
           </h2>
           <p className="text-base text-slate-500 max-w-xl mx-auto leading-relaxed font-sans font-medium">
@@ -134,7 +134,7 @@ export const LandingHowItWorks: React.FC = () => {
                 className="bg-white border border-slate-200/60 p-8 rounded-3xl relative text-left hover:border-royal/25 hover:bg-white hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group shadow-lg cursor-pointer"
               >
                 {/* Step indicator number */}
-                <div className="absolute top-6 right-8 text-7xl font-black text-slate-100/50 group-hover:text-royal/5 font-sans pointer-events-none select-none transition-colors duration-300">
+                <div className="absolute top-6 right-8 text-7xl font-bold text-slate-100/50 group-hover:text-royal/5 font-sans pointer-events-none select-none transition-colors duration-300">
                   {step.number}
                 </div>
 
@@ -145,7 +145,7 @@ export const LandingHowItWorks: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <h3 className="text-lg font-black text-navy font-sans tracking-tight">{step.title}</h3>
+                    <h3 className="text-lg font-bold text-navy font-sans tracking-tight">{step.title}</h3>
                     <p className="text-xs text-slate-500 leading-relaxed font-sans font-medium">
                       {step.desc}
                     </p>

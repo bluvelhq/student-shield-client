@@ -78,11 +78,11 @@ export const AboutPage: React.FC = () => {
         <div className="absolute top-1/3 right-12 w-2.5 h-2.5 rounded-full bg-royal/40 pointer-events-none" />
         
         <div className="max-w-4xl mx-auto relative z-10 space-y-5 select-none text-center">
-          <div className="inline-flex items-center space-x-2 bg-[#2563EB]/10 border border-[#2563EB]/20 rounded-none px-3.5 py-1.5 text-[10px] text-royal font-extrabold uppercase tracking-widest font-mono">
+          <div className="inline-flex items-center space-x-2 bg-[#2563EB]/10 border border-[#2563EB]/20 rounded-none px-3.5 py-1.5 text-[10px] text-royal font-semibold uppercase tracking-widest font-mono">
             <div className="w-1.5 h-1.5 rounded-full bg-royal animate-pulse" />
             <span>OUR BRAND & PURPOSE</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] text-[#00183D] font-sans max-w-3xl mx-auto">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight leading-[1.1] text-[#00183D] font-sans max-w-3xl mx-auto">
             Empowering <br className="sm:hidden" /> Academic Continuity
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto leading-relaxed font-sans font-semibold">
@@ -128,7 +128,7 @@ export const AboutPage: React.FC = () => {
         {/* 3. OUR VALUES SECTION */}
         <div className="mb-24 text-center">
           <div className="mb-12">
-            <h2 className="text-2xl sm:text-3xl font-black tracking-widest text-royal font-sans uppercase">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-widest text-royal font-sans uppercase">
               OUR VALUES
             </h2>
           </div>
@@ -139,7 +139,7 @@ export const AboutPage: React.FC = () => {
               <div className="w-10 h-10 rounded-lg border border-royal/20 bg-royal/5 flex items-center justify-center text-royal">
                 <CreditCard className="w-5 h-5 flex-shrink-0" />
               </div>
-              <h3 className="text-lg font-extrabold text-[#00183D] font-sans tracking-tight">
+              <h3 className="text-lg font-semibold text-[#00183D] font-sans tracking-tight">
                 Affordability
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium">
@@ -152,7 +152,7 @@ export const AboutPage: React.FC = () => {
               <div className="w-10 h-10 rounded-lg border border-royal/20 bg-royal/5 flex items-center justify-center text-royal">
                 <Shield className="w-5 h-5 flex-shrink-0" />
               </div>
-              <h3 className="text-lg font-extrabold text-[#00183D] font-sans tracking-tight">
+              <h3 className="text-lg font-semibold text-[#00183D] font-sans tracking-tight">
                 Safety
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium">
@@ -165,7 +165,7 @@ export const AboutPage: React.FC = () => {
               <div className="w-10 h-10 rounded-lg border border-royal/20 bg-royal/5 flex items-center justify-center text-royal">
                 <Heart className="w-5 h-5 flex-shrink-0" />
               </div>
-              <h3 className="text-lg font-extrabold text-[#00183D] font-sans tracking-tight">
+              <h3 className="text-lg font-semibold text-[#00183D] font-sans tracking-tight">
                 Device Wellness
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium">
@@ -178,7 +178,7 @@ export const AboutPage: React.FC = () => {
               <div className="w-10 h-10 rounded-lg border border-royal/20 bg-royal/5 flex items-center justify-center text-royal">
                 <Lightbulb className="w-5 h-5 flex-shrink-0" />
               </div>
-              <h3 className="text-lg font-extrabold text-[#00183D] font-sans tracking-tight">
+              <h3 className="text-lg font-semibold text-[#00183D] font-sans tracking-tight">
                 Innovation
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-semibold">
@@ -192,19 +192,19 @@ export const AboutPage: React.FC = () => {
         <div className="border-t border-b border-slate-200/60 py-10 mb-24 select-none">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center items-center">
             <div className="space-y-1">
-              <span className="text-2xl sm:text-3.5xl font-black text-royal font-sans tracking-tight">98%+</span>
+              <span className="text-2xl sm:text-3.5xl font-bold text-royal font-sans tracking-tight">98%+</span>
               <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Student Resolution</span>
             </div>
             <div className="space-y-1">
-              <span className="text-2xl sm:text-3.5xl font-black text-royal font-sans tracking-tight">GH₵340+</span>
+              <span className="text-2xl sm:text-3.5xl font-bold text-royal font-sans tracking-tight">GH₵340+</span>
               <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Average Savings</span>
             </div>
             <div className="space-y-1">
-              <span className="text-2xl sm:text-3.5xl font-black text-royal font-sans tracking-tight">500+</span>
+              <span className="text-2xl sm:text-3.5xl font-bold text-royal font-sans tracking-tight">500+</span>
               <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Active Protections</span>
             </div>
             <div className="space-y-1">
-              <span className="text-2xl sm:text-3.5xl font-black text-royal font-sans tracking-tight">100%</span>
+              <span className="text-2xl sm:text-3.5xl font-bold text-royal font-sans tracking-tight">100%</span>
               <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Grade Safe Guarantee</span>
             </div>
           </div>
@@ -213,10 +213,10 @@ export const AboutPage: React.FC = () => {
         {/* 5. TEAM OF EXPERTS - Inspired by vertical big portraits right page top layout of uploaded image */}
         <div className="mb-24 text-center">
           <div className="max-w-3xl mx-auto mb-16 select-none space-y-3">
-            <span className="text-[11px] uppercase tracking-[0.25em] text-royal font-extrabold bg-royal/5 px-3.5 py-1 text-center inline-block">
+            <span className="text-[11px] uppercase tracking-[0.25em] text-royal font-semibold bg-royal/5 px-3.5 py-1 text-center inline-block">
               OUR TEAMS
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-navy leading-none">
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-navy leading-none">
               Meet The Team Behind <br className="sm:hidden" /> StudentShield's Innovation
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed font-sans font-medium">
@@ -241,10 +241,10 @@ export const AboutPage: React.FC = () => {
 
                   {/* Typography info centered immediately below frame */}
                   <div className="p-6">
-                    <h4 className="text-base font-black text-navy tracking-tight leading-none mb-1 text-ellipsis overflow-hidden font-sans">
+                    <h4 className="text-base font-bold text-navy tracking-tight leading-none mb-1 text-ellipsis overflow-hidden font-sans">
                       {t.name}
                     </h4>
-                    <span className="text-[9px] text-royal font-black uppercase tracking-widest">
+                    <span className="text-[9px] text-royal font-bold uppercase tracking-widest">
                       {t.role}
                     </span>
                     <p className="text-[11px] text-slate-400 mt-3 leading-snug font-medium border-t border-slate-100 pt-3">
@@ -294,10 +294,10 @@ export const AboutPage: React.FC = () => {
         {/* BENTO GRID GALLERY BELOW TEAM */}
         <div className="mt-32 mb-24">
           <div className="max-w-3xl mx-auto mb-16 text-center select-none space-y-3">
-            <span className="text-[11px] uppercase tracking-[0.25em] text-[#2563EB] font-extrabold bg-[#2563EB]/5 px-3.5 py-1 text-center inline-block">
+            <span className="text-[11px] uppercase tracking-[0.25em] text-[#2563EB] font-semibold bg-[#2563EB]/5 px-3.5 py-1 text-center inline-block">
               EXPLORE OUR SPACES
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#00183D] leading-none uppercase">
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#00183D] leading-none uppercase">
               STUDENTSHIELD BENTO HUBS
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed font-sans font-semibold">
@@ -350,14 +350,14 @@ export const AboutPage: React.FC = () => {
 
         {/* 6. PARTNERS LOGOS - Inspired by the 'Trusted by Leading Financial Institutions' logos in paynext right */}
         <div className="my-24 py-12 border-t border-b border-slate-100/80 text-center select-none">
-          <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-extrabold block mb-8">
+          <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-semibold block mb-8">
             TRUSTED BY CAMPUS STUDENT NETWORKS
           </span>
           <div className="flex flex-wrap items-center justify-center gap-10 sm:gap-16 opacity-40 hover:opacity-100 transition-opacity duration-300">
-            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-extrabold text-navy/70">UG SRC</span>
-            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-extrabold text-navy/70">UG COMPUTER SCIENCE</span>
-            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-extrabold text-navy/70">UG LEGON LIBRARY</span>
-            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-extrabold text-navy/70">UG BUSINESS SCHOOL</span>
+            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-semibold text-navy/70">UG SRC</span>
+            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-semibold text-navy/70">UG COMPUTER SCIENCE</span>
+            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-semibold text-navy/70">UG LEGON LIBRARY</span>
+            <span className="font-mono text-xs sm:text-sm tracking-[0.25em] font-semibold text-navy/70">UG BUSINESS SCHOOL</span>
           </div>
         </div>
 
@@ -370,7 +370,7 @@ export const AboutPage: React.FC = () => {
           
           {/* Left part */}
           <div className="max-w-2xl space-y-3.5 relative z-10">
-            <h3 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight font-sans">
+            <h3 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white leading-tight font-sans">
               Let's Redefine <br />
               Campus Care Together
             </h3>
@@ -392,7 +392,7 @@ export const AboutPage: React.FC = () => {
             
             <div className="space-y-1.5">
               <span className="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Office Address</span>
-              <p className="text-[12px] text-slate-200 font-extrabold font-sans">
+              <p className="text-[12px] text-slate-200 font-semibold font-sans">
                 SRC Tech Hub Booth, University Avenue, Ghana
               </p>
             </div>
@@ -464,7 +464,7 @@ export const ServicesPage: React.FC = () => {
         
         <div className="text-center mb-16 select-none">
           <span className="text-[10px] uppercase tracking-widest text-royal font-bold block mb-2">Service Portfolio</span>
-          <h1 className="text-4xl font-extrabold text-navy tracking-tight">On-Campus Technical Capabilities</h1>
+          <h1 className="text-4xl font-semibold text-navy tracking-tight">On-Campus Technical Capabilities</h1>
           <p className="text-sm text-slate-500 max-w-xl mx-auto mt-4 leading-relaxed">
             Professional diagnostic capabilities aligned under semester packages. No hidden labor commissions.
           </p>
@@ -539,7 +539,7 @@ export const ContactPage: React.FC = () => {
           <span className="bg-royal/10 border border-royal/20 text-royal text-[10px] font-bold font-mono px-3.5 py-1.5 rounded-full uppercase tracking-widest inline-block">
             CAMPUS HELP CENTER
           </span>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-none text-[#00183D] font-sans max-w-3xl mx-auto">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-none text-[#00183D] font-sans max-w-3xl mx-auto">
             Get in Touch
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed font-sans font-medium">
@@ -561,7 +561,7 @@ export const ContactPage: React.FC = () => {
 
             <div className="space-y-8 relative z-10">
               <div className="space-y-2">
-                <h3 className="text-2xl font-black tracking-tight text-white font-sans">
+                <h3 className="text-2xl font-bold tracking-tight text-white font-sans">
                   Support Channels
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed font-sans font-medium">
@@ -580,7 +580,7 @@ export const ContactPage: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-[9px] uppercase tracking-wider text-slate-400 font-mono block">Direct Helpline</span>
-                    <a href="tel:+233244123456" className="text-xs sm:text-sm font-extrabold text-white block hover:text-royal transition-colors mt-0.5 font-mono">
+                    <a href="tel:+233244123456" className="text-xs sm:text-sm font-semibold text-white block hover:text-royal transition-colors mt-0.5 font-mono">
                       +233-244-123-456
                     </a>
                   </div>
@@ -593,7 +593,7 @@ export const ContactPage: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-[9px] uppercase tracking-wider text-slate-400 font-mono block">Academic Email</span>
-                    <a href="mailto:support@studentshield.gh" className="text-xs sm:text-sm font-extrabold text-white block hover:text-royal transition-colors mt-0.5 font-mono">
+                    <a href="mailto:support@studentshield.gh" className="text-xs sm:text-sm font-semibold text-white block hover:text-royal transition-colors mt-0.5 font-mono">
                       support@studentshield.gh
                     </a>
                   </div>
@@ -623,10 +623,10 @@ export const ContactPage: React.FC = () => {
           {/* Right Block: Message Form (Glassmorphic Light card) */}
           <div className="lg:col-span-7 bg-white border border-slate-200/60 p-8 sm:p-10 rounded-3xl shadow-2xl flex flex-col justify-center text-left hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 cursor-pointer">
             <div>
-              <span className="text-[10px] uppercase tracking-widest text-royal font-extrabold block">
+              <span className="text-[10px] uppercase tracking-widest text-royal font-semibold block">
                 SEND MESSAGE
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-navy font-sans tracking-tight mt-1 mb-3">
+              <h2 className="text-2xl sm:text-3xl font-bold text-navy font-sans tracking-tight mt-1 mb-3">
                 Send us a message
               </h2>
               <p className="text-xs text-slate-500 leading-relaxed font-sans font-medium mb-8">
@@ -672,7 +672,7 @@ export const ContactPage: React.FC = () => {
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-8 py-3.5 bg-royal text-white text-xs font-extrabold tracking-widest uppercase transition-all shadow-md hover:bg-blue-700 active:scale-[0.98] cursor-pointer rounded-xl"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-royal text-white text-xs font-semibold tracking-widest uppercase transition-all shadow-md hover:bg-blue-700 active:scale-[0.98] cursor-pointer rounded-xl"
                 >
                   Send Message
                 </button>
@@ -704,8 +704,8 @@ export const ContactPage: React.FC = () => {
             {/* HQ Desk Info */}
             <div className="bg-white border border-slate-200/50 p-8 rounded-3xl flex flex-col justify-between space-y-6 hover:-translate-y-1.5 hover:shadow-2xl transition-all duration-300 cursor-pointer">
               <div className="space-y-2">
-                <span className="text-[9px] uppercase tracking-wider text-royal font-extrabold block">BOOTHS LOCATION</span>
-                <h3 className="text-xl font-extrabold text-navy font-sans tracking-tight">Main Campus Library Desk</h3>
+                <span className="text-[9px] uppercase tracking-wider text-royal font-semibold block">BOOTHS LOCATION</span>
+                <h3 className="text-xl font-semibold text-navy font-sans tracking-tight">Main Campus Library Desk</h3>
                 <p className="text-xs text-slate-500 leading-relaxed font-medium">
                   Drop by our central support desk inside the Central Balme Library. Students can check diagnostic status and consult with technical advisors in person.
                 </p>
@@ -778,7 +778,7 @@ export const BlogPage: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200 pb-10 mb-10">
           <div className="max-w-md select-none">
             <span className="text-[10px] uppercase tracking-widest text-royal font-bold block mb-1.5">Academic Forum</span>
-            <h1 className="text-4xl font-extrabold text-navy tracking-tight">Tech Diagnostics Blog</h1>
+            <h1 className="text-4xl font-semibold text-navy tracking-tight">Tech Diagnostics Blog</h1>
             <p className="text-xs text-slate-500 mt-2.5">Guides, insights, and warnings regarding academic PC safety and Windows/macOS health audits.</p>
           </div>
 
@@ -890,7 +890,7 @@ export const BlogPage: React.FC = () => {
                     <span className="bg-royal font-mono font-bold text-[9px] uppercase tracking-widest px-2.5 py-0.5 rounded border border-white/10 text-white">
                       {activeBlog.category}
                     </span>
-                    <h2 className="text-lg sm:text-xl font-extrabold mt-2 leading-snug">{activeBlog.title}</h2>
+                    <h2 className="text-lg sm:text-xl font-semibold mt-2 leading-snug">{activeBlog.title}</h2>
                   </div>
                 </div>
 
@@ -957,7 +957,7 @@ export const HelpCenterPage: React.FC = () => {
         {/* Upper heading dashboard */}
         <div className="text-center max-w-2xl mx-auto mb-12 select-none">
           <span className="text-[10px] uppercase tracking-widest text-royal font-bold block mb-2">Knowledge repository</span>
-          <h1 className="text-4xl font-extrabold text-navy tracking-tight">How Can We Assist?</h1>
+          <h1 className="text-4xl font-semibold text-navy tracking-tight">How Can We Assist?</h1>
           <p className="text-xs text-slate-500 mt-2">Lookup semester coverage plans, campus boots operating hours, and active repair queries.</p>
           
           <div className="relative max-w-md mx-auto mt-6">

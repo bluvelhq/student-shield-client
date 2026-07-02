@@ -283,7 +283,7 @@ function MainLayout() {
           <div className="bg-white border border-slate-200 shadow-2xl rounded-3xl max-w-sm w-full overflow-hidden text-left select-none">
             <div className="p-5.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-[#3ECF8E] rounded-lg flex items-center justify-center text-white font-black text-sm">
+                <div className="w-8 h-8 bg-[#3ECF8E] rounded-lg flex items-center justify-center text-white font-bold text-sm">
                   P
                 </div>
                 <div>

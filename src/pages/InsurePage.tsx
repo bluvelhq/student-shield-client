@@ -122,7 +122,7 @@ export const InsurePage: React.FC = () => {
         
         {/* Title Header Section */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#00183D] font-sans">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#00183D] font-sans">
             Insure Your Laptop Today
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed font-sans font-medium">
@@ -150,7 +150,7 @@ export const InsurePage: React.FC = () => {
               <div>
                 <span className="text-xs font-bold text-slate-900 block font-sans">Basic Plan</span>
                 <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
-                  <span className="text-xl font-extrabold text-[#00183D] font-sans">GH₵20</span>
+                  <span className="text-xl font-semibold text-[#00183D] font-sans">GH₵20</span>
                   <span className="text-slate-450 text-[9px] font-semibold font-sans">/ sem</span>
                 </div>
               </div>
@@ -171,7 +171,7 @@ export const InsurePage: React.FC = () => {
               <div>
                 <span className="text-xs font-bold text-slate-900 block font-sans">Premium Shield ⭐️</span>
                 <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
-                  <span className="text-xl font-extrabold text-[#00183D] font-sans">GH₵50</span>
+                  <span className="text-xl font-semibold text-[#00183D] font-sans">GH₵50</span>
                   <span className="text-slate-450 text-[9px] font-semibold font-sans">/ sem</span>
                 </div>
               </div>
@@ -192,7 +192,7 @@ export const InsurePage: React.FC = () => {
               <div>
                 <span className="text-xs font-bold text-amber-900 block font-sans">Bonanza Plan 🚀</span>
                 <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
-                  <span className="text-xl font-extrabold text-amber-950 font-sans">GH₵120</span>
+                  <span className="text-xl font-semibold text-amber-950 font-sans">GH₵120</span>
                   <span className="text-amber-700 text-[9px] font-semibold font-sans">/ sem</span>
                 </div>
               </div>
@@ -409,7 +409,7 @@ export const InsurePage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-6 text-xs sm:text-sm font-extrabold text-white bg-royal hover:bg-royal/90 rounded-none transition-all tracking-wider flex items-center justify-center space-x-2 disabled:opacity-50 pointer-events-auto cursor-pointer shadow-none"
+              className="w-full py-3.5 px-6 text-xs sm:text-sm font-semibold text-white bg-royal hover:bg-royal/90 rounded-none transition-all tracking-wider flex items-center justify-center space-x-2 disabled:opacity-50 pointer-events-auto cursor-pointer shadow-none"
             >
               <Shield className="w-4.5 h-4.5 flex-shrink-0 text-white" />
               <span>

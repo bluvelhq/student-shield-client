@@ -307,7 +307,7 @@ export const AdminDashboard: React.FC = () => {
               <Shield className="w-5 h-5 flex-shrink-0" />
             </div>
             <div>
-              <span className="font-extrabold text-sm tracking-tight block">ShieldHQ Control</span>
+              <span className="font-semibold text-sm tracking-tight block">ShieldHQ Control</span>
               <span className="text-[9px] text-blue-400 font-mono tracking-widest uppercase">{isAgent ? 'Support Desk' : 'Root Console'}</span>
             </div>
           </div>
@@ -412,7 +412,7 @@ export const AdminDashboard: React.FC = () => {
                 <Shield className="w-5 h-5 flex-shrink-0" />
               </div>
               <div>
-                <span className="font-extrabold text-sm tracking-tight block">ShieldHQ Control</span>
+                <span className="font-semibold text-sm tracking-tight block">ShieldHQ Control</span>
                 <span className="text-[9px] text-blue-400 font-mono tracking-widest uppercase">{isAgent ? 'Support Desk' : 'Root Console'}</span>
               </div>
             </div>
@@ -539,7 +539,7 @@ export const AdminDashboard: React.FC = () => {
           {activeTab === 'metrics' && (
             <div className="space-y-8 animate-fade-in">
               <div>
-                <h2 className="text-2xl font-black text-navy tracking-tight">Superuser metrics portal</h2>
+                <h2 className="text-2xl font-bold text-navy tracking-tight">Superuser metrics portal</h2>
                 <p className="text-xs text-slate-400 font-semibold font-sans mt-0.5">Aggregated offline data summaries.</p>
               </div>
 
@@ -554,7 +554,7 @@ export const AdminDashboard: React.FC = () => {
                     <Users className="w-4 h-4 text-royal opacity-60" />
                   </div>
                   <div className="mt-4 relative z-10">
-                    <span className="text-3xl font-black text-navy tracking-tight block">{stats.activePlans} active</span>
+                    <span className="text-3xl font-bold text-navy tracking-tight block">{stats.activePlans} active</span>
                     <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">{stats.totalUsers} total registered accounts</span>
                   </div>
                 </div>
@@ -567,7 +567,7 @@ export const AdminDashboard: React.FC = () => {
                     <DollarSign className="w-4 h-4 text-emerald-600 opacity-60" />
                   </div>
                   <div className="mt-4 relative z-10">
-                    <span className="text-3xl font-black text-emerald-650 tracking-tight block">GH₵ {stats.totalRevenue}.00</span>
+                    <span className="text-3xl font-bold text-emerald-650 tracking-tight block">GH₵ {stats.totalRevenue}.00</span>
                     <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">Simulated Paystack checks</span>
                   </div>
                 </div>
@@ -580,7 +580,7 @@ export const AdminDashboard: React.FC = () => {
                     <Laptop className="w-4 h-4 text-royal opacity-60" />
                   </div>
                   <div className="mt-4 relative z-10">
-                    <span className="text-3xl font-black text-navy tracking-tight block">{stats.activeDevicesCount} total</span>
+                    <span className="text-3xl font-bold text-navy tracking-tight block">{stats.activeDevicesCount} total</span>
                     <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">Windows OS configuration sets</span>
                   </div>
                 </div>
@@ -593,7 +593,7 @@ export const AdminDashboard: React.FC = () => {
                     <Activity className="w-4 h-4 text-royal opacity-60" />
                   </div>
                   <div className="mt-4 relative z-10">
-                    <span className="text-3xl font-black text-royal tracking-tight block">{stats.openTickets} open</span>
+                    <span className="text-3xl font-bold text-royal tracking-tight block">{stats.openTickets} open</span>
                     <span className="text-[10px] text-slate-455 block mt-1.5 font-semibold">Awaiting Booth technicians dispatch</span>
                   </div>
                 </div>
@@ -674,7 +674,7 @@ export const AdminDashboard: React.FC = () => {
                       return (
                         <tr key={idx} className="hover:bg-slate-50/70 transition-colors duration-200">
                           <td className="p-4">
-                            <span className="font-extrabold text-[#00183D] text-[12.5px] block">{m.profile?.full_name}</span>
+                            <span className="font-semibold text-[#00183D] text-[12.5px] block">{m.profile?.full_name}</span>
                             <span className="text-[10px] text-slate-400 font-mono block mt-0.5">ID: {m.profile?.student_id}</span>
                           </td>
                           <td className="p-4 text-slate-655 font-medium">{m.profile?.university}</td>
@@ -818,7 +818,7 @@ export const AdminDashboard: React.FC = () => {
                           <div className="p-5 border-b border-slate-100 bg-slate-50 flex flex-wrap justify-between items-start gap-4">
                             <div className="space-y-0.5 text-left">
                               <span className="text-[9px] text-slate-400 font-mono block">Active Triage Case: #{adminFocusTicket.id}</span>
-                              <h4 className="text-sm font-extrabold text-[#00183D]">{adminFocusTicket.title}</h4>
+                              <h4 className="text-sm font-semibold text-[#00183D]">{adminFocusTicket.title}</h4>
                             </div>
 
                             {/* Status updating actions */}
@@ -843,7 +843,7 @@ export const AdminDashboard: React.FC = () => {
                           <div className="flex-grow p-6 space-y-6 text-xs text-left bg-slate-50/20">
                             
                             <div className="bg-white border border-slate-100 shadow-sm p-5 rounded-2xl space-y-4">
-                              <h5 className="font-extrabold text-[#00183D] text-[12px] border-b border-slate-100 pb-2 flex items-center space-x-2">
+                              <h5 className="font-semibold text-[#00183D] text-[12px] border-b border-slate-100 pb-2 flex items-center space-x-2">
                                 <Users className="w-4 h-4 text-royal" />
                                 <span>Subscriber Contact Details</span>
                               </h5>
@@ -888,7 +888,7 @@ export const AdminDashboard: React.FC = () => {
                               const device = allDevices.find(d => d.id === adminFocusTicket.device_id);
                               return device ? (
                                 <div className="bg-white border border-slate-100 shadow-sm p-5 rounded-2xl space-y-4">
-                                  <h5 className="font-extrabold text-[#00183D] text-[12px] border-b border-slate-100 pb-2 flex items-center space-x-2">
+                                  <h5 className="font-semibold text-[#00183D] text-[12px] border-b border-slate-100 pb-2 flex items-center space-x-2">
                                     <Laptop className="w-4 h-4 text-royal" />
                                     <span>Associated Device Details</span>
                                   </h5>
@@ -919,7 +919,7 @@ export const AdminDashboard: React.FC = () => {
                             })()}
 
                             <div className="bg-white border border-slate-100 shadow-sm p-5 rounded-2xl space-y-3">
-                              <h5 className="font-extrabold text-[#00183D] text-[12px] border-b border-slate-100 pb-2 flex items-center space-x-2">
+                              <h5 className="font-semibold text-[#00183D] text-[12px] border-b border-slate-100 pb-2 flex items-center space-x-2">
                                 <FileText className="w-4 h-4 text-royal" />
                                 <span>Issue Description</span>
                               </h5>
@@ -929,7 +929,7 @@ export const AdminDashboard: React.FC = () => {
                             {/* website_details layout display commented out */}
                             {/* {adminFocusTicket.website_details && (
                               <div className="bg-white border border-slate-100 shadow-sm p-5 rounded-2xl space-y-3">
-                                <h5 className="font-extrabold text-[#00183D] text-[12px] border-b border-slate-100 pb-2 flex items-center space-x-2">
+                                <h5 className="font-semibold text-[#00183D] text-[12px] border-b border-slate-100 pb-2 flex items-center space-x-2">
                                   <Laptop className="w-4 h-4 text-royal" />
                                   <span>Website Setup Specifications</span>
                                 </h5>
@@ -975,7 +975,7 @@ export const AdminDashboard: React.FC = () => {
                   <div className="w-12 h-12 bg-royal/10 text-royal rounded-xl flex items-center justify-center mx-auto border border-royal/20">
                     <Layers className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg font-black text-[#00183D] uppercase tracking-tight">
+                  <h3 className="text-lg font-bold text-[#00183D] uppercase tracking-tight">
                     {editingPlanId ? 'Update Protection Plan' : 'Plan Design Builder'}
                   </h3>
                   <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
@@ -1087,7 +1087,7 @@ export const AdminDashboard: React.FC = () => {
               {/* Right List: Existing Protection Plans */}
               <div className="lg:col-span-7 bg-white border border-slate-100 shadow-sm rounded-2xl p-6 sm:p-8 space-y-6 text-left hover:shadow-md transition-shadow duration-300">
                 <div className="border-b border-slate-100 pb-3">
-                  <h3 className="text-sm font-extrabold text-navy uppercase tracking-wider">Active Semester Plans</h3>
+                  <h3 className="text-sm font-semibold text-navy uppercase tracking-wider">Active Semester Plans</h3>
                   <p className="text-[11px] text-slate-400 mt-0.5">Existing coverage tiers available for student subscription.</p>
                 </div>
 
@@ -1100,20 +1100,20 @@ export const AdminDashboard: React.FC = () => {
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
-                            <span className="font-extrabold text-sm text-[#00183D] block">{plan.name}</span>
+                            <span className="font-semibold text-sm text-[#00183D] block">{plan.name}</span>
                             <span className={`text-[8px] uppercase font-bold font-mono px-2 py-0.5 rounded-full ${
                               plan.status === 'inactive' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                             }`}>
                               {plan.status || 'active'}
                             </span>
                           </div>
-                          <span className="text-[9.5px] uppercase font-mono font-extrabold px-2.5 py-0.5 bg-royal/5 border border-royal/10 text-royal rounded-full">
+                          <span className="text-[9.5px] uppercase font-mono font-semibold px-2.5 py-0.5 bg-royal/5 border border-royal/10 text-royal rounded-full">
                             GH₵ {plan.price}
                           </span>
                         </div>
                         <p className="text-[11.5px] text-slate-550 leading-relaxed font-medium">{plan.description}</p>
                         <div className="space-y-1.5 pt-2 border-t border-slate-100/50">
-                          <span className="text-[8.5px] font-black uppercase tracking-wider text-slate-405 font-mono block">Plan features:</span>
+                          <span className="text-[8.5px] font-bold uppercase tracking-wider text-slate-405 font-mono block">Plan features:</span>
                           <ul className="space-y-1 text-[10.5px] text-slate-600 font-medium">
                             {(plan.features || []).map((feat, fIdx) => (
                               <li key={fIdx} className="flex items-center space-x-1.5">
@@ -1161,7 +1161,7 @@ export const AdminDashboard: React.FC = () => {
                 <div className="w-12 h-12 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl flex items-center justify-center mx-auto">
                   <ShieldAlert className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-black text-navy uppercase tracking-tight">Institution Cohort Operations</h3>
+                <h3 className="text-lg font-bold text-navy uppercase tracking-tight">Institution Cohort Operations</h3>
                 <p className="text-[11px] text-slate-500 max-w-sm mx-auto font-medium">Deactivate and suspend students from a selected university cohort as the semester ends.</p>
               </div>
 
@@ -1222,7 +1222,7 @@ export const AdminDashboard: React.FC = () => {
                   <div className="w-12 h-12 bg-royal/10 text-royal rounded-xl flex items-center justify-center mx-auto border border-royal/20">
                     <School className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg font-black text-[#00183D] uppercase tracking-tight">
+                  <h3 className="text-lg font-bold text-[#00183D] uppercase tracking-tight">
                     {editingInstId ? 'Update Institution' : 'Add Institution'}
                   </h3>
                   <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
@@ -1379,7 +1379,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
                 <div className="text-left">
                   <span className="text-[9px] uppercase font-bold text-slate-400 font-mono block">SUBSCRIBER CARD DETAILS</span>
-                  <span className="text-sm font-extrabold text-navy block truncate">{selectedMember.profile?.full_name}</span>
+                  <span className="text-sm font-semibold text-navy block truncate">{selectedMember.profile?.full_name}</span>
                 </div>
                 <button 
                   onClick={() => setSelectedMember(null)}
@@ -1394,7 +1394,7 @@ export const AdminDashboard: React.FC = () => {
                 
                 {/* School Profile Specs */}
                 <div className="space-y-3.5 bg-slate-50/50 p-4 border border-slate-150 rounded-2xl">
-                  <h4 className="text-[9.5px] uppercase font-extrabold tracking-wider text-slate-400 font-mono">Academic parameters</h4>
+                  <h4 className="text-[9.5px] uppercase font-semibold tracking-wider text-slate-400 font-mono">Academic parameters</h4>
                   
                   <div className="grid grid-cols-2 gap-4 text-[10.5px]">
                     <div>
@@ -1438,7 +1438,7 @@ export const AdminDashboard: React.FC = () => {
 
                 {/* Devices lists */}
                 <div className="space-y-3">
-                  <h4 className="text-[9.5px] uppercase font-extrabold tracking-wider text-slate-400 font-mono">Registered Devices list</h4>
+                  <h4 className="text-[9.5px] uppercase font-semibold tracking-wider text-slate-400 font-mono">Registered Devices list</h4>
                   
                   <div className="space-y-2">
                     {selectedMemberDevices.map(dev => (
@@ -1464,7 +1464,7 @@ export const AdminDashboard: React.FC = () => {
 
                 {/* Tickets list */}
                 <div className="space-y-3">
-                  <h4 className="text-[9.5px] uppercase font-extrabold tracking-wider text-slate-400 font-mono font-mono">Service diagnostic requests</h4>
+                  <h4 className="text-[9.5px] uppercase font-semibold tracking-wider text-slate-400 font-mono font-mono">Service diagnostic requests</h4>
                   
                   <div className="space-y-2">
                     {selectedMemberTickets.map(tix => (

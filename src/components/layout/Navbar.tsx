@@ -248,7 +248,7 @@ export const Navbar: React.FC = () => {
                 <button
                   onClick={logout}
                   title="Sign Out"
-                  className={`p-1 px-1.5 text-[10px] font-extrabold transition-colors duration-350 cursor-pointer ${isDarkBg ? "text-slate-400 hover:text-red-400" : "text-slate-500 hover:text-red-500"}`}
+                  className={`p-1 px-1.5 text-[10px] font-semibold transition-colors duration-350 cursor-pointer ${isDarkBg ? "text-slate-400 hover:text-red-400" : "text-slate-500 hover:text-red-500"}`}
                 >
                   Exit
                 </button>

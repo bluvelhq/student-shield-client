@@ -29,7 +29,7 @@ interface AppContextType {
   login: (emailOrPhone: string, password?: string) => boolean | Promise<boolean>;
   register: (data: { email: string; fullName: string; university: string; studentId: string; phone: string; role?: 'student' | 'admin' }) => void | Promise<void>;
   logout: () => void;
-  updateProfile: (fullName: string, phone: string, university: string) => boolean;
+  updateProfile: (fullName: string, phone: string, university: string, avatarUrl?: string) => boolean;
   showToast: (message: string, type?: 'success' | 'warning' | 'error' | 'info') => void;
 }
 
@@ -175,8 +175,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     navigate('landing');
   };
 
-  const updateProfile = (fullName: string, phone: string, university: string): boolean => {
-    const res = dbService.updateProfile(fullName, phone, university);
+  const updateProfile = (fullName: string, phone: string, university: string, avatarUrl?: string): boolean => {
+    const res = dbService.updateProfile(fullName, phone, university, avatarUrl);
     if (res) {
       refreshData();
       return true;

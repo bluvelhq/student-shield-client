@@ -601,7 +601,7 @@ const KeystrokePreview = () => {
               damping: 30,
               mass: 0.5,
             }}
-            className="absolute flex items-center justify-center rounded-lg px-4 py-2 font-mono text-xl font-black text-royal"
+            className="absolute flex items-center justify-center rounded-lg px-4 py-2 font-mono text-xl font-bold text-royal"
           >
             <motion.span
               initial={{ opacity: 0, scale: 1.2, filter: "blur(10px)" }}

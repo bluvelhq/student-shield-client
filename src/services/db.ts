@@ -647,7 +647,7 @@ class StudentShieldDB {
     localStorage.removeItem('ss_current_user_id');
   }
 
-  public updateProfile(fullName: string, phone: string, university: string): Profile | null {
+  public updateProfile(fullName: string, phone: string, university: string, avatarUrl?: string): Profile | null {
     const session = this.getCurrentUser();
     if (!session) return null;
 
@@ -658,6 +658,9 @@ class StudentShieldDB {
       profiles[idx].full_name = fullName;
       profiles[idx].phone = phone;
       profiles[idx].university = university;
+      if (avatarUrl !== undefined) {
+        profiles[idx].avatar_url = avatarUrl;
+      }
       this.setTable('ss_profiles', profiles);
       this.createActivityLog(session.user.id, 'Profile Update', 'Updated contact parameters.');
       return profiles[idx];

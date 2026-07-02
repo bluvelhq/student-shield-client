@@ -45,10 +45,10 @@ export const LandingFAQ: React.FC = () => {
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="bg-royal/5 border border-royal/10 text-royal text-[10px] font-extrabold px-3 py-1 rounded-none uppercase tracking-widest font-mono inline-block mb-3">
+          <span className="bg-royal/5 border border-royal/10 text-royal text-[10px] font-semibold px-3 py-1 rounded-none uppercase tracking-widest font-mono inline-block mb-3">
             Got Questions?
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-navy">
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-navy">
             We Have Answers
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-3.5 leading-relaxed">
@@ -101,7 +101,7 @@ export const LandingFAQ: React.FC = () => {
           <div className="absolute -top-12 -right-12 w-44 h-44 bg-royal/10 filter blur-2xl rounded-full" />
           
           <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-            <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-white tracking-tight leading-tight">
               Your Laptop Deserves Protection.<br />
               You Deserve <span className="text-royal">Peace of Mind.</span>
             </h3>
@@ -111,7 +111,7 @@ export const LandingFAQ: React.FC = () => {
             <div className="pt-4">
               <button 
                 onClick={() => navigate(user ? 'dashboard' : 'register')}
-                className="py-3.5 px-8 text-xs font-black uppercase tracking-widest bg-royal hover:bg-royal/90 text-white rounded-none transition-transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer inline-flex items-center space-x-2 shadow-none"
+                className="py-3.5 px-8 text-xs font-bold uppercase tracking-widest bg-royal hover:bg-royal/90 text-white rounded-none transition-transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer inline-flex items-center space-x-2 shadow-none"
               >
                 <Shield className="w-4 h-4 text-white" />
                 <span>Get Insured for GH₵ 20</span>

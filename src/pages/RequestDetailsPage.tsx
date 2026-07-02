@@ -76,7 +76,7 @@ export const RequestDetailsPage: React.FC = () => {
             <AlertTriangle className="w-8 h-8" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-lg font-black text-navy uppercase tracking-wide">Tracking Log Not Found</h3>
+            <h3 className="text-lg font-bold text-navy uppercase tracking-wide">Tracking Log Not Found</h3>
             <p className="text-slate-500 text-xs leading-relaxed font-medium">
               We couldn't retrieve any active StudentShield request details for code <strong className="text-slate-700 font-mono">{reqId || 'N/A'}</strong>. The code may be incorrect or expired.
             </p>
@@ -128,7 +128,7 @@ export const RequestDetailsPage: React.FC = () => {
                 {ticket.category.toUpperCase().replace('_', ' ')}
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black text-navy tracking-tight">{ticket.title}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-navy tracking-tight">{ticket.title}</h1>
             <p className="text-xs text-slate-450 font-semibold">
               Logged on {new Date(ticket.created_at).toLocaleString()} • Priority: <span className="uppercase text-slate-500 font-bold font-mono">{ticket.priority}</span>
             </p>

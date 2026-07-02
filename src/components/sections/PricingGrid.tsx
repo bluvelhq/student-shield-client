@@ -115,13 +115,13 @@ export const PricingGrid: React.FC = () => {
           >
             <div>
               <div className="bg-linear-to-br from-[#E2EAFD] via-[#E8EBFF] to-[#FAF9F6] border border-royal/10 p-6 sm:p-7 rounded-4xl mb-8 relative">
-                <span className="inline-block bg-white border border-slate-200/70 text-slate-800 text-[10px] font-extrabold uppercase tracking-widest px-4 py-1.5 mb-6 rounded-full shadow-sm">
+                <span className="inline-block bg-white border border-slate-200/70 text-slate-800 text-[10px] font-semibold uppercase tracking-widest px-4 py-1.5 mb-6 rounded-full shadow-sm">
                   Premium
                 </span>
 
                 <div className="mb-3">
                   <div className="flex items-baseline space-x-0.5">
-                    <span className="text-4xl sm:text-5xl font-black text-slate-900 font-sans tracking-tight">GH₵50</span>
+                    <span className="text-4xl sm:text-5xl font-bold text-slate-900 font-sans tracking-tight">GH₵50</span>
                     <span className="text-royal text-xs font-bold font-sans">/semester</span>
                   </div>
                 </div>
@@ -168,13 +168,13 @@ export const PricingGrid: React.FC = () => {
           >
             <div>
               <div className="bg-linear-to-br from-[#FFF5D1] via-[#FFF8E7] to-[#FAF9F6] border border-amber-200 p-6 sm:p-7 rounded-4xl mb-8 relative">
-                <span className="inline-block bg-amber-500 border border-amber-400 text-white text-[10px] font-extrabold uppercase tracking-widest px-4 py-1.5 mb-6 rounded-full shadow-sm animate-pulse">
+                <span className="inline-block bg-amber-500 border border-amber-400 text-white text-[10px] font-semibold uppercase tracking-widest px-4 py-1.5 mb-6 rounded-full shadow-sm animate-pulse">
                   Bonanza
                 </span>
 
                 <div className="mb-3">
                   <div className="flex items-baseline space-x-0.5">
-                    <span className="text-4xl sm:text-5xl font-black text-amber-950 font-sans tracking-tight">GH₵120</span>
+                    <span className="text-4xl sm:text-5xl font-bold text-amber-950 font-sans tracking-tight">GH₵120</span>
                     <span className="text-amber-700 text-xs font-bold font-sans">/semester</span>
                   </div>
                 </div>

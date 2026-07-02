@@ -99,10 +99,10 @@ export const LandingStats: React.FC = () => {
         
         {/* Title / Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-xs uppercase tracking-widest text-royal font-extrabold block mb-2">
+          <span className="text-xs uppercase tracking-widest text-royal font-semibold block mb-2">
             PROVEN PERFORMANCE
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight font-sans">
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight font-sans">
             By Students, For Students. <br />
             Our Impact in <span className="text-royal animate-pulse">Numbers.</span>
           </h2>
@@ -122,7 +122,7 @@ export const LandingStats: React.FC = () => {
                 className="bg-navy/45 border border-white/10 p-8 rounded-none text-left relative"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-3xl sm:text-4xl font-black text-royal font-sans tracking-tight">
+                  <span className="text-3xl sm:text-4xl font-bold text-royal font-sans tracking-tight">
                     <CountUp 
                       end={stat.numericValue} 
                       suffix={stat.suffix} 
@@ -133,7 +133,7 @@ export const LandingStats: React.FC = () => {
                     <Icon className="w-4 h-4" />
                   </div>
                 </div>
-                <h3 className="text-sm font-extrabold text-white mb-2 uppercase tracking-wide font-sans">{stat.label}</h3>
+                <h3 className="text-sm font-semibold text-white mb-2 uppercase tracking-wide font-sans">{stat.label}</h3>
                 <p className="text-xs text-slate-300 leading-relaxed font-medium">
                   {stat.desc}
                 </p>

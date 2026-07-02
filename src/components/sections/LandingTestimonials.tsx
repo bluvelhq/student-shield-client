@@ -59,10 +59,10 @@ export const LandingTestimonials: React.FC = () => {
         
         {/* Header Title */}
         <div className="text-center max-w-3xl mx-auto">
-          <span className="bg-royal/5 border border-royal/10 text-royal text-[10px] font-extrabold px-3 py-1 rounded-none uppercase tracking-widest font-sans inline-block mb-3.5">
+          <span className="bg-royal/5 border border-royal/10 text-royal text-[10px] font-semibold px-3 py-1 rounded-none uppercase tracking-widest font-sans inline-block mb-3.5">
             REVIEWS & EXPERIENCES
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-navy leading-tight font-sans">
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-navy leading-tight font-sans">
             Loved By Students. <br />
             <span className="text-royal">Tested and Trusted On Campus.</span>
           </h2>
@@ -103,7 +103,7 @@ export const LandingTestimonials: React.FC = () => {
 
                 <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
                   <div>
-                    <h4 className="text-sm font-extrabold text-[#00183D] font-sans leading-none">{testimonial.name}</h4>
+                    <h4 className="text-sm font-semibold text-[#00183D] font-sans leading-none">{testimonial.name}</h4>
                     <span className="text-[10px] text-slate-400 font-bold block mt-1.5 font-sans">{testimonial.role}</span>
                   </div>
                   <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-slate-50 text-slate-600 rounded-none border border-slate-200/40 font-sans">

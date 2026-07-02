@@ -9,7 +9,7 @@ import { dbService } from '../services/db';
 import { 
   Shield, Cpu, FileText, CheckCircle, 
   PlusCircle, ArrowLeft, X, Laptop, 
-  ArrowRight, Search, Bell, ChevronDown, User, 
+  ArrowRight, Search, Bell, ChevronDown, User, Camera,
   LogOut, History, CreditCard, AlertTriangle, 
   Printer, Download, QrCode, Smartphone, Info,
   Play, Image as ImageIcon, Video, Plus, Trash2, Check,
@@ -49,6 +49,7 @@ export const StudentDashboard: React.FC = () => {
   const [editName, setEditName] = useState(profile?.full_name || '');
   const [editPhone, setEditPhone] = useState(profile?.phone || '');
   const [editUni, setEditUni] = useState(profile?.university || '');
+  const [editAvatar, setEditAvatar] = useState(profile?.avatar_url || '');
   const [profileSaved, setProfileSaved] = useState(false);
 
   // New Device registration fields
@@ -124,6 +125,7 @@ export const StudentDashboard: React.FC = () => {
       setEditName(profile.full_name || '');
       setEditPhone(profile.phone || '');
       setEditUni(profile.university || '');
+      setEditAvatar(profile.avatar_url || '');
     }
   }, [profile]);
 
@@ -133,9 +135,24 @@ export const StudentDashboard: React.FC = () => {
     }
   }, [selectedTicket]);
 
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('Image size must be less than 2MB', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditAvatar(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleUpdateProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const success = updateProfile(editName, editPhone, editUni);
+    const success = updateProfile(editName, editPhone, editUni, editAvatar);
     if (success) {
       setProfileSaved(true);
       setTimeout(() => setProfileSaved(false), 2000);
@@ -507,7 +524,7 @@ export const StudentDashboard: React.FC = () => {
               <Shield className="w-5 h-5 flex-shrink-0" />
             </div>
             <div>
-              <span className="font-extrabold text-sm tracking-tight block">StudentShield</span>
+              <span className="font-semibold text-sm tracking-tight block">StudentShield</span>
               <span className="text-[9px] text-slate-400 font-mono tracking-widest uppercase">Student Portal</span>
             </div>
           </div>
@@ -553,7 +570,7 @@ export const StudentDashboard: React.FC = () => {
               <Bell className="w-4 h-4" />
               <span>Notifications</span>
               {notifications.filter(n => !n.is_read).length > 0 && (
-                <span className="ml-auto bg-amber-500 text-slate-950 text-[9px] px-1.5 py-0.2 rounded-full font-extrabold font-mono">
+                <span className="ml-auto bg-amber-500 text-slate-950 text-[9px] px-1.5 py-0.2 rounded-full font-semibold font-mono">
                   {notifications.filter(n => !n.is_read).length}
                 </span>
               )}
@@ -612,7 +629,7 @@ export const StudentDashboard: React.FC = () => {
                 <Shield className="w-5 h-5 flex-shrink-0" />
               </div>
               <div>
-                <span className="font-extrabold text-sm tracking-tight block">StudentShield</span>
+                <span className="font-semibold text-sm tracking-tight block">StudentShield</span>
                 <span className="text-[9px] text-slate-400 font-mono tracking-widest uppercase">Student Portal</span>
               </div>
             </div>
@@ -665,7 +682,7 @@ export const StudentDashboard: React.FC = () => {
               <Bell className="w-4 h-4" />
               <span>Notifications</span>
               {notifications.filter(n => !n.is_read).length > 0 && (
-                <span className="ml-auto bg-amber-500 text-slate-950 text-[9px] px-1.5 py-0.2 rounded-full font-extrabold font-mono">
+                <span className="ml-auto bg-amber-500 text-slate-950 text-[9px] px-1.5 py-0.2 rounded-full font-semibold font-mono">
                   {notifications.filter(n => !n.is_read).length}
                 </span>
               )}
@@ -761,7 +778,7 @@ export const StudentDashboard: React.FC = () => {
                     exit={{ opacity: 0, y: 10 }}
                     className="absolute right-0 mt-2.5 w-72 bg-white border border-slate-200 rounded-xl shadow-xl z-50 text-xs p-4 space-y-2.5"
                   >
-                    <div className="font-extrabold text-navy uppercase text-[9px] tracking-wider border-b border-slate-100 pb-1.5 flex justify-between items-center">
+                    <div className="font-semibold text-navy uppercase text-[9px] tracking-wider border-b border-slate-100 pb-1.5 flex justify-between items-center">
                       <span>Recent Alerts</span>
                       <button onClick={() => setNotifDropdownOpen(false)} className="text-slate-400 hover:text-navy font-bold">Close</button>
                     </div>
@@ -807,14 +824,14 @@ export const StudentDashboard: React.FC = () => {
               {/* Header greeting */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h2 className="text-2xl font-black text-navy tracking-tight">Welcome back, {profile?.full_name} 👋</h2>
+                  <h2 className="text-2xl font-bold text-navy tracking-tight">Welcome back, {profile?.full_name} 👋</h2>
                   <p className="text-xs text-slate-400 font-semibold font-sans mt-0.5">
                     {profile?.university} • Student ID: {profile?.student_id} • Semester 2
                   </p>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <span className="text-[9px] uppercase tracking-wider text-slate-450 font-extrabold font-mono">PLAN LEVEL:</span>
+                  <span className="text-[9px] uppercase tracking-wider text-slate-450 font-semibold font-mono">PLAN LEVEL:</span>
                   <span className={`text-[10px] font-bold font-mono px-3 py-1 rounded-full uppercase border ${
                     subscription?.status === 'suspended' 
                       ? 'bg-rose-50 text-rose-600 border-rose-200' 
@@ -829,19 +846,19 @@ export const StudentDashboard: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
                   <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">PLAN COVER</span>
-                  <span className="text-xl font-black text-navy mt-1 tracking-tight block capitalize">{planName}</span>
+                  <span className="text-xl font-bold text-navy mt-1 tracking-tight block capitalize">{planName}</span>
                   <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">GH₵ {planPrice} Paid</span>
                 </div>
 
                 <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
                   <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">DEVICES ADDED</span>
-                  <span className="text-xl font-black text-navy mt-1 tracking-tight block">{currentDevicesCount} / {maxDevicesAllowed}</span>
+                  <span className="text-xl font-bold text-navy mt-1 tracking-tight block">{currentDevicesCount} / {maxDevicesAllowed}</span>
                   <span className="text-[10px] text-slate-455 block mt-1.5 font-semibold">Allocated devices count</span>
                 </div>
 
                 <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
                   <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">TREATMENT REPAIRS</span>
-                  <span className="text-xl font-black text-emerald-600 mt-1 tracking-tight block">
+                  <span className="text-xl font-bold text-emerald-600 mt-1 tracking-tight block">
                     {filteredTickets.filter(t => t.status === 'resolved').length} Resolved
                   </span>
                   <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">
@@ -851,7 +868,7 @@ export const StudentDashboard: React.FC = () => {
 
                 <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
                   <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">SAVINGS CALCULATOR</span>
-                  <span className="text-xl font-black text-[#D97706] mt-1 tracking-tight block">
+                  <span className="text-xl font-bold text-[#D97706] mt-1 tracking-tight block">
                     GH₵ {isBonanza ? '580.00' : (isPremium ? '320.00' : '80.00')}
                   </span>
                   <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">vs. external service costs</span>
@@ -953,7 +970,7 @@ export const StudentDashboard: React.FC = () => {
                           {/* Details Metadata */}
                           <div className="p-4 space-y-2 text-left text-xs">
                             <div>
-                              <span className="font-extrabold text-navy block truncate text-[12px]">{dev.name}</span>
+                              <span className="font-semibold text-navy block truncate text-[12px]">{dev.name}</span>
                               <span className="text-[9px] text-slate-400 font-mono block mt-0.5">Device ID: {dev.id}</span>
                             </div>
 
@@ -967,7 +984,7 @@ export const StudentDashboard: React.FC = () => {
                             {/* Render custom fields if present */}
                             {dev.custom_fields && dev.custom_fields.length > 0 && (
                               <div className="border-t border-slate-100 pt-2 space-y-1 text-[9.5px]">
-                                <span className="text-royal font-mono text-[8px] font-extrabold block uppercase tracking-wider">Custom attributes</span>
+                                <span className="text-royal font-mono text-[8px] font-semibold block uppercase tracking-wider">Custom attributes</span>
                                 {dev.custom_fields.map((f, i) => (
                                   <p key={i} className="text-slate-600"><span className="font-bold text-slate-450">{f.label}:</span> {f.value}</p>
                                 ))}
@@ -1061,7 +1078,7 @@ export const StudentDashboard: React.FC = () => {
             <div className="space-y-6 animate-fade-in text-left">
               <div className="flex justify-between items-center border-b border-slate-200 pb-4">
                 <div>
-                  <h2 className="text-xl font-black text-navy uppercase tracking-tight">Enrolled Devices</h2>
+                  <h2 className="text-xl font-bold text-navy uppercase tracking-tight">Enrolled Devices</h2>
                   <p className="text-xs text-slate-400 mt-0.5 font-semibold font-sans">
                     Your active coverage allows up to {maxDevicesAllowed} device(s) (Currently using {currentDevicesCount}).
                   </p>
@@ -1123,7 +1140,7 @@ export const StudentDashboard: React.FC = () => {
                         <div className="p-5 space-y-3.5 text-left text-xs flex-grow flex flex-col justify-between">
                           <div className="space-y-2">
                             <div>
-                              <span className="font-extrabold text-navy block truncate text-[13px]">{dev.name}</span>
+                              <span className="font-semibold text-navy block truncate text-[13px]">{dev.name}</span>
                               <span className="text-[9px] text-slate-400 font-mono block mt-0.5">Device ID: {dev.id}</span>
                             </div>
 
@@ -1136,7 +1153,7 @@ export const StudentDashboard: React.FC = () => {
 
                             {dev.custom_fields && dev.custom_fields.length > 0 && (
                               <div className="border-t border-slate-100 pt-2.5 space-y-1 text-[9.5px]">
-                                <span className="text-royal font-mono text-[8px] font-extrabold block uppercase tracking-wider">Custom attributes</span>
+                                <span className="text-royal font-mono text-[8px] font-semibold block uppercase tracking-wider">Custom attributes</span>
                                 {dev.custom_fields.map((f, i) => (
                                   <p key={i} className="text-slate-600"><span className="font-bold text-slate-450">{f.label}:</span> {f.value}</p>
                                 ))}
@@ -1201,7 +1218,7 @@ export const StudentDashboard: React.FC = () => {
             <div className="space-y-6 animate-fade-in text-left">
               <div className="flex justify-between items-center border-b border-slate-200 pb-4">
                 <div>
-                  <h2 className="text-xl font-black text-navy uppercase tracking-tight">Technical Service Requests</h2>
+                  <h2 className="text-xl font-bold text-navy uppercase tracking-tight">Technical Service Requests</h2>
                   <p className="text-xs text-slate-400 mt-0.5 font-semibold font-sans">
                     Submit and track active diagnostic repairs with campus Booth technicians.
                   </p>
@@ -1279,6 +1296,56 @@ export const StudentDashboard: React.FC = () => {
                 <h3 className="text-xs font-bold text-navy uppercase tracking-wider border-b border-slate-100 pb-3">My Profile Details</h3>
 
                 <form onSubmit={handleUpdateProfileSubmit} className="space-y-4 text-xs font-sans">
+                  <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 pb-5 border-b border-slate-100">
+                    <div className="relative group w-20 h-20 rounded-full overflow-hidden border-2 border-slate-200 bg-slate-50 flex items-center justify-center shrink-0">
+                      <img 
+                        src={editAvatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(editName || 'User')}`} 
+                        alt="Profile Preview" 
+                        className="w-full h-full object-cover" 
+                      />
+                      <label className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white cursor-pointer select-none text-[8.5px] uppercase font-bold tracking-wider space-y-1">
+                        <Camera className="w-4 h-4" />
+                        <span>Change</span>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={handleAvatarFileChange} 
+                        />
+                      </label>
+                    </div>
+                    <div className="text-center sm:text-left space-y-1.5 flex-grow">
+                      <h4 className="font-bold text-navy text-xs uppercase tracking-wide">Profile Photo</h4>
+                      <p className="text-[10px] text-slate-400 font-semibold leading-relaxed max-w-xs">
+                        Upload a JPEG or PNG image (max 2MB), or generate one below.
+                      </p>
+                      <div className="flex flex-wrap gap-2 pt-1 justify-center sm:justify-start">
+                        <button
+                          type="button"
+                          onClick={() => setEditAvatar(`https://api.dicebear.com/7.x/pixel-art/svg?seed=${Math.random().toString(36).substring(2, 9)}`)}
+                          className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[9px] font-bold uppercase tracking-wider rounded border-0 cursor-pointer"
+                        >
+                          Pixel Art
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditAvatar(`https://api.dicebear.com/7.x/bottts/svg?seed=${Math.random().toString(36).substring(2, 9)}`)}
+                          className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[9px] font-bold uppercase tracking-wider rounded border-0 cursor-pointer"
+                        >
+                          Robot
+                        </button>
+                        {editAvatar && (
+                          <button
+                            type="button"
+                            onClick={() => setEditAvatar('')}
+                            className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[9px] font-bold uppercase tracking-wider rounded border-0 cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] uppercase font-bold text-slate-400 block font-mono">Account Email Address</label>
                     <div className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-mono text-[10.5px] text-slate-500 select-all">
@@ -1621,7 +1688,7 @@ export const StudentDashboard: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-3">
                   <Printer className="w-5 h-5 text-royal" />
-                  <span className="font-extrabold text-sm text-navy uppercase tracking-wider font-sans">Print Request Receipt</span>
+                  <span className="font-semibold text-sm text-navy uppercase tracking-wider font-sans">Print Request Receipt</span>
                 </div>
 
                 {/* Printable receipt content */}
@@ -1705,7 +1772,7 @@ export const StudentDashboard: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <h3 className="text-sm font-black text-navy uppercase tracking-wide">Device Registered</h3>
+                <h3 className="text-sm font-bold text-navy uppercase tracking-wide">Device Registered</h3>
                 <p className="text-slate-450 text-[10.5px] font-semibold leading-relaxed">
                   Your device <span className="text-navy font-bold">{lastAddedDevice.name}</span> has been securely logged to the system repository and is active under your protect plan.
                 </p>
@@ -1790,7 +1857,7 @@ export const StudentDashboard: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center space-x-2 border-b border-slate-100 pb-3">
                   <Sliders className="w-5 h-5 text-royal" />
-                  <span className="font-extrabold text-sm text-navy uppercase tracking-wider">Edit Device Specifications</span>
+                  <span className="font-semibold text-sm text-navy uppercase tracking-wider">Edit Device Specifications</span>
                 </div>
 
                 <form onSubmit={handleDeviceUpdateSubmit} className="space-y-4 text-xs">
@@ -1843,7 +1910,7 @@ export const StudentDashboard: React.FC = () => {
                     <div className="grid grid-cols-2 gap-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
                       {editDevType === 'other' && (
                         <div className="space-y-1.5 col-span-1">
-                          <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Device Type *</label>
+                          <label className="text-[9px] uppercase font-semibold text-royal font-mono">Custom Device Type *</label>
                           <input
                             type="text"
                             required
@@ -1856,7 +1923,7 @@ export const StudentDashboard: React.FC = () => {
 
                       {editDevBrand === 'other' && (
                         <div className="space-y-1.5 col-span-1">
-                          <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Brand *</label>
+                          <label className="text-[9px] uppercase font-semibold text-royal font-mono">Custom Brand *</label>
                           <input
                             type="text"
                             required
@@ -1901,7 +1968,7 @@ export const StudentDashboard: React.FC = () => {
 
                   {editDevOS === 'other' && (
                     <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
-                      <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Operating System *</label>
+                      <label className="text-[9px] uppercase font-semibold text-royal font-mono">Custom Operating System *</label>
                       <input
                         type="text"
                         required
@@ -1925,7 +1992,7 @@ export const StudentDashboard: React.FC = () => {
 
                   {/* Media attachments */}
                   <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
-                    <span className="text-[10px] uppercase font-extrabold text-navy font-mono block">Edit Media Attachments</span>
+                    <span className="text-[10px] uppercase font-semibold text-navy font-mono block">Edit Media Attachments</span>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <span className="text-[9px] uppercase font-bold text-slate-500 block">Add Images</span>
@@ -1990,7 +2057,7 @@ export const StudentDashboard: React.FC = () => {
               </div>
 
               <div className="space-y-1.5 text-center">
-                <h3 className="text-sm font-black text-navy uppercase tracking-wide">Deregister Device?</h3>
+                <h3 className="text-sm font-bold text-navy uppercase tracking-wide">Deregister Device?</h3>
                 <p className="text-slate-500 text-[10.5px] leading-relaxed font-semibold">
                   Are you sure you want to remove <span className="text-navy font-bold">{deletingDevice.name}</span>? This action is permanent and will suspend all active diagnostics and logs for this device ID.
                 </p>
@@ -2041,7 +2108,7 @@ export const StudentDashboard: React.FC = () => {
                 <div className="w-12 h-12 bg-royal/10 text-royal rounded-xl flex items-center justify-center mx-auto">
                   <Laptop className="w-6 h-6" />
                 </div>
-                <h2 className="text-lg font-black text-navy uppercase tracking-tight">Register Academic Device</h2>
+                <h2 className="text-lg font-bold text-navy uppercase tracking-tight">Register Academic Device</h2>
                 <p className="text-[11px] text-slate-550 max-w-sm mx-auto font-medium">
                   Enroll devices to diagnostic logs. Your plan limit is {maxDevicesAllowed} device(s) (Currently using {currentDevicesCount}).
                 </p>
@@ -2109,7 +2176,7 @@ export const StudentDashboard: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
                     {newDeviceType === 'other' && (
                       <div className="space-y-1.5 col-span-1">
-                        <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Device Type *</label>
+                        <label className="text-[9px] uppercase font-semibold text-royal font-mono">Custom Device Type *</label>
                         <input
                           type="text"
                           required
@@ -2123,7 +2190,7 @@ export const StudentDashboard: React.FC = () => {
 
                     {newDeviceBrand === 'other' && (
                       <div className="space-y-1.5 col-span-1">
-                        <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Brand *</label>
+                        <label className="text-[9px] uppercase font-semibold text-royal font-mono">Custom Brand *</label>
                         <input
                           type="text"
                           required
@@ -2170,7 +2237,7 @@ export const StudentDashboard: React.FC = () => {
 
                 {newDeviceOS === 'other' && (
                   <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5">
-                    <label className="text-[9px] uppercase font-extrabold text-royal font-mono">Custom Operating System *</label>
+                    <label className="text-[9px] uppercase font-semibold text-royal font-mono">Custom Operating System *</label>
                     <input
                       type="text"
                       required
@@ -2196,7 +2263,7 @@ export const StudentDashboard: React.FC = () => {
 
                 {/* Dynamic Image & Video Upload Section */}
                 <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
-                  <span className="text-[10px] uppercase font-extrabold text-navy font-mono block">Media Attachments</span>
+                  <span className="text-[10px] uppercase font-semibold text-navy font-mono block">Media Attachments</span>
                   
                   <div className="grid grid-cols-2 gap-4">
                     {/* Images Picker */}
@@ -2283,7 +2350,7 @@ export const StudentDashboard: React.FC = () => {
 
                 {/* Custom Fields configuration */}
                 <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
-                  <span className="text-[10px] uppercase font-extrabold text-navy font-mono block">Custom Field Attributes</span>
+                  <span className="text-[10px] uppercase font-semibold text-navy font-mono block">Custom Field Attributes</span>
                   
                   <div className="grid grid-cols-2 gap-3 items-end">
                     <div className="space-y-1">
@@ -2380,7 +2447,7 @@ export const StudentDashboard: React.FC = () => {
 
               <div className="border-b border-slate-100 pb-4">
                 <span className="text-[9px] uppercase font-bold text-royal font-mono block">Service Pipeline</span>
-                <h3 className="text-lg font-black text-navy uppercase mt-1">Submit technical diagnostics request</h3>
+                <h3 className="text-lg font-bold text-navy uppercase mt-1">Submit technical diagnostics request</h3>
                 <p className="text-[11px] text-slate-500 mt-0.5 font-medium">Filter technical request options based on your active plan tier.</p>
               </div>
 
