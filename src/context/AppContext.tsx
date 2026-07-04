@@ -4,10 +4,14 @@
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { dbService } from '../services/db';
-import { User, Profile, Device, SupportTicket, Subscription, Notification } from '../types';
+import { User, Profile, Device, SupportTicket, Subscription, Notification, Payment } from '../types';
 import { CheckCircle, AlertTriangle, X, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { authService } from '../services/authService';
+import { subscriberService } from '../services/subscriberService';
+import { adminService } from '../services/adminService';
+import { notificationService } from '../services/notificationService';
+import { paymentService } from '../services/paymentService';
 
 export interface ToastMessage {
   id: string;
@@ -25,11 +29,30 @@ interface AppContextType {
   tickets: SupportTicket[];
   subscription: Subscription | null;
   notifications: Notification[];
-  refreshData: () => void;
-  login: (emailOrPhone: string, password?: string) => boolean | Promise<boolean>;
-  register: (data: { email: string; fullName: string; university: string; studentId: string; phone: string; role?: 'student' | 'admin' }) => void | Promise<void>;
-  logout: () => void;
-  updateProfile: (fullName: string, phone: string, university: string, avatarUrl?: string) => boolean;
+  payments: Payment[];
+  refreshData: () => Promise<void>;
+  readNotification: (id: string) => Promise<void>;
+  clearNotification: (id: string) => Promise<void>;
+  login: (serviceId: string, role: 'SUBSCRIBER' | 'ADMIN') => Promise<boolean>;
+  register: (data: {
+    email: string;
+    fullName: string;
+    universityId: string;
+    studentId: string;
+    phone: string;
+    gender: 'MALE' | 'FEMALE';
+    residence: string;
+    level: number;
+    planId: string;
+  }) => Promise<void>;
+  logout: () => Promise<void>;
+  updateProfile: (
+    fullName: string,
+    phone: string,
+    residence: string,
+    level: number,
+    gender: 'MALE' | 'FEMALE'
+  ) => Promise<boolean>;
   showToast: (message: string, type?: 'success' | 'warning' | 'error' | 'info') => void;
 }
 
@@ -96,16 +119,174 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
 
-  const refreshData = () => {
-    const session = dbService.getCurrentUser();
-    if (session) {
-      setUser(session.user);
-      setProfile(session.profile);
-      setDevices(dbService.getDevices());
-      setTickets(dbService.getTickets());
-      setSubscription(dbService.getSubscription());
-      setNotifications(dbService.getNotifications());
+  const refreshData = async () => {
+    const token = localStorage.getItem('ss_token');
+    const role = localStorage.getItem('ss_role'); // 'SUBSCRIBER' or 'ADMIN'
+    
+    if (token && role) {
+      try {
+        if (role === 'SUBSCRIBER') {
+          const res = await subscriberService.getProfile();
+          const sub = res.data;
+          
+          setUser({
+            id: sub.id,
+            email: sub.email,
+            role: 'student',
+            created_at: sub.joinedAt
+          });
+          
+          setProfile({
+            id: `prof-${sub.id}`,
+            user_id: sub.id,
+            full_name: `${sub.firstName} ${sub.lastName}`,
+            university: sub.institution?.name || 'Unknown University',
+            residence: sub.residence || '',
+            student_id: sub.studentId || 'N/A',
+            phone: sub.phone,
+            gender: sub.gender,
+            avatar_url: sub.profilePicture || undefined,
+            created_at: sub.joinedAt
+          });
+
+          // Fetch devices
+          const userDevices = sub.devices || [];
+          setDevices(userDevices.map((d: any) => ({
+            id: d.id,
+            user_id: d.subscriberId,
+            name: d.name || `${d.brand} ${d.model}`,
+            type: d.type.toLowerCase(),
+            brand: d.brand || '',
+            model: d.model || '',
+            serial_number: d.serialCode || '',
+            operating_system: d.os || '',
+            image_url: d.media && d.media[0] ? d.media[0] : undefined,
+            status: d.serviceRequests && d.serviceRequests.length > 0 
+              ? (d.serviceRequests[0].status === 'RESOLVED' ? 'resolved' : 'under_repair') 
+              : 'active',
+            created_at: d.createdAt
+          })));
+
+          // Fetch service requests (support tickets)
+          const requests = sub.serviceRequests || [];
+          setTickets(requests.map((r: any) => ({
+            id: r.id,
+            user_id: r.subscriberId,
+            device_id: r.deviceId,
+            title: r.title,
+            description: r.description,
+            category: r.type,
+            priority: r.urgency === 'CRITICAL' ? 'urgent' : r.urgency.toLowerCase(),
+            status: r.status.toLowerCase(),
+            created_at: r.createdAt,
+            updated_at: r.updatedAt,
+            website_details: r.businessName ? {
+              business_name: r.businessName,
+              subdomain: r.desiredSubdomain,
+              description: r.websiteConceptDescription,
+              pages_count: r.websitePageCount,
+              hosting_required: r.preferHosting
+            } : undefined,
+            receipt_pdf: r.receipt,
+            tracking_qr: r.qrCode
+          })));
+
+          // Subscription details
+          if (sub.plan) {
+            setSubscription({
+              id: `sub-${sub.id}`,
+              user_id: sub.id,
+              plan_id: sub.planId,
+              status: sub.subscriptionStatus.toLowerCase() as any,
+              start_date: sub.joinedAt,
+              end_date: new Date(new Date(sub.joinedAt).getTime() + 120 * 24 * 60 * 60 * 1000).toISOString(),
+              created_at: sub.joinedAt
+            });
+          } else {
+            setSubscription(null);
+          }
+
+          // Fetch Payments
+          try {
+            const payRes = await paymentService.getPaymentHistory();
+            setPayments(payRes.data || []);
+          } catch (_) {
+            setPayments([]);
+          }
+
+          // Fetch Notifications
+          try {
+            const notifRes = await notificationService.getNotifications();
+            setNotifications((notifRes.data || []).map((n: any) => ({
+              id: n.id,
+              user_id: n.subscriberId || n.adminId,
+              title: n.title,
+              content: n.body || '',
+              type: n.body && n.body.toLowerCase().includes('error') ? 'error' : 'success',
+              is_read: n.isRead,
+              created_at: n.createdAt
+            })));
+          } catch (_) {
+            setNotifications([]);
+          }
+
+        } else if (role === 'ADMIN') {
+          const res = await adminService.getProfile();
+          const admin = res.data;
+
+          setUser({
+            id: admin.id,
+            email: admin.email,
+            role: 'admin',
+            created_at: admin.createdAt
+          });
+
+          setProfile({
+            id: `prof-admin-${admin.id}`,
+            user_id: admin.id,
+            full_name: `${admin.firstName} ${admin.lastName}`,
+            university: 'StudentShield Hub HQ',
+            student_id: admin.serviceId,
+            phone: '',
+            avatar_url: admin.profilePicture || undefined,
+            created_at: admin.createdAt
+          });
+
+          setDevices([]);
+          setTickets([]);
+          setSubscription(null);
+          setPayments([]); // Admin payments fetched locally in AdminDashboard if available
+
+          // Fetch Admin Notifications
+          try {
+            const notifRes = await notificationService.getNotifications();
+            setNotifications((notifRes.data || []).map((n: any) => ({
+              id: n.id,
+              user_id: n.subscriberId || n.adminId,
+              title: n.title,
+              content: n.body || '',
+              type: 'info',
+              is_read: n.isRead,
+              created_at: n.createdAt
+            })));
+          } catch (_) {
+            setNotifications([]);
+          }
+        }
+      } catch (err) {
+        console.error('Error refreshing session details from server:', err);
+        localStorage.removeItem('ss_token');
+        localStorage.removeItem('ss_role');
+        setUser(null);
+        setProfile(null);
+        setDevices([]);
+        setTickets([]);
+        setSubscription(null);
+        setNotifications([]);
+        setPayments([]);
+      }
     } else {
       setUser(null);
       setProfile(null);
@@ -113,6 +294,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setTickets([]);
       setSubscription(null);
       setNotifications([]);
+      setPayments([]);
     }
   };
 
@@ -145,43 +327,118 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const login = async (emailOrPhone: string, password?: string): Promise<boolean> => {
-    const res = dbService.login(emailOrPhone);
-    if (res) {
-      refreshData();
-      if (res.user.role === 'admin' || res.user.role === 'support_agent') {
-        navigate('admin');
-      } else {
-        navigate('dashboard');
+  const login = async (serviceId: string, role: 'SUBSCRIBER' | 'ADMIN'): Promise<boolean> => {
+    try {
+      const res = await authService.login(serviceId, role);
+      if (res && res.token) {
+        localStorage.setItem('ss_token', res.token);
+        localStorage.setItem('ss_role', role);
+        await refreshData();
+        if (role === 'ADMIN') {
+          navigate('admin');
+        } else {
+          navigate('dashboard');
+        }
+        return true;
       }
-      return true;
+      return false;
+    } catch (err) {
+      console.error('Login failed:', err);
+      return false;
     }
-    return false;
   };
 
-  const register = async (data: { email: string; fullName: string; university: string; studentId: string; phone: string; role?: 'student' | 'admin' }) => {
-    const res = dbService.signUp(data);
-    refreshData();
-    if (res.user.role === 'admin' || res.user.role === 'support_agent') {
-      navigate('admin');
+  const register = async (data: {
+    email: string;
+    fullName: string;
+    universityId: string;
+    studentId: string;
+    phone: string;
+    gender: 'MALE' | 'FEMALE';
+    residence: string;
+    level: number;
+    planId: string;
+  }) => {
+    const [firstName = '', ...lastNameParts] = data.fullName.trim().split(' ');
+    const lastName = lastNameParts.join(' ') || 'Student';
+    
+    const payload = {
+      email: data.email,
+      firstName,
+      lastName,
+      studentId: data.studentId,
+      level: data.level,
+      phone: data.phone,
+      residence: data.residence,
+      gender: data.gender
+    };
+
+    const res = await authService.subscribe(payload, data.planId, data.universityId);
+    const authUrl = res?.data?.data?.authorization_url || res?.data?.authorization_url;
+    if (authUrl) {
+      window.location.href = authUrl;
     } else {
-      navigate('dashboard');
+      throw new Error('Failed to initiate subscription payment checkout');
     }
   };
 
-  const logout = () => {
-    dbService.logout();
-    refreshData();
+  const logout = async () => {
+    const token = localStorage.getItem('ss_token');
+    const role = localStorage.getItem('ss_role') as 'SUBSCRIBER' | 'ADMIN';
+    const currentUserId = user?.id;
+    
+    if (token && role && currentUserId) {
+      try {
+        await authService.logout(currentUserId, role);
+      } catch (_) {}
+    }
+    
+    localStorage.removeItem('ss_token');
+    localStorage.removeItem('ss_role');
+    await refreshData();
     navigate('landing');
   };
 
-  const updateProfile = (fullName: string, phone: string, university: string, avatarUrl?: string): boolean => {
-    const res = dbService.updateProfile(fullName, phone, university, avatarUrl);
-    if (res) {
-      refreshData();
-      return true;
+  const readNotification = async (id: string) => {
+    try {
+      await notificationService.readNotification(id);
+      await refreshData();
+    } catch (e) {
+      console.error('Failed to read notification', e);
     }
-    return false;
+  };
+
+  const clearNotification = async (id: string) => {
+    try {
+      await notificationService.deleteNotification(id);
+      await refreshData();
+    } catch (e) {
+      console.error('Failed to clear notification', e);
+    }
+  };
+
+  const updateProfile = async (
+    fullName: string,
+    phone: string,
+    residence: string,
+    avatarFile?: File | null
+  ): Promise<boolean> => {
+    try {
+      const [firstName = '', ...lastNameParts] = fullName.trim().split(' ');
+      const lastName = lastNameParts.join(' ') || 'Student';
+      
+      await subscriberService.updateProfile({
+        firstName,
+        lastName,
+        phone,
+        residence
+      }, avatarFile || undefined);
+      await refreshData();
+      return true;
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      return false;
+    }
   };
 
   const showToast = (message: string, type: 'success' | 'warning' | 'error' | 'info' = 'success') => {
@@ -203,7 +460,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       tickets,
       subscription,
       notifications,
+      payments,
       refreshData,
+      readNotification,
+      clearNotification,
       login,
       register,
       logout,

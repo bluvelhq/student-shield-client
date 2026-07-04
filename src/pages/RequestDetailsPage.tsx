@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { dbService } from '../services/db';
 import { useApp } from '../context/AppContext';
 import { 
   Shield, Cpu, FileText, Laptop, 
@@ -7,6 +6,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { SupportTicket, Device, Profile, Message } from '../types';
+import { requestService } from '../services/requestService';
 
 export const RequestDetailsPage: React.FC = () => {
   const { navigate } = useApp();
@@ -25,12 +25,79 @@ export const RequestDetailsPage: React.FC = () => {
     setReqId(id);
 
     if (id) {
-      const details = dbService.getPublicRequestDetails(id);
-      if (details) {
-        setData(details);
-      }
+      setLoading(true);
+      requestService.getRequestDetails(id)
+        .then(res => {
+          const req = res.data;
+          if (!req) throw new Error('No request found');
+
+          const profile: Profile = {
+            id: `prof-${req.subscriber.id}`,
+            user_id: req.subscriber.id,
+            full_name: `${req.subscriber.firstName} ${req.subscriber.lastName}`,
+            university: req.subscriber.institution?.name || 'Unknown University',
+            student_id: req.subscriber.studentId || 'N/A',
+            phone: req.subscriber.phone,
+            created_at: req.subscriber.joinedAt
+          };
+
+          const device: Device | undefined = req.device ? {
+            id: req.device.id,
+            user_id: req.device.subscriberId,
+            name: req.device.name || `${req.device.brand} ${req.device.model}`,
+            type: req.device.type.toLowerCase(),
+            brand: req.device.brand || '',
+            model: req.device.model || '',
+            serial_number: req.device.serialCode || '',
+            operating_system: req.device.os || '',
+            status: req.status.toLowerCase(),
+            created_at: req.device.createdAt
+          } : undefined;
+
+          const ticket: SupportTicket = {
+            id: req.id,
+            user_id: req.subscriberId,
+            device_id: req.deviceId,
+            title: req.title,
+            description: req.description,
+            category: req.type as any,
+            priority: req.urgency === 'CRITICAL' ? 'urgent' : req.urgency.toLowerCase() as any,
+            status: req.status.toLowerCase() as any,
+            created_at: req.createdAt,
+            updated_at: req.updatedAt,
+            receipt_pdf: req.receipt,
+            tracking_qr: req.qrCode
+          };
+
+          const localMessages = (req.messages || []).map((m: any) => ({
+            message: {
+              id: m.id,
+              ticket_id: req.id,
+              sender_id: m.senderId,
+              sender_role: m.senderRole === 'SUBSCRIBER' ? 'student' : 'support',
+              content: m.content,
+              created_at: m.createdAt
+            },
+            senderName: m.senderRole === 'SUBSCRIBER' ? profile.full_name : 'StudentShield Support',
+            senderAvatar: m.senderRole === 'SUBSCRIBER' ? profile.avatar_url : undefined
+          }));
+
+          setData({
+            ticket,
+            profile,
+            device,
+            messages: localMessages
+          });
+        })
+        .catch(err => {
+          console.error('Failed to get public request details:', err);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const getStatusStep = (status: string): number => {

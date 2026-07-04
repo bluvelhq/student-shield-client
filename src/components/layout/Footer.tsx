@@ -77,7 +77,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <button 
-                  onClick={() => handleLinkClick('landing', 'coverage-plans')} 
+                  onClick={() => handleLinkClick('plans')} 
                   className="hover:text-royal transition-colors text-left block"
                 >
                   Plans
@@ -85,7 +85,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <button 
-                  onClick={() => handleLinkClick('landing', 'faq')} 
+                  onClick={() => handleLinkClick('faq')} 
                   className="hover:text-royal transition-colors text-left block"
                 >
                   FAQ
@@ -102,20 +102,20 @@ export const Footer: React.FC = () => {
             <ul className="space-y-3.5 text-xs text-slate-400 font-sans">
               <li>
                 <a 
-                  href="mailto:hello@studentshield.gh" 
+                  href="mailto:info@bluvelhq.com" 
                   className="hover:text-royal transition-colors text-left block"
                 >
-                  hello@studentshield.gh
+                  info@bluvelhq.com
                 </a>
               </li>
               <li>
                 <a 
-                  href="https://wa.me/233244123456" 
+                  href="https://wa.me/233593705543" 
                   target="_blank" 
                   rel="noreferrer"
                   className="hover:text-royal transition-colors text-left block"
                 >
-                  WhatsApp Support
+                  WhatsApp Support (0593705543)
                 </a>
               </li>
               <li>

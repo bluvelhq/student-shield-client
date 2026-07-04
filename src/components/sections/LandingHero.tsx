@@ -197,7 +197,7 @@ export const LandingHero: React.FC = () => {
               </button>
 
               <button
-                onClick={handleScrollToPlans}
+                onClick={() => navigate('plans')}
                 className="px-8 py-4 text-base font-heading font-semibold rounded-full bg-transparent border-2 border-slate-300 text-slate-700 hover:border-royal hover:text-royal transition-all flex items-center space-x-2.5 cursor-pointer"
               >
                 <span>View Plans</span>

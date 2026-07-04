@@ -15,6 +15,7 @@ export interface Profile {
   user_id: string;
   full_name: string;
   university: string;
+  residence: string;
   student_id: string;
   phone: string;
   gender?: string;
@@ -41,11 +42,15 @@ export interface Device {
 
 export interface Plan {
   id: string;
-  name: string;
-  price: number; // e.g. 20 or 50 (in GH₵)
-  billing_cycle: 'semester';
-  features: string[];
-  description: string;
+  name?: string;
+  type?: string;
+  price?: number; 
+  fee?: number;
+  billing_cycle?: 'semester';
+  features?: string[];
+  benefits?: string[];
+  description?: string;
+  summary?: string;
   max_devices?: number;
   status?: 'active' | 'inactive';
 }
@@ -58,6 +63,7 @@ export interface Subscription {
   start_date: string;
   end_date: string;
   created_at: string;
+  plan?: any;
 }
 
 export interface Payment {

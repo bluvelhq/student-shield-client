@@ -5,7 +5,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { dbService } from '../services/db';
 import { 
   Shield, Cpu, FileText, CheckCircle, 
   PlusCircle, ArrowLeft, X, Laptop, 
@@ -13,19 +12,31 @@ import {
   LogOut, History, CreditCard, AlertTriangle, 
   Printer, Download, QrCode, Smartphone, Info,
   Play, Image as ImageIcon, Video, Plus, Trash2, Check,
-  Sliders, Calendar, Menu
+  Sliders, Calendar, Menu, RefreshCw, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Device, SupportTicket, Message } from '../types';
+import { authService } from '../services/authService';
+import { deviceService } from '../services/deviceService';
+import { planService } from '../services/planService';
+import { requestService } from '../services/requestService';
 
 export const StudentDashboard: React.FC = () => {
   const { 
-    user, profile, devices, tickets, subscription, 
-    refreshData, logout, updateProfile, notifications, showToast
+    user, profile, devices, tickets, subscription, payments,
+    refreshData, logout, updateProfile, notifications, showToast,
+    readNotification, clearNotification
   } = useApp();
 
   // Sidebar active tab
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'devices' | 'make_request' | 'profile' | 'history' | 'notifications'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'devices' | 'make_request' | 'profile' | 'history' | 'notifications'>(
+    () => (localStorage.getItem('studentActiveTab') as any) || 'dashboard'
+  );
+  
+  useEffect(() => {
+    localStorage.setItem('studentActiveTab', activeTab);
+  }, [activeTab]);
+
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Dialog & Modal states
@@ -51,6 +62,12 @@ export const StudentDashboard: React.FC = () => {
   const [editUni, setEditUni] = useState(profile?.university || '');
   const [editAvatar, setEditAvatar] = useState(profile?.avatar_url || '');
   const [profileSaved, setProfileSaved] = useState(false);
+  const [profileUpdating, setProfileUpdating] = useState(false);
+  const [deviceAdding, setDeviceAdding] = useState(false);
+  const [deviceUpdating, setDeviceUpdating] = useState(false);
+  const [deviceDeleting, setDeviceDeleting] = useState(false);
+  const [requestSubmitting, setRequestSubmitting] = useState(false);
+  const [isRenewing, setIsRenewing] = useState(false);
 
   // New Device registration fields
   const [newDeviceName, setNewDeviceName] = useState('');
@@ -66,7 +83,9 @@ export const StudentDashboard: React.FC = () => {
 
   // Device files attachments
   const [attachedImages, setAttachedImages] = useState<string[]>([]);
+  const [attachedImageFiles, setAttachedImageFiles] = useState<File[]>([]);
   const [attachedVideo, setAttachedVideo] = useState<string>('');
+  const [attachedVideoFile, setAttachedVideoFile] = useState<File | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
   const [videoLoading, setVideoLoading] = useState(false);
 
@@ -89,7 +108,9 @@ export const StudentDashboard: React.FC = () => {
   const [editDevType, setEditDevType] = useState('laptop');
   const [editCustomType, setEditCustomType] = useState('');
   const [editAttachedImages, setEditAttachedImages] = useState<string[]>([]);
+  const [editAttachedImageFiles, setEditAttachedImageFiles] = useState<File[]>([]);
   const [editAttachedVideo, setEditAttachedVideo] = useState<string>('');
+  const [editAttachedVideoFile, setEditAttachedVideoFile] = useState<File | null>(null);
   const [editCustomFields, setEditCustomFields] = useState<{ label: string; value: string }[]>([]);
   const [editFieldLabel, setEditFieldLabel] = useState('');
   const [editFieldValue, setEditFieldValue] = useState('');
@@ -109,6 +130,8 @@ export const StudentDashboard: React.FC = () => {
   const [webDescription, setWebDescription] = useState('');
   const [webPagesCount, setWebPagesCount] = useState(5);
   const [webHosting, setWebHosting] = useState(true);
+  
+  const [editAvatarFile, setEditAvatarFile] = useState<File | null>(null);
 
   // Active chat session
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
@@ -119,19 +142,27 @@ export const StudentDashboard: React.FC = () => {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
+  const [plans, setPlans] = useState<any[]>([]);
+  useEffect(() => {
+    authService.getPlans()
+      .then(setPlans)
+      .catch(err => console.error('Failed to load plans:', err));
+  }, []);
+
   // Auto-fill edits on user profiles loading
   useEffect(() => {
     if (profile) {
       setEditName(profile.full_name || '');
       setEditPhone(profile.phone || '');
-      setEditUni(profile.university || '');
+      setEditUni(profile.residence || profile.university || '');
       setEditAvatar(profile.avatar_url || '');
+      setEditAvatarFile(null);
     }
   }, [profile]);
 
   useEffect(() => {
     if (selectedTicket) {
-      setChatMessages(dbService.getTicketMessages(selectedTicket.id));
+      setChatMessages([]);
     }
   }, [selectedTicket]);
 
@@ -145,14 +176,17 @@ export const StudentDashboard: React.FC = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setEditAvatar(reader.result as string);
+        setEditAvatarFile(file);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleUpdateProfileSubmit = (e: React.FormEvent) => {
+  const handleUpdateProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = updateProfile(editName, editPhone, editUni, editAvatar);
+    setProfileUpdating(true);
+    const success = await updateProfile(editName, editPhone, editUni, editAvatarFile);
+    setProfileUpdating(false);
     if (success) {
       setProfileSaved(true);
       setTimeout(() => setProfileSaved(false), 2000);
@@ -160,12 +194,56 @@ export const StudentDashboard: React.FC = () => {
     }
   };
 
-  const handleUpgradeDowngrade = (planId: string) => {
+  const handleUpgradeDowngrade = async (planId: string) => {
     const confirmChange = window.confirm(`Are you sure you want to change your cover plan to ${planId.replace('-', ' ').toUpperCase()}?`);
     if (confirmChange) {
-      dbService.purchasePlan(planId, 'Mobile Money Upgrade');
-      refreshData();
-      alert('Plan updated successfully!');
+      try {
+        const plans = await authService.getPlans();
+        const mappedType = planId === 'bonanza-plan' ? 'BONANZA' : (planId === 'premium-plan' ? 'PREMIUM' : 'BASIC');
+        const targetPlan = plans.find((p: any) => p.type === mappedType || p.id === planId);
+        if (!targetPlan) {
+          alert('Selected plan is not configured in the system.');
+          return;
+        }
+
+        const isUpgrade = subscription && (targetPlan as any).fee > (subscription.plan_id === 'premium-plan' ? 50 : 20);
+        let res;
+        if (isUpgrade) {
+          res = await planService.upgradePlan((targetPlan as any).id);
+        } else {
+          res = await planService.renewPlan((targetPlan as any).id);
+        }
+
+        if (res && res.data && res.data.authorization_url) {
+          window.location.href = res.data.authorization_url;
+        } else {
+          alert(res.message || 'Plan change initiated successfully!');
+          refreshData();
+        }
+      } catch (err: any) {
+        console.error('Plan modification failed:', err);
+        showToast('Plan change failed', 'error');
+      }
+    }
+  };
+
+  const handleRenewPlan = async () => {
+    if (!subscription?.plan_id) return;
+    setIsRenewing(true);
+    try {
+      const res = await planService.renewPlan(subscription.plan_id);
+      const authUrl = res?.data?.data?.authorization_url || res?.data?.authorization_url;
+      if (authUrl) {
+        window.location.href = authUrl;
+      } else {
+        showToast(res.message || 'Plan renewal initiated successfully!', 'success');
+        refreshData();
+      }
+    } catch (err: any) {
+      console.error('Plan renewal failed:', err);
+      showToast(err.message || 'Plan renewal failed', 'error');
+    } finally {
+      setIsRenewing(false);
     }
   };
 
@@ -211,41 +289,61 @@ export const StudentDashboard: React.FC = () => {
     setEditCustomFields(dev.custom_fields || []);
   };
 
-  const handleDeviceUpdateSubmit = (e: React.FormEvent) => {
+  const handleDeviceUpdateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingDevice) return;
+    setDeviceUpdating(true);
 
     const brandVal = editDevBrand === 'other' ? editCustomBrand : editDevBrand;
     const typeVal = editDevType === 'other' ? editCustomType : editDevType;
     const osVal = editDevOS === 'other' ? editCustomOS : editDevOS;
 
-    const updated = dbService.updateDevice(editingDevice.id, {
-      name: editDevName,
-      type: typeVal,
-      brand: brandVal,
-      model: editDevModel,
-      serial_number: editDevSN,
-      operating_system: osVal,
-      device_images: editAttachedImages,
-      image_url: editAttachedImages[0] || editingDevice.image_url,
-      video_url: editAttachedVideo || undefined,
-      custom_fields: editCustomFields
-    });
+    const typeMap: Record<string, string> = {
+      laptop: 'LAPTOP',
+      phone: 'MOBILE_PHONE',
+      desktop: 'DESKTOP',
+      tablet: 'TABLET',
+      other: 'OTHER'
+    };
+    const backendType = (typeMap[typeVal] || 'OTHER') as any;
 
-    if (updated) {
+    try {
+      const mediaFiles = [...editAttachedImageFiles];
+      if (editAttachedVideoFile) mediaFiles.push(editAttachedVideoFile);
+
+      await deviceService.editDevice(editingDevice.id, {
+        name: editDevName,
+        type: backendType,
+        brand: brandVal,
+        model: editDevModel,
+        serialCode: editDevSN,
+        os: osVal,
+        attributes: editCustomFields.map(f => ({ key: f.label, value: f.value })),
+      }, mediaFiles);
+      setDeviceUpdating(false);
       setEditingDevice(null);
       refreshData();
-      alert('Device specs updated successfully!');
+      showToast('Device specs updated successfully!', 'success');
+    } catch (err: any) {
+      setDeviceUpdating(false);
+      console.error('API update device failed:', err);
+      showToast('Device update failed', 'error');
     }
   };
 
-  const handleDeviceDeleteSubmit = () => {
+  const handleDeviceDeleteSubmit = async () => {
     if (!deletingDevice) return;
-    const deleted = dbService.deleteDevice(deletingDevice.id);
-    if (deleted) {
+    setDeviceDeleting(true);
+    try {
+      await deviceService.removeDevice(deletingDevice.id);
+      setDeviceDeleting(false);
       setDeletingDevice(null);
       refreshData();
-      alert('Device removed from coverage logs.');
+      showToast('Device removed from coverage logs.', 'success');
+    } catch (err: any) {
+      setDeviceDeleting(false);
+      console.error('API remove device failed:', err);
+      showToast('Device removal failed', 'error');
     }
   };
 
@@ -254,7 +352,10 @@ export const StudentDashboard: React.FC = () => {
     if (!files) return;
     setEditImageLoading(true);
 
-    const loadPromises = Array.from(files).map((file: any) => {
+    const fileArray = Array.from(files) as File[];
+    setEditAttachedImageFiles((prev) => [...prev, ...fileArray]);
+
+    const loadPromises = fileArray.map((file: any) => {
       return new Promise<string>((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -275,6 +376,7 @@ export const StudentDashboard: React.FC = () => {
     if (!file) return;
     setEditVideoLoading(true);
 
+    setEditAttachedVideoFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
       setEditAttachedVideo(reader.result as string);
@@ -284,10 +386,11 @@ export const StudentDashboard: React.FC = () => {
   };
 
   // Device registration limit checks
+  const activePlanType = subscription?.plan?.type || (subscription?.plan_id === 'premium-plan' ? 'PREMIUM' : subscription?.plan_id === 'bonanza-plan' ? 'BONANZA' : 'BASIC');
   const planId = subscription?.plan_id || 'basic-plan';
-  const isBonanza = planId === 'bonanza-plan';
-  const isPremium = planId === 'premium-plan';
-  const maxDevicesAllowed = isBonanza ? 3 : 1;
+  const isBonanza = activePlanType === 'BONANZA';
+  const isPremium = activePlanType === 'PREMIUM';
+  const maxDevicesAllowed = subscription?.plan?.maxDevices || (isBonanza ? 3 : 1);
   const currentDevicesCount = devices.length;
 
   // File loading methods
@@ -296,7 +399,10 @@ export const StudentDashboard: React.FC = () => {
     if (!files) return;
     setImageLoading(true);
 
-    const loadPromises = Array.from(files).map((file: any) => {
+    const fileArray = Array.from(files) as File[];
+    setAttachedImageFiles((prev) => [...prev, ...fileArray]);
+
+    const loadPromises = fileArray.map((file: any) => {
       return new Promise<string>((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -317,6 +423,7 @@ export const StudentDashboard: React.FC = () => {
     if (!file) return;
     setVideoLoading(true);
 
+    setAttachedVideoFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
       setAttachedVideo(reader.result as string);
@@ -337,7 +444,7 @@ export const StudentDashboard: React.FC = () => {
     setCustomFields(customFields.filter((_, i) => i !== index));
   };
 
-  const handleDeviceRegisterSubmit = (e: React.FormEvent) => {
+  const handleDeviceRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setDeviceError('');
 
@@ -347,38 +454,48 @@ export const StudentDashboard: React.FC = () => {
     }
 
     if (newDeviceName && newDeviceModel && newDeviceSN) {
+      setDeviceAdding(true);
       const brandVal = newDeviceBrand === 'other' ? customBrand : newDeviceBrand;
       const typeVal = newDeviceType === 'other' ? customType : newDeviceType;
       const osVal = newDeviceOS === 'other' ? customOS : newDeviceOS;
 
-      const generatedId = `DEV-${brandVal.slice(0,3).toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`;
-      
-      const newDevObject = {
-        name: newDeviceName,
-        type: typeVal,
-        brand: brandVal,
-        model: newDeviceModel,
-        serialNumber: newDeviceSN,
-        operatingSystem: osVal,
-        image_url: attachedImages[0] || (typeVal === 'phone' 
-          ? 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=300&q=80' 
-          : 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=300&q=80'),
-        video_url: attachedVideo || undefined,
-        device_images: attachedImages.length > 0 ? attachedImages : undefined,
-        custom_fields: customFields.length > 0 ? customFields : undefined
+      const typeMap: Record<string, string> = {
+        laptop: 'LAPTOP',
+        phone: 'MOBILE_PHONE',
+        desktop: 'DESKTOP',
+        tablet: 'TABLET',
+        other: 'OTHER'
       };
+      const backendType = (typeMap[typeVal] || 'OTHER') as any;
 
-      const registered = dbService.registerDevice(newDevObject);
+      try {
+        const mediaFiles = [...attachedImageFiles];
+        if (attachedVideoFile) mediaFiles.push(attachedVideoFile);
 
-      if (registered) {
-        // Sync local storage id mapping override
-        const currentDevices = dbService.getDevices();
-        if (currentDevices.length > 0) {
-          const lastDevice = currentDevices[currentDevices.length - 1];
-          lastDevice.id = generatedId;
-          localStorage.setItem('ss_devices', JSON.stringify(currentDevices));
-          setLastAddedDevice(lastDevice);
-        }
+        const res = await deviceService.addDevice({
+          type: backendType,
+          model: newDeviceModel,
+          serialCode: newDeviceSN,
+          name: newDeviceName,
+          brand: brandVal,
+          os: osVal,
+          attributes: customFields.map(f => ({ key: f.label, value: f.value })),
+        }, mediaFiles);
+
+        const newDev = res.data;
+        const mappedDevice: Device = {
+          id: newDev.id,
+          user_id: newDev.subscriberId,
+          name: newDev.name || `${newDev.brand} ${newDev.model}`,
+          type: newDev.type.toLowerCase(),
+          brand: newDev.brand || '',
+          model: newDev.model || '',
+          serial_number: newDev.serialCode || '',
+          operating_system: newDev.os || '',
+          status: 'active',
+          created_at: newDev.createdAt
+        };
+        setLastAddedDevice(mappedDevice);
 
         // Clear states
         setNewDeviceName('');
@@ -394,33 +511,35 @@ export const StudentDashboard: React.FC = () => {
         setAttachedVideo('');
         setCustomFields([]);
 
-        refreshData();
+        await refreshData();
+        setDeviceAdding(false);
         setShowAddDeviceModal(false);
         setShowDeviceSuccessModal(true);
+        showToast('Device registered successfully!', 'success');
+      } catch (err: any) {
+        setDeviceAdding(false);
+        console.error('API add device failed:', err);
+        showToast('Device registration failed', 'error');
       }
     }
   };
 
   // Service options filtered by plan tier
   const getSelectableRequestServices = () => {
-    const options = [
-      { value: 'software', label: 'Software Installation & Setup', minPlan: 'basic-plan' },
-      { value: 'diagnostic', label: 'Hardware Fault Diagnosis', minPlan: 'basic-plan' },
-      { value: 'other', label: 'Repair Coordination & Assistance', minPlan: 'basic-plan' },
-      { value: 'hardware', label: 'Hardware Labor Repair (Free Labor)', minPlan: 'premium-plan' },
-      // { value: 'website_portfolio', label: 'Free Portfolio / Personal Website Request', minPlan: 'premium-plan' },
-      // { value: 'website_business', label: '5-Page Business Website Setup', minPlan: 'bonanza-plan' },
-      { value: 'tech_consultation', label: 'Free Tech Consultation Session', minPlan: 'bonanza-plan' },
-      // { value: 'domain_hosting', label: 'Domain & Hosting Support setup', minPlan: 'bonanza-plan' },
-      { value: 'monthly_maintenance', label: 'Monthly Maintenance & System Checkup', minPlan: 'bonanza-plan' },
-    ];
+    const activePlan = plans.find(p => p.id === subscription?.plan_id) || plans.find(p => p.type === activePlanType);
+    if (activePlan && activePlan.benefits && activePlan.benefits.length > 0) {
+      return activePlan.benefits.map((b: string) => ({ value: b, label: b }));
+    }
 
-    if (isBonanza) return options;
-    if (isPremium) return options.filter(o => o.minPlan === 'basic-plan' || o.minPlan === 'premium-plan');
-    return options.filter(o => o.minPlan === 'basic-plan');
+    // fallback
+    return [
+      { value: 'software', label: 'Software Installation & Setup' },
+      { value: 'diagnostic', label: 'Hardware Fault Diagnosis' },
+      { value: 'other', label: 'Repair Coordination & Assistance' }
+    ];
   };
 
-  const handleMakeRequestSubmit = (e: React.FormEvent) => {
+  const handleMakeRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reqTitle || !reqDesc) {
       alert('Please fill out all details.');
@@ -432,7 +551,7 @@ export const StudentDashboard: React.FC = () => {
       return;
     }
 
-    const isHardwareOrSoftware = ['software', 'diagnostic', 'hardware', 'monthly_maintenance'].includes(reqCategory);
+    const isHardwareOrSoftware = !reqCategory.includes('website');
     if (isHardwareOrSoftware && !reqDeviceId) {
       alert('Please select the registered device for this repair / update.');
       return;
@@ -446,18 +565,44 @@ export const StudentDashboard: React.FC = () => {
       hosting_required: webHosting
     } : undefined;
 
-    const requestObj = dbService.createServiceRequest({
-      deviceId: isHardwareOrSoftware ? reqDeviceId : undefined,
-      title: reqTitle,
-      description: reqDesc,
-      category: reqCategory,
-      priority: reqPriority,
-      websiteDetails
-    });
+    const urgencyMap: Record<string, string> = {
+      low: 'LOW',
+      medium: 'MEDIUM',
+      high: 'HIGH',
+      urgent: 'CRITICAL'
+    };
+    const backendUrgency = (urgencyMap[reqPriority] || 'LOW') as any;
 
-    if (requestObj) {
-      refreshData();
-      
+    setRequestSubmitting(true);
+    try {
+      const res = await requestService.createRequest({
+        type: reqCategory,
+        title: reqTitle,
+        description: reqDesc,
+        urgency: backendUrgency,
+        businessName: websiteDetails?.business_name,
+        desiredSubdomain: websiteDetails?.subdomain,
+        websiteConceptDescription: websiteDetails?.description,
+        websitePageCount: websiteDetails?.pages_count,
+        preferHosting: websiteDetails?.hosting_required,
+      }, isHardwareOrSoftware ? reqDeviceId : undefined);
+
+      const reqObj = res.data;
+      const mappedRequest: SupportTicket = {
+        id: reqObj.id,
+        user_id: reqObj.subscriberId,
+        device_id: reqObj.deviceId,
+        title: reqObj.title,
+        description: reqObj.description,
+        category: reqObj.type as any,
+        priority: reqObj.urgency === 'CRITICAL' ? 'urgent' : reqObj.urgency.toLowerCase() as any,
+        status: reqObj.status.toLowerCase() as any,
+        created_at: reqObj.createdAt,
+        updated_at: reqObj.updatedAt,
+        receipt_pdf: reqObj.receipt,
+        tracking_qr: reqObj.qrCode || res.qrCode?.data
+      };
+
       // Clear forms
       setReqTitle('');
       setReqDesc('');
@@ -467,19 +612,25 @@ export const StudentDashboard: React.FC = () => {
       setWebDescription('');
 
       // Auto-show receipt
+      setRequestSubmitting(false);
       setShowAddRequestModal(false);
-      setSelectedRequestForReceipt(requestObj);
+      setSelectedRequestForReceipt(mappedRequest);
       setActiveTab('dashboard');
+      await refreshData();
+      showToast('Support request submitted successfully!', 'success');
+
+    } catch (err: any) {
+      setRequestSubmitting(false);
+      console.error('API make request failed:', err);
+      showToast(err.message || 'Failed to submit support request', 'error');
     }
   };
 
   const handleSendChatMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedTicket && newMsgContent.trim()) {
-      dbService.sendTicketMessage(selectedTicket.id, newMsgContent);
+      showToast('Messaging coming soon', 'info');
       setNewMsgContent('');
-      setChatMessages(dbService.getTicketMessages(selectedTicket.id));
-      refreshData();
     }
   };
 
@@ -593,7 +744,9 @@ export const StudentDashboard: React.FC = () => {
             </div>
             <div className="truncate">
               <span className="text-[11px] font-bold block truncate text-slate-200">{profile?.full_name}</span>
-              <span className="text-[9px] text-royal block font-semibold truncate capitalize">{planName}</span>
+              <span className={`text-[9px] block font-semibold truncate capitalize ${subscription?.status === 'expired' ? 'text-amber-400' : subscription?.status === 'suspended' ? 'text-rose-400' : 'text-royal'}`}>
+                {planName} {subscription?.status === 'expired' ? '(Expired)' : subscription?.status === 'suspended' ? '(Suspended)' : ''}
+              </span>
             </div>
           </div>
 
@@ -705,7 +858,9 @@ export const StudentDashboard: React.FC = () => {
             </div>
             <div className="truncate">
               <span className="text-[11px] font-bold block truncate text-slate-200">{profile?.full_name}</span>
-              <span className="text-[9px] text-royal block font-semibold truncate capitalize">{planName}</span>
+              <span className={`text-[9px] block font-semibold truncate capitalize ${subscription?.status === 'expired' ? 'text-amber-400' : subscription?.status === 'suspended' ? 'text-rose-400' : 'text-royal'}`}>
+                {planName} {subscription?.status === 'expired' ? '(Expired)' : subscription?.status === 'suspended' ? '(Suspended)' : ''}
+              </span>
             </div>
           </div>
 
@@ -826,7 +981,7 @@ export const StudentDashboard: React.FC = () => {
                 <div>
                   <h2 className="text-2xl font-bold text-navy tracking-tight">Welcome back, {profile?.full_name} 👋</h2>
                   <p className="text-xs text-slate-400 font-semibold font-sans mt-0.5">
-                    {profile?.university} • Student ID: {profile?.student_id} • Semester 2
+                    {profile?.residence || profile?.university} • Student ID: {profile?.student_id} • Semester 2
                   </p>
                 </div>
 
@@ -835,19 +990,40 @@ export const StudentDashboard: React.FC = () => {
                   <span className={`text-[10px] font-bold font-mono px-3 py-1 rounded-full uppercase border ${
                     subscription?.status === 'suspended' 
                       ? 'bg-rose-50 text-rose-600 border-rose-200' 
+                      : subscription?.status === 'expired'
+                      ? 'bg-amber-50 text-amber-600 border-amber-200'
                       : 'bg-emerald-50 text-emerald-700 border-emerald-250'
                   }`}>
-                    {planName} ({subscription?.status === 'suspended' ? 'Suspended' : 'Active'})
+                    {planName} ({subscription?.status === 'suspended' ? 'Suspended' : subscription?.status === 'expired' ? 'Expired' : 'Active'})
                   </span>
+                  {subscription?.status === 'expired' && (
+                    <button
+                      onClick={handleRenewPlan}
+                      disabled={isRenewing}
+                      className="ml-2 bg-royal hover:bg-royal/90 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase flex items-center space-x-1.5 disabled:opacity-50 cursor-pointer shadow-sm shadow-royal/20 transition-colors"
+                    >
+                      {isRenewing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                      <span>Renew Plan</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
               {/* Bento analytics stats blocks */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
-                  <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">PLAN COVER</span>
-                  <span className="text-xl font-bold text-navy mt-1 tracking-tight block capitalize">{planName}</span>
-                  <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">GH₵ {planPrice} Paid</span>
+                  <div className="flex justify-between items-start">
+                    <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">PLAN COVER</span>
+
+                  </div>
+                  <div>
+                    <span className="text-xl font-bold text-navy mt-1 tracking-tight flex items-center space-x-2 capitalize">
+                      <span>{planName}</span>
+                      {subscription?.status === 'expired' && <span className="text-[10px] bg-amber-50 text-amber-600 border border-amber-200 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">Expired</span>}
+                      {subscription?.status === 'suspended' && <span className="text-[10px] bg-rose-50 text-rose-600 border border-rose-200 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">Suspended</span>}
+                    </span>
+                    <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">GH₵ {planPrice} Paid</span>
+                  </div>
                 </div>
 
                 <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
@@ -1224,8 +1400,12 @@ export const StudentDashboard: React.FC = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => setShowAddRequestModal(true)}
-                  disabled={subscription?.status === 'suspended'}
+                  onClick={() => {
+                    const opts = getSelectableRequestServices();
+                    if (opts.length > 0) setReqCategory(opts[0].value as any);
+                    setShowAddRequestModal(true);
+                  }}
+                  disabled={subscription?.status === 'suspended' || subscription?.status === 'expired'}
                   className="px-4 py-2.5 bg-royal hover:bg-royal/90 disabled:opacity-50 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center space-x-1.5 shadow-md shadow-royal/10 border-0"
                 >
                   <PlusCircle className="w-4.5 h-4.5" />
@@ -1276,7 +1456,11 @@ export const StudentDashboard: React.FC = () => {
                     You haven't submitted any diagnostics request tickets yet. Submit one if your device experiences system crashes.
                   </p>
                   <button
-                    onClick={() => setShowAddRequestModal(true)}
+                    onClick={() => {
+                      const opts = getSelectableRequestServices();
+                      if (opts.length > 0) setReqCategory(opts[0].value as any);
+                      setShowAddRequestModal(true);
+                    }}
                     disabled={subscription?.status === 'suspended'}
                     className="py-2.5 px-4 bg-royal hover:bg-royal/90 disabled:opacity-50 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer shadow-md shadow-royal/10 border-0"
                   >
@@ -1378,7 +1562,7 @@ export const StudentDashboard: React.FC = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">University Hub</label>
+                    <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Residence (Hall / Hostel)</label>
                     <input 
                       type="text"
                       required
@@ -1390,9 +1574,19 @@ export const StudentDashboard: React.FC = () => {
 
                   <button
                     type="submit"
-                    className="w-full py-3 bg-navy hover:bg-slate-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
+                    disabled={profileUpdating}
+                    className="w-full flex justify-center items-center gap-2 py-3 bg-navy hover:bg-slate-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    {profileSaved ? 'Updates Logged successfully ✓' : 'Save profile changes'}
+                    {profileUpdating ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        Saving...
+                      </>
+                    ) : profileSaved ? (
+                      'Updates Logged successfully ✓'
+                    ) : (
+                      'Save profile changes'
+                    )}
                   </button>
                 </form>
               </div>
@@ -1404,64 +1598,40 @@ export const StudentDashboard: React.FC = () => {
                   <p className="text-[10px] text-slate-400 mt-0.5">Upgrade or downgrade your semester diagnostics cover.</p>
                 </div>
 
-                <div className="space-y-4">
-                  {/* Basic Plan options */}
-                  <div className={`p-4 border rounded-2xl text-xs space-y-2 transition-all ${planId === 'basic-plan' ? 'border-royal bg-blue-50/20' : 'border-slate-200 bg-white'}`}>
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-navy block text-[12px]">Basic Cover Option</span>
-                      <span className="font-mono text-royal font-bold">GH₵20/sem</span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">Includes basic software setups and diagnostics representation for 1 device.</p>
-                    {planId !== 'basic-plan' ? (
-                      <button 
-                        onClick={() => handleUpgradeDowngrade('basic-plan')}
-                        className="py-1.5 px-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold rounded-lg uppercase cursor-pointer"
-                      >
-                        Downgrade to Basic
-                      </button>
-                    ) : (
-                      <span className="text-[10px] text-royal font-bold uppercase tracking-wide block pt-1">Active coverage ✓</span>
-                    )}
-                  </div>
-
-                  {/* Premium plan options */}
-                  <div className={`p-4 border rounded-2xl text-xs space-y-2 transition-all ${planId === 'premium-plan' ? 'border-royal bg-blue-50/20' : 'border-slate-200 bg-white'}`}>
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-navy block text-[12px]">Premium Shield Tier</span>
-                      <span className="font-mono text-royal font-bold">GH₵50/sem</span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">Free repair labor representation + free semester personal web developer block.</p>
-                    {planId !== 'premium-plan' ? (
-                      <button 
-                        onClick={() => handleUpgradeDowngrade('premium-plan')}
-                        className="py-1.5 px-3.5 bg-royal text-white hover:bg-blue-600 text-[10px] font-bold rounded-lg uppercase cursor-pointer"
-                      >
-                        Upgrade to Premium
-                      </button>
-                    ) : (
-                      <span className="text-[10px] text-royal font-bold uppercase tracking-wide block pt-1">Active coverage ✓</span>
-                    )}
-                  </div>
-
-                  {/* Bonanza plan options */}
-                  <div className={`p-4 border rounded-2xl text-xs space-y-2 transition-all ${planId === 'bonanza-plan' ? 'border-amber-500 bg-amber-50/10' : 'border-slate-200 bg-white'}`}>
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-amber-900 block text-[12px]">Bonanza Plan 🚀</span>
-                      <span className="font-mono text-amber-600 font-bold">GH₵120/sem</span>
-                    </div>
-                    <p className="text-[10px] text-amber-850 leading-normal font-medium">Up to 3 devices + 5-page business site + free consulting + monthly checks.</p>
-                    {planId !== 'bonanza-plan' ? (
-                      <button 
-                        onClick={() => handleUpgradeDowngrade('bonanza-plan')}
-                        className="py-1.5 px-3.5 bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold rounded-lg uppercase cursor-pointer"
-                      >
-                        Upgrade to Bonanza
-                      </button>
-                    ) : (
-                      <span className="text-[10px] text-amber-600 font-bold uppercase tracking-wide block pt-1">Active coverage ✓</span>
-                    )}
-                  </div>
-
+                 <div className="space-y-4">
+                  {plans.map((p) => {
+                    const isCurrent = subscription?.plan_id === p.id || activePlanType === p.type;
+                    const isBonanzaPlan = p.type === 'BONANZA';
+                    return (
+                      <div key={p.id} className={`p-4 border rounded-2xl text-xs space-y-2 transition-all ${isCurrent ? isBonanzaPlan ? 'border-amber-500 bg-amber-50/10' : 'border-royal bg-blue-50/20' : 'border-slate-200 bg-white'}`}>
+                        <div className="flex justify-between items-center">
+                          <span className={`font-bold block text-[12px] ${isBonanzaPlan ? 'text-amber-900' : 'text-navy'}`}>{p.type.charAt(0) + p.type.slice(1).toLowerCase()} Plan {isBonanzaPlan ? '🚀' : p.type === 'PREMIUM' ? '⭐️' : ''}</span>
+                          <span className={`font-mono font-bold ${isBonanzaPlan ? 'text-amber-600' : 'text-royal'}`}>GH₵{p.fee}/sem</span>
+                        </div>
+                        <p className={`text-[10px] leading-normal font-medium ${isBonanzaPlan ? 'text-amber-800' : 'text-slate-500'}`}>{p.summary || p.description}</p>
+                        {(p.benefits && p.benefits.length > 0) && (
+                          <ul className="space-y-1 mt-2 mb-2 text-[10px]">
+                            {p.benefits.map((benefit: string, idx: number) => (
+                              <li key={idx} className="flex items-start space-x-1.5">
+                                <span className={`w-1 h-1 mt-1.5 rounded-full shrink-0 ${isBonanzaPlan ? 'bg-amber-600' : 'bg-royal'}`} />
+                                <span className={isBonanzaPlan ? 'text-amber-700' : 'text-slate-600'}>{benefit}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {!isCurrent ? (
+                          <button 
+                            onClick={() => handleUpgradeDowngrade(p.id)}
+                            className={`py-1.5 px-3.5 text-[10px] font-bold rounded-lg uppercase cursor-pointer ${isBonanzaPlan ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-royal hover:bg-blue-600 text-white'}`}
+                          >
+                            Change to {p.type.toLowerCase()}
+                          </button>
+                        ) : (
+                          <span className={`text-[10px] font-bold uppercase tracking-wide block pt-1 ${isBonanzaPlan ? 'text-amber-600' : 'text-royal'}`}>Active coverage ✓</span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1548,15 +1718,14 @@ export const StudentDashboard: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {dbService.getTable<any>('ss_payments')
-                        .filter((p: any) => p.user_id === user?.id)
+                      {payments
                         .map((pay: any, idx: number) => (
                           <tr key={idx} className="hover:bg-slate-50/50">
-                            <td className="p-3 font-mono font-bold text-royal">{pay.transaction_ref}</td>
-                            <td className="p-3 font-medium capitalize">{pay.subscription_id ? 'Semester Coverage Package' : 'Upgrade Allocation'}</td>
-                            <td className="p-3 text-slate-655">{pay.payment_method}</td>
+                            <td className="p-3 font-mono font-bold text-royal">{pay.transactionRef || pay.id}</td>
+                            <td className="p-3 font-medium capitalize">Semester Coverage Package</td>
+                            <td className="p-3 text-slate-600">{pay.method || 'Mobile Money'}</td>
                             <td className="p-3 font-bold text-emerald-600">GH₵ {pay.amount}.00</td>
-                            <td className="p-3 text-right text-slate-400 font-mono text-[10px]">{new Date(pay.created_at).toLocaleDateString()}</td>
+                            <td className="p-3 text-right text-slate-400 font-mono text-[10px]">{new Date(pay.createdAt).toLocaleDateString()}</td>
                           </tr>
                         ))}
                     </tbody>
@@ -2008,7 +2177,10 @@ export const StudentDashboard: React.FC = () => {
                         {editAttachedImages.map((src, i) => (
                           <div key={i} className="w-10 h-10 rounded border border-slate-200 overflow-hidden relative group">
                             <img src={src} className="w-full h-full object-cover" alt="preview" />
-                            <button type="button" onClick={() => setEditAttachedImages(editAttachedImages.filter((_, idx) => idx !== i))} className="absolute inset-0 bg-red-600/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer"><Trash2 className="w-3 h-3" /></button>
+                            <button type="button" onClick={() => {
+                              setEditAttachedImages(editAttachedImages.filter((_, idx) => idx !== i));
+                              setEditAttachedImageFiles(editAttachedImageFiles.filter((_, idx) => idx !== i));
+                            }} className="absolute inset-0 bg-red-600/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer"><Trash2 className="w-3 h-3" /></button>
                           </div>
                         ))}
                       </div>
@@ -2025,9 +2197,17 @@ export const StudentDashboard: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      className="py-3 bg-navy hover:bg-slate-900 text-white rounded-xl font-bold uppercase cursor-pointer text-center"
+                      disabled={deviceUpdating}
+                      className="py-3 flex justify-center items-center gap-2 bg-navy hover:bg-slate-900 text-white rounded-xl font-bold uppercase cursor-pointer text-center disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                      Save changes
+                      {deviceUpdating ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        'Save changes'
+                      )}
                     </button>
                   </div>
                 </form>
@@ -2072,9 +2252,17 @@ export const StudentDashboard: React.FC = () => {
                 </button>
                 <button
                   onClick={handleDeviceDeleteSubmit}
-                  className="py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold uppercase cursor-pointer text-center"
+                  disabled={deviceDeleting}
+                  className="py-2.5 flex justify-center items-center gap-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold uppercase cursor-pointer text-center disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  Delete Device
+                  {deviceDeleting ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Confirm Deregister'
+                  )}
                 </button>
               </div>
             </motion.div>
@@ -2318,7 +2506,10 @@ export const StudentDashboard: React.FC = () => {
                             <img src={src} className="w-full h-full object-cover" alt="Attached preview" />
                             <button
                               type="button"
-                              onClick={() => setAttachedImages(attachedImages.filter((_, idx) => idx !== i))}
+                              onClick={() => {
+                                setAttachedImages(attachedImages.filter((_, idx) => idx !== i));
+                                setAttachedImageFiles(attachedImageFiles.filter((_, idx) => idx !== i));
+                              }}
                               className="absolute inset-0 bg-red-655/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white cursor-pointer"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -2412,9 +2603,17 @@ export const StudentDashboard: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    className="flex-grow py-3 bg-navy hover:bg-slate-900 text-white font-bold uppercase tracking-wider rounded-xl cursor-pointer border-0 text-center"
+                    disabled={deviceAdding}
+                    className="flex-grow py-3 flex justify-center items-center gap-2 bg-navy hover:bg-slate-900 text-white font-bold uppercase tracking-wider rounded-xl cursor-pointer border-0 text-center disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    Confirm Register
+                    {deviceAdding ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      'Confirm Register'
+                    )}
                   </button>
                 </div>
               </form>
@@ -2467,7 +2666,7 @@ export const StudentDashboard: React.FC = () => {
                 </div>
 
                 {/* Device selection list if Hardware or Software fixes are selected */}
-                {['software', 'diagnostic', 'hardware', 'monthly_maintenance'].includes(reqCategory) && (
+                {!reqCategory.includes('website') && (
                   <div className="space-y-1.5">
                     <label className="text-[9.5px] uppercase font-bold text-slate-450 block font-mono">Select Registered Device *</label>
                     <select
@@ -2533,9 +2732,17 @@ export const StudentDashboard: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      className="flex-grow py-3.5 bg-royal hover:bg-blue-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border-0 text-center"
+                      disabled={requestSubmitting}
+                      className="flex-grow py-3.5 flex justify-center items-center gap-2 bg-royal hover:bg-blue-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border-0 text-center disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                      Submit Request
+                      {requestSubmitting ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        'Submit Request'
+                      )}
                     </button>
                   </div>
                 </div>

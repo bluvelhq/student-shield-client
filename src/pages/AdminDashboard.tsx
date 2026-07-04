@@ -5,12 +5,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { dbService } from '../services/db';
+import { adminService } from '../services/adminService';
+import { authService } from '../services/authService';
 import { 
   Shield, Cpu, FileText, CheckCircle, 
   MessageCircle, RefreshCw, Send, ArrowLeft,
   TrendingUp, Users, DollarSign, Activity, Eye, X,
-  AlertTriangle, PlayCircle, ShieldAlert, Award, Plus,
+  AlertTriangle, PlayCircle, ShieldAlert, Award, Plus, Loader2,
   Layers, Settings, Laptop, ArrowRight, LogOut, Menu, School
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -21,7 +22,14 @@ export const AdminDashboard: React.FC = () => {
   const isAgent = user?.role === 'support_agent';
 
   // Left sidebar navigation
-  const [activeTab, setActiveTab] = useState<'metrics' | 'membership' | 'tickets' | 'plan_creation' | 'cohort_operations' | 'institutions'>('metrics');
+  const [activeTab, setActiveTab] = useState<'metrics' | 'membership' | 'tickets' | 'plan_creation' | 'cohort_operations' | 'institutions'>(
+    () => (localStorage.getItem('adminActiveTab') as any) || 'metrics'
+  );
+  
+  useEffect(() => {
+    localStorage.setItem('adminActiveTab', activeTab);
+  }, [activeTab]);
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // DB registries
@@ -37,6 +45,7 @@ export const AdminDashboard: React.FC = () => {
   const [allTickets, setAllTickets] = useState<SupportTicket[]>([]);
   const [allDevices, setAllDevices] = useState<Device[]>([]);
   const [allPayments, setAllPayments] = useState<{ payment: Payment; profile: Profile }[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
 
   // Triage Active Focus
   const [adminFocusTicket, setAdminFocusTicket] = useState<SupportTicket | null>(null);
@@ -53,7 +62,6 @@ export const AdminDashboard: React.FC = () => {
   const [cohortMsg, setCohortMsg] = useState('');
 
   // Plan creation forms
-  const [newPlanId, setNewPlanId] = useState('');
   const [newPlanName, setNewPlanName] = useState('');
   const [newPlanFee, setNewPlanFee] = useState(30);
   const [newPlanDesc, setNewPlanDesc] = useState('');
@@ -61,11 +69,13 @@ export const AdminDashboard: React.FC = () => {
   const [newPlanDevices, setNewPlanDevices] = useState(1);
   const [newPlanError, setNewPlanError] = useState('');
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
+  const [isPlanSubmitting, setIsPlanSubmitting] = useState(false);
 
   // Support ticket filter criteria
   const [ticketPriorityFilter, setTicketPriorityFilter] = useState<string>('all');
   const [ticketPlanFilter, setTicketPlanFilter] = useState<string>('all');
   const [ticketStatusFilter, setTicketStatusFilter] = useState<string>('all');
+  const [isStatusUpdating, setIsStatusUpdating] = useState<string | null>(null);
 
   // Institutions Tab states
   const [institutions, setInstitutions] = useState<Institution[]>([]);
@@ -73,14 +83,125 @@ export const AdminDashboard: React.FC = () => {
   const [instShort, setInstShort] = useState('');
   const [instLocation, setInstLocation] = useState('');
   const [editingInstId, setEditingInstId] = useState<string | null>(null);
+  const [isInstSubmitting, setIsInstSubmitting] = useState(false);
+  const [cohortSubmittingType, setCohortSubmittingType] = useState<'suspend' | 'expire' | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadAdminData = () => {
-    setStats(dbService.getAdminStats());
-    setAllUsers(dbService.getAdminAllProfiles());
-    setAllTickets(dbService.getTickets()); 
-    setAllDevices(dbService.getDevices());
-    setAllPayments(dbService.getAdminAllPayments());
-    setInstitutions(dbService.getInstitutions());
+  const loadAdminData = async () => {
+    setIsRefreshing(true);
+    try {
+      const [usersRes, ticketsRes, devicesRes, instsRes, plansRes] = await Promise.all([
+        adminService.getSubscribers(),
+        adminService.getRequests(),
+        adminService.getDevices(),
+        adminService.getInstitutions(),
+        authService.getPlans()
+      ]);
+
+      const subscribers = usersRes.data || [];
+      const requestsList = ticketsRes.data || [];
+      const devicesList = devicesRes.data || [];
+      const instsList = instsRes.data || [];
+      const plansList = plansRes || [];
+
+      setPlans(plansList);
+
+      setAllUsers(subscribers.map((s: any) => ({
+        user: {
+          id: s.id,
+          email: s.email,
+          role: 'student',
+          created_at: s.joinedAt
+        },
+        profile: {
+          id: `prof-${s.id}`,
+          user_id: s.id,
+          full_name: `${s.firstName} ${s.lastName}`,
+          university: s.institution?.name || 'Unknown University',
+          student_id: s.studentId || 'N/A',
+          phone: s.phone,
+          gender: s.gender,
+          created_at: s.joinedAt
+        },
+        subscription: s.plan ? {
+          id: `sub-${s.id}`,
+          user_id: s.id,
+          plan_id: s.planId,
+          status: s.subscriptionStatus?.toLowerCase() || 'active',
+          start_date: s.joinedAt,
+          end_date: s.updatedAt,
+          created_at: s.joinedAt,
+          plan: s.plan
+        } : undefined,
+        activeDeviceCount: s.devices?.length || 0
+      })));
+
+      setAllTickets(requestsList.map((req: any) => ({
+        id: req.id,
+        user_id: req.subscriberId,
+        device_id: req.deviceId,
+        title: req.title,
+        description: req.description,
+        category: req.type as any,
+        priority: req.urgency === 'CRITICAL' ? 'urgent' : req.urgency.toLowerCase() as any,
+        status: req.status.toLowerCase() as any,
+        created_at: req.createdAt,
+        updated_at: req.updatedAt,
+        receipt_pdf: req.receipt,
+        tracking_qr: req.qrCode
+      })));
+
+      setAllDevices(devicesList.map((d: any) => ({
+        id: d.id,
+        user_id: d.subscriberId,
+        name: d.name || `${d.brand} ${d.model}`,
+        type: d.type.toLowerCase(),
+        brand: d.brand || '',
+        model: d.model || '',
+        serial_number: d.serialCode || '',
+        operating_system: d.os || '',
+        status: 'active',
+        created_at: d.createdAt
+      })));
+
+      setInstitutions(instsList.map((i: any) => ({
+        id: i.id,
+        name: i.name,
+        short_name: i.shortName,
+        location: i.location,
+        status: i.status.toLowerCase() as any
+      })));
+
+      const totalUsers = subscribers.length;
+      const activePlans = 3;
+      const openTickets = requestsList.filter((t: any) => t.status !== 'RESOLVED' && t.status !== 'CLOSED').length;
+      const activeDevicesCount = devicesList.length;
+
+      let totalRevenue = 0;
+      try {
+        const revRes = await adminService.getRevenue();
+        totalRevenue = revRes.data || 0;
+      } catch (e) {
+        console.warn('Failed to fetch revenue:', e);
+      }
+
+      setStats({
+        totalUsers,
+        activePlans,
+        openTickets,
+        totalRevenue,
+        activeDevicesCount,
+        monthlySubRate: totalRevenue / (totalUsers || 1)
+      });
+
+      setAllPayments([]);
+
+    } catch (err: any) {
+      console.error('API error loading admin data:', err);
+      showToast('Failed to load admin data', 'error');
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   useEffect(() => {
@@ -89,83 +210,118 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     if (adminFocusTicket) {
-      setAdminFocusedMessages(dbService.getTicketMessages(adminFocusTicket.id));
+      setAdminFocusedMessages([]);
     }
   }, [adminFocusTicket]);
 
   useEffect(() => {
     if (selectedMember) {
-      const devs = dbService.getDevices().filter(d => d.user_id === selectedMember.user.id);
-      const tix = dbService.getTickets().filter(t => t.user_id === selectedMember.user.id);
+      const devs = allDevices.filter(d => d.user_id === selectedMember.user.id);
+      const tix = allTickets.filter(t => t.user_id === selectedMember.user.id);
       setSelectedMemberDevices(devs);
       setSelectedMemberTickets(tix);
     }
-  }, [selectedMember]);
+  }, [selectedMember, allDevices, allTickets]);
 
-  const handleAdminStatusChange = (ticketId: string, status: SupportTicket['status']) => {
-    dbService.updateTicketStatus(ticketId, status);
-    loadAdminData();
-    if (adminFocusTicket && adminFocusTicket.id === ticketId) {
-      setAdminFocusTicket({ ...adminFocusTicket, status });
-    }
-    // Update selected member view as well
-    if (selectedMember) {
-      const updatedTix = dbService.getTickets().filter(t => t.user_id === selectedMember.user.id);
-      setSelectedMemberTickets(updatedTix);
+  const handleAdminStatusChange = async (ticketId: string, status: SupportTicket['status']) => {
+    setIsStatusUpdating(status);
+    try {
+      const backendStatusMap: Record<string, string> = {
+        open: 'OPEN',
+        in_progress: 'IN_PROGRESS',
+        waiting_on_user: 'PENDING',
+        resolved: 'RESOLVED',
+        closed: 'CLOSED',
+        delivered: 'DELIVERED'
+      };
+      const backendStatus = (backendStatusMap[status] || 'OPEN') as any;
+      await adminService.updateRequestStatus(ticketId, backendStatus);
+      await loadAdminData();
+      if (adminFocusTicket && adminFocusTicket.id === ticketId) {
+        setAdminFocusTicket({ ...adminFocusTicket, status });
+      }
+    } catch (err) {
+      console.error('API update status failed:', err);
+      showToast('Status update failed', 'error');
+    } finally {
+      setIsStatusUpdating(null);
     }
   };
 
   const handleAdminReplySubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (adminFocusTicket && adminReplyVal.trim()) {
-      dbService.sendTicketMessage(adminFocusTicket.id, adminReplyVal);
+      showToast('Messaging coming soon', 'info');
       setAdminReplyVal('');
-      setAdminFocusedMessages(dbService.getTicketMessages(adminFocusTicket.id));
-      loadAdminData();
     }
   };
 
-  const toggleSubStatus = (subId: string, currentStatus: string) => {
+  const toggleSubStatus = async (subId: string, currentStatus: string) => {
     const nextStatus = currentStatus === 'active' ? 'suspended' : 'active';
-    dbService.updateSubscriptionStatus(subId, nextStatus);
-    loadAdminData();
-    // Sync drawer details
-    if (selectedMember && selectedMember.subscription?.id === subId) {
-      setSelectedMember({
-        ...selectedMember,
-        subscription: {
-          ...selectedMember.subscription,
-          status: nextStatus
-        }
-      });
+    try {
+      // Suspend single subscriber is fallback only (no direct endpoint)
+      console.warn(`Suspending a single subscriber (subId=${subId}) is not yet supported via API.`);
+      showToast(`Subscriber status update not supported via API yet.`, 'warning');
+    } catch (err) {
+      console.error('Toggle subscription failed:', err);
+      showToast('Toggle subscription failed', 'error');
     }
-    showToast(`Subscriber status updated to ${nextStatus.toUpperCase()}`, 'success');
   };
 
-  const togglePlanStatus = (planId: string, currentStatus?: 'active' | 'inactive') => {
+  const togglePlanStatus = async (planId: string, currentStatus?: 'active' | 'inactive') => {
     const nextStatus = currentStatus === 'inactive' ? 'active' : 'inactive';
-    dbService.updatePlan(planId, { status: nextStatus });
-    loadAdminData();
-    showToast(`Plan status updated to ${nextStatus.toUpperCase()}`, 'success');
+    try {
+      await adminService.updatePlan(planId, { isActive: nextStatus === 'active' });
+      await loadAdminData();
+      showToast(`Plan status updated to ${nextStatus.toUpperCase()}`, 'success');
+    } catch (err) {
+      console.error('Toggle plan status failed:', err);
+      showToast('Toggle plan status failed', 'error');
+    }
   };
 
-  const executeCohortDeactivate = () => {
-    const count = dbService.deactivateInstitutionSubscribers(targetUniCohort);
-    loadAdminData();
-    setCohortMsg(`Success: Suspended ${count} active subscribers from ${targetUniCohort}.`);
+  const executeCohortDeactivate = async () => {
+    setCohortSubmittingType('suspend');
+    try {
+      const matched = institutions.find(i => i.name === targetUniCohort || i.id === targetUniCohort);
+      if (matched) {
+        await adminService.bulkSuspendSubscription(matched.id);
+        await loadAdminData();
+        setCohortMsg(`Success: Suspended active subscribers in ${matched.name}.`);
+      } else {
+        throw new Error('Hub not found');
+      }
+    } catch (err: any) {
+      console.error('API cohort deactivate failed:', err);
+      showToast(err.message || 'Cohort deactivation failed', 'error');
+    } finally {
+      setCohortSubmittingType(null);
+    }
     setTimeout(() => setCohortMsg(''), 5000);
   };
 
-  const executeCohortExpire = () => {
-    const count = dbService.expireInstitutionSubscribers(targetUniCohort);
-    loadAdminData();
-    setCohortMsg(`Success: Expired ${count} active subscribers from ${targetUniCohort}.`);
+  const executeCohortExpire = async () => {
+    setCohortSubmittingType('expire');
+    try {
+      const matched = institutions.find(i => i.name === targetUniCohort || i.id === targetUniCohort);
+      if (matched) {
+        await adminService.bulkExpireSubscription(matched.id);
+        await loadAdminData();
+        setCohortMsg(`Success: Expired active subscribers in ${matched.name}.`);
+      } else {
+        throw new Error('Hub not found');
+      }
+    } catch (err: any) {
+      console.error('API cohort expire failed:', err);
+      showToast(err.message || 'Cohort expiration failed', 'error');
+    } finally {
+      setCohortSubmittingType(null);
+    }
     setTimeout(() => setCohortMsg(''), 5000);
   };
 
   const handleCancelEditPlan = () => {
     setEditingPlanId(null);
-    setNewPlanId('');
     setNewPlanName('');
     setNewPlanFee(30);
     setNewPlanDesc('');
@@ -175,19 +331,18 @@ export const AdminDashboard: React.FC = () => {
 
   const handleEditPlan = (plan: Plan) => {
     setEditingPlanId(plan.id);
-    setNewPlanId(plan.id);
-    setNewPlanName(plan.name);
-    setNewPlanFee(plan.price);
-    setNewPlanDesc(plan.description);
-    setNewPlanBenefits((plan.features || []).join('\n'));
-    setNewPlanDevices(plan.max_devices || 1);
+    setNewPlanName(plan.type || plan.name || 'BASIC');
+    setNewPlanFee(plan.fee || plan.price || 30);
+    setNewPlanDesc(plan.summary || plan.description || '');
+    setNewPlanBenefits((plan.benefits || plan.features || []).join('\n'));
+    setNewPlanDevices(plan.max_devices || (plan as any).maxDevices || 1);
   };
 
-  const handlePlanCreationSubmit = (e: React.FormEvent) => {
+  const handlePlanCreationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setNewPlanError('');
 
-    if (!newPlanId || !newPlanName || !newPlanDesc) {
+    if (!newPlanName || !newPlanDesc) {
       setNewPlanError('Please enter all required plan configurations.');
       return;
     }
@@ -197,56 +352,78 @@ export const AdminDashboard: React.FC = () => {
       .map(b => b.trim())
       .filter(b => b.length > 0);
 
-    const targetPlan: Plan = {
-      id: newPlanId,
-      name: newPlanName,
-      price: newPlanFee,
-      billing_cycle: 'semester',
-      description: newPlanDesc,
-      features: benefitList,
-      max_devices: newPlanDevices,
-      status: 'active'
-    };
-
-    if (editingPlanId) {
-      dbService.updatePlan(editingPlanId, targetPlan);
-      setEditingPlanId(null);
-      alert(`Plan [${newPlanName}] updated successfully inside localized memory!`);
-    } else {
-      dbService.addPlan(targetPlan);
-      alert(`Dynamic cover plan [${newPlanName}] generated successfully inside localized memory!`);
+    setIsPlanSubmitting(true);
+    try {
+      // If adding a new plan, ensure type matches enum format
+      const backendType = newPlanName.toUpperCase().replace(/\s|-/g, '_') as any;
+      if (editingPlanId) {
+        await adminService.updatePlan(editingPlanId, {
+          fee: newPlanFee,
+          maxDevices: newPlanDevices,
+          summary: newPlanDesc,
+          benefits: benefitList
+        });
+        setEditingPlanId(null);
+        showToast(`Plan [${newPlanName}] updated successfully.`, 'success');
+      } else {
+        await adminService.addPlan({
+          type: backendType,
+          fee: newPlanFee,
+          maxDevices: newPlanDevices,
+          summary: newPlanDesc,
+          benefits: benefitList
+        });
+        showToast(`Plan [${newPlanName}] created successfully.`, 'success');
+      }
+      
+      setNewPlanName('');
+      setNewPlanFee(30);
+      setNewPlanDesc('');
+      setNewPlanBenefits('');
+      setNewPlanDevices(1);
+      await loadAdminData();
+    } catch (err: any) {
+      console.error('API update plan failed:', err);
+      showToast(err?.response?.data?.message || 'Plan creation/update failed', 'error');
+    } finally {
+      setIsPlanSubmitting(false);
     }
-
-    setNewPlanId('');
-    setNewPlanName('');
-    setNewPlanFee(30);
-    setNewPlanDesc('');
-    setNewPlanBenefits('');
-    setNewPlanDevices(1);
-    loadAdminData();
   };
 
-  const handleSaveInstitution = (e: React.FormEvent) => {
+  const handleSaveInstitution = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!instName.trim() || !instShort.trim() || !instLocation.trim()) return;
 
-    if (editingInstId) {
-      dbService.updateInstitution(editingInstId, instName, instShort, instLocation);
-      setEditingInstId(null);
-      alert(`Institution updated successfully inside memory!`);
-    } else {
-      dbService.addInstitution({
-        name: instName,
-        short_name: instShort,
-        location: instLocation
-      });
-      alert(`Institution [${instName}] added successfully inside memory!`);
+    setIsInstSubmitting(true);
+    try {
+      if (editingInstId) {
+        await adminService.updateInstitution(editingInstId, {
+          name: instName,
+          shortName: instShort,
+          location: instLocation,
+          status: 'ACTIVE'
+        });
+        setEditingInstId(null);
+        showToast('Institution updated successfully.', 'success');
+      } else {
+        await adminService.addInstitution({
+          name: instName,
+          shortName: instShort,
+          location: instLocation,
+          status: 'ACTIVE'
+        });
+        showToast('Institution added successfully.', 'success');
+      }
+      setInstName('');
+      setInstShort('');
+      setInstLocation('');
+      await loadAdminData();
+    } catch (err) {
+      console.error('API save institution failed:', err);
+      showToast('Save institution failed', 'error');
+    } finally {
+      setIsInstSubmitting(false);
     }
-
-    setInstName('');
-    setInstShort('');
-    setInstLocation('');
-    loadAdminData();
   };
 
   const handleEditClick = (inst: Institution) => {
@@ -256,17 +433,25 @@ export const AdminDashboard: React.FC = () => {
     setInstLocation(inst.location);
   };
 
-  const handleDeleteInstitution = (id: string) => {
+  const handleDeleteInstitution = async (id: string) => {
     if (confirm('Are you sure you want to delete this institution?')) {
-      dbService.deleteInstitution(id);
-      loadAdminData();
+      try {
+        await adminService.removeInstitution(id);
+        await loadAdminData();
+      } catch (err) {
+        console.error('API delete institution failed:', err);
+        showToast('Delete institution failed', 'error');
+      }
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-emerald-50 text-emerald-600 border border-emerald-100';
-      case 'suspended': return 'bg-rose-50 text-rose-650 border border-rose-100';
+      case 'active': return 'bg-emerald-50 text-emerald-700 border-emerald-250';
+      case 'inactive': return 'bg-slate-100 text-slate-500 border-slate-200';
+      case 'suspended': return 'bg-rose-50 text-rose-600 border-rose-200';
+      case 'expired': return 'bg-amber-50 text-amber-600 border-amber-200';
+      case 'deleted': return 'bg-rose-50 text-rose-600 border-rose-200';
       case 'resolved': return 'bg-emerald-50 text-emerald-700 border border-emerald-150';
       case 'delivered': return 'bg-teal-50 text-teal-700 border border-teal-150';
       case 'open': return 'bg-blue-50 text-royal border border-blue-150';
@@ -276,14 +461,13 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const getSubscribedPlan = (userId: string) => {
-    const sub = dbService.getTable<any>('ss_subscriptions').find(s => s.user_id === userId);
-    return sub ? sub.plan_id : 'No Active Cover';
+    const member = allUsers.find(u => u.user.id === userId);
+    return member?.subscription ? (member.subscription.plan?.type || member.subscription.planId) : 'No Active Cover';
   };
 
-  // Ticket filters logic
   const getPlanByUserId = (userId: string) => {
-    const sub = dbService.getTable<any>('ss_subscriptions').find(s => s.user_id === userId);
-    return sub ? sub.plan_id : 'basic-plan';
+    const member = allUsers.find(u => u.user.id === userId);
+    return member?.subscription ? (member.subscription.plan?.type || member.subscription.planId) : 'basic-plan';
   };
 
   const filteredTickets = allTickets.filter(ticket => {
@@ -520,10 +704,11 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={loadAdminData}
-              className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-655 border border-slate-200/50 rounded-full flex items-center justify-center cursor-pointer transition-colors"
+              disabled={isRefreshing}
+              className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-655 border border-slate-200/50 rounded-full flex items-center justify-center cursor-pointer transition-colors disabled:opacity-50"
               title="Refresh logs"
             >
-              <RefreshCw className="w-4 h-4 text-royal" />
+              <RefreshCw className={`w-4 h-4 text-royal ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
 
             <span className="bg-slate-100 text-slate-800 text-[10px] font-bold font-mono px-3 py-1 rounded-full uppercase border">
@@ -608,11 +793,11 @@ export const AdminDashboard: React.FC = () => {
                     <span>Subscribers by University</span>
                   </h3>
                   <div className="space-y-3 text-xs font-sans">
-                    {['University of Ghana (Legon)', 'Ashesi University', 'KNUST'].map(uni => {
-                      const count = allUsers.filter(u => u.profile?.university === uni).length;
+                    {institutions.slice(0, 5).map(inst => {
+                      const count = allUsers.filter(u => u.profile?.university === inst.name).length;
                       return (
-                        <div key={uni} className="flex justify-between items-center p-2.5 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100/50 transition-colors">
-                          <span className="font-semibold text-slate-800">{uni}</span>
+                        <div key={inst.id} className="flex justify-between items-center p-2.5 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100/50 transition-colors">
+                          <span className="font-semibold text-slate-800">{inst.name}</span>
                           <span className="font-bold text-navy bg-white border border-slate-200 px-2 py-0.5 rounded-lg">{count} students</span>
                         </div>
                       );
@@ -626,11 +811,11 @@ export const AdminDashboard: React.FC = () => {
                     <span>Protection Plan distribution</span>
                   </h3>
                   <div className="space-y-3 text-xs font-sans">
-                    {['basic-plan', 'premium-plan', 'bonanza-plan'].map(plan => {
-                      const count = allUsers.filter(u => u.subscription?.plan_id === plan).length;
+                    {plans.map(plan => {
+                      const count = allUsers.filter(u => u.subscription?.plan_id === plan.id).length;
                       return (
-                        <div key={plan} className="flex justify-between items-center p-2.5 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100/50 transition-colors">
-                          <span className="font-semibold text-slate-800 uppercase tracking-wide">{plan.replace('-', ' ')}</span>
+                        <div key={plan.id} className="flex justify-between items-center p-2.5 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100/50 transition-colors">
+                          <span className="font-semibold text-slate-800 uppercase tracking-wide">{plan.type || plan.name}</span>
                           <span className="font-bold text-navy bg-white border border-slate-200 px-2 py-0.5 rounded-lg">{count} active</span>
                         </div>
                       );
@@ -670,7 +855,7 @@ export const AdminDashboard: React.FC = () => {
                   <tbody className="divide-y divide-slate-100">
                     {allUsers.map((m, idx) => {
                       const status = m.subscription?.status || 'unprotected';
-                      const plan = m.subscription?.plan_id || 'unprotected';
+                      const plan = m.subscription?.plan?.type || m.subscription?.plan?.name || m.subscription?.plan_id || 'unprotected';
                       return (
                         <tr key={idx} className="hover:bg-slate-50/70 transition-colors duration-200">
                           <td className="p-4">
@@ -827,13 +1012,18 @@ export const AdminDashboard: React.FC = () => {
                                 <button
                                   key={stat}
                                   onClick={() => handleAdminStatusChange(adminFocusTicket.id, stat as any)}
-                                  className={`py-1 px-2.5 text-[9px] font-bold uppercase rounded-lg border transition-all duration-200 cursor-pointer ${
+                                  disabled={isStatusUpdating === stat}
+                                  className={`py-1 px-2.5 text-[9px] font-bold uppercase rounded-lg border transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed ${
                                     adminFocusTicket.status === stat 
                                       ? 'bg-navy text-white border-navy' 
                                       : 'bg-white hover:bg-slate-100 text-slate-655 border-slate-200'
                                   }`}
                                 >
-                                  {stat.replace('_', ' ')}
+                                  {isStatusUpdating === stat ? (
+                                    <span className="flex items-center space-x-1"><Loader2 className="w-3 h-3 animate-spin" /><span>updating</span></span>
+                                  ) : (
+                                    stat.replace('_', ' ')
+                                  )}
                                 </button>
                               ))}
                             </div>
@@ -993,31 +1183,20 @@ export const AdminDashboard: React.FC = () => {
                 <form onSubmit={handlePlanCreationSubmit} className="space-y-4 text-xs font-sans">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Plan Unique ID *</label>
-                      <input
-                        type="text"
+                      <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Plan Type *</label>
+                      <select
                         required
                         disabled={!!editingPlanId}
-                        value={newPlanId}
-                        onChange={(e) => setNewPlanId(e.target.value)}
-                        placeholder="e.g. basic-plan, mega-shield"
-                        className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none disabled:opacity-50"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Plan Display Name *</label>
-                      <input
-                        type="text"
-                        required
                         value={newPlanName}
                         onChange={(e) => setNewPlanName(e.target.value)}
-                        placeholder="e.g. Mega Shield Cover"
-                        className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none"
-                      />
+                        className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none disabled:opacity-50"
+                      >
+                        <option value="">Select Plan Type</option>
+                        <option value="BASIC">Basic</option>
+                        <option value="PREMIUM">Premium</option>
+                        <option value="BONANZA">Bonanza</option>
+                      </select>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Semester Fee (GH₵) *</label>
                       <input
@@ -1028,6 +1207,9 @@ export const AdminDashboard: React.FC = () => {
                         className="w-full text-xs px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none"
                       />
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
                     <div className="space-y-1.5">
                       <label className="text-[10px] uppercase font-bold text-slate-450 block font-mono">Device limit Allocation *</label>
                       <input
@@ -1067,9 +1249,10 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex space-x-3">
                     <button
                       type="submit"
-                      className="flex-grow py-3.5 bg-royal hover:bg-royal/90 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer shadow-md shadow-royal/10 hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 text-center"
+                      disabled={isPlanSubmitting}
+                      className="flex-grow py-3.5 bg-royal hover:bg-royal/90 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer shadow-md shadow-royal/10 hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 text-center disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                      {editingPlanId ? '⚡ Update Plan Specs' : '⚡ Assemble Cover Option'}
+                      {isPlanSubmitting ? '⏳ Processing...' : (editingPlanId ? '⚡ Update Plan Specs' : '⚡ Assemble Cover Option')}
                     </button>
                     {editingPlanId && (
                       <button
@@ -1092,7 +1275,7 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 <div className="space-y-4">
-                  {dbService.getPlans().map((plan) => (
+                  {plans.map((plan) => (
                     <div 
                       key={plan.id} 
                       className="p-5 border border-slate-100 rounded-2xl bg-slate-50/40 hover:border-royal/30 transition-all duration-200 relative group flex flex-col justify-between"
@@ -1100,7 +1283,7 @@ export const AdminDashboard: React.FC = () => {
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
-                            <span className="font-semibold text-sm text-[#00183D] block">{plan.name}</span>
+                            <span className="font-semibold text-sm text-[#00183D] block">{plan.type || plan.name}</span>
                             <span className={`text-[8px] uppercase font-bold font-mono px-2 py-0.5 rounded-full ${
                               plan.status === 'inactive' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                             }`}>
@@ -1108,14 +1291,14 @@ export const AdminDashboard: React.FC = () => {
                             </span>
                           </div>
                           <span className="text-[9.5px] uppercase font-mono font-semibold px-2.5 py-0.5 bg-royal/5 border border-royal/10 text-royal rounded-full">
-                            GH₵ {plan.price}
+                            GH₵ {plan.fee || plan.price}
                           </span>
                         </div>
-                        <p className="text-[11.5px] text-slate-550 leading-relaxed font-medium">{plan.description}</p>
+                        <p className="text-[11.5px] text-slate-550 leading-relaxed font-medium">{plan.summary || plan.description}</p>
                         <div className="space-y-1.5 pt-2 border-t border-slate-100/50">
                           <span className="text-[8.5px] font-bold uppercase tracking-wider text-slate-405 font-mono block">Plan features:</span>
                           <ul className="space-y-1 text-[10.5px] text-slate-600 font-medium">
-                            {(plan.features || []).map((feat, fIdx) => (
+                            {(plan.benefits || plan.features || []).map((feat, fIdx) => (
                               <li key={fIdx} className="flex items-center space-x-1.5">
                                 <span className="w-1.5 h-1.5 bg-royal rounded-full shrink-0" />
                                 <span>{feat}</span>
@@ -1126,7 +1309,7 @@ export const AdminDashboard: React.FC = () => {
                       </div>
 
                       <div className="pt-4 flex items-center justify-between border-t border-slate-100/50 mt-4">
-                        <span className="text-[10px] text-slate-405 font-mono">Max Devices: <strong>{plan.max_devices || 1}</strong></span>
+                        <span className="text-[10px] text-slate-405 font-mono">Max Devices: <strong>{(plan as any).maxDevices || plan.max_devices || 1}</strong></span>
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => togglePlanStatus(plan.id, plan.status)}
@@ -1188,24 +1371,27 @@ export const AdminDashboard: React.FC = () => {
                     onChange={(e) => setTargetUniCohort(e.target.value)}
                     className="w-full text-xs px-3.5 py-2.5 border border-slate-200 bg-white rounded-xl focus:outline-none"
                   >
-                    <option>University of Ghana (Legon)</option>
-                    <option>Ashesi University</option>
-                    <option>KNUST</option>
+                    <option value="" disabled>Select a University Cohort</option>
+                    {institutions.map(inst => (
+                      <option key={inst.id} value={inst.name}>{inst.name}</option>
+                    ))}
                   </select>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <button
                     onClick={executeCohortDeactivate}
-                    className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer text-center shadow-md shadow-rose-650/10 hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200"
+                    disabled={cohortSubmittingType !== null}
+                    className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer text-center shadow-md shadow-rose-650/10 hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                   >
-                    ⚡ Bulk Suspend Cohort
+                    {cohortSubmittingType === 'suspend' ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Processing...</span></> : '⚡ Bulk Suspend Cohort'}
                   </button>
                   <button
                     onClick={executeCohortExpire}
-                    className="w-full py-3.5 bg-navy hover:bg-navy/95 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer text-center shadow-md shadow-navy/10 hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200"
+                    disabled={cohortSubmittingType !== null}
+                    className="w-full py-3.5 bg-navy hover:bg-navy/95 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer text-center shadow-md shadow-navy/10 hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                   >
-                    ⌛ Bulk Expire Cohort
+                    {cohortSubmittingType === 'expire' ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Processing...</span></> : '⚠️ Bulk Expire Cohort'}
                   </button>
                 </div>
               </div>
@@ -1286,9 +1472,14 @@ export const AdminDashboard: React.FC = () => {
                     )}
                     <button
                       type="submit"
-                      className="flex-grow py-3 bg-royal hover:bg-royal/90 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer shadow-md shadow-royal/10 hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200"
+                      disabled={isInstSubmitting}
+                      className="flex-grow py-3 bg-royal hover:bg-royal/90 text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer shadow-md shadow-royal/10 hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                     >
-                      {editingInstId ? '💾 Save Updates' : '➕ Register Institution'}
+                      {isInstSubmitting ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /><span>Processing...</span></>
+                      ) : (
+                        editingInstId ? '💾 Save Updates' : '➕ Register Institution'
+                      )}
                     </button>
                   </div>
                 </form>
@@ -1415,7 +1606,7 @@ export const AdminDashboard: React.FC = () => {
                   <div className="text-[10.5px]">
                     <span className="text-slate-400 block text-[9.5px]">Cover Plan</span>
                     <span className="font-bold text-royal uppercase block mt-0.5 tracking-tight font-mono">
-                      {selectedMember.subscription?.plan_id.replace('-', ' ') || 'None'} 
+                      {(selectedMember.subscription?.plan?.type || selectedMember.subscription?.plan?.name || selectedMember.subscription?.plan_id || 'None').replace('_', ' ').replace('-', ' ')} 
                       <span className="lowercase font-normal text-slate-400 font-sans ml-1">({selectedMember.subscription?.status})</span>
                     </span>
                   </div>

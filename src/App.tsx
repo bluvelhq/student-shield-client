@@ -5,7 +5,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
-import { dbService } from './services/db';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { LandingHero } from './components/sections/LandingHero';
@@ -76,20 +75,17 @@ function MainLayout() {
 
       if (subId && userId) {
         setVerifying(true);
-        setTimeout(() => {
-          dbService.activateSubscription(
-            subId,
-            userId,
-            planId || 'basic-plan',
-            Number(amount) || 20,
-            reference || `REF-SIM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-            'MTN Mobile Money'
-          );
-          refreshData();
+        import('./services/paymentService').then(async ({ paymentService }) => {
+          try {
+            await paymentService.devActivatePayment(reference);
+          } catch (e) {
+            console.warn('Dev activation failed:', e);
+          }
+          await refreshData();
           window.history.replaceState({}, document.title, window.location.pathname);
           navigate('dashboard');
           setVerifying(false);
-        }, 800);
+        });
       }
     }
   }, []);
@@ -100,20 +96,17 @@ function MainLayout() {
     setShowMockCheckout(false);
 
     if (success) {
-      setTimeout(() => {
-        dbService.activateSubscription(
-          mockDetails.subId,
-          mockDetails.userId,
-          mockDetails.planId,
-          Number(mockDetails.amount) || 20,
-          mockDetails.reference || `REF-SIM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
-          'MTN Mobile Money'
-        );
-        refreshData();
+      import('./services/paymentService').then(async ({ paymentService }) => {
+        try {
+          await paymentService.devActivatePayment(mockDetails.reference);
+        } catch (e) {
+          console.warn('Dev activation failed:', e);
+        }
+        await refreshData();
         window.history.replaceState({}, document.title, window.location.pathname);
         navigate('dashboard');
         setVerifying(false);
-      }, 800);
+      });
       return;
     }
 

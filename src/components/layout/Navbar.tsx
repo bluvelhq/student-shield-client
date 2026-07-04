@@ -13,6 +13,7 @@ export const Navbar: React.FC = () => {
   const { activeView, navigate, user, profile, logout } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   // Active section tracker for the landing/home page sections
@@ -21,11 +22,21 @@ export const Navbar: React.FC = () => {
   >("home");
 
   useEffect(() => {
+    let lastScrollY = window.scrollY;
+
     const handleScrollTransition = () => {
       const currentScrollY = window.scrollY;
 
       // Determine if scrolled past top offset for sticky glass appearance
       setIsScrolled(currentScrollY > 20);
+
+      // Hide on scroll down, show on scroll up
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        setIsHidden(true);
+      } else {
+        setIsHidden(false);
+      }
+      lastScrollY = currentScrollY;
     };
 
     window.addEventListener("scroll", handleScrollTransition, {
@@ -135,7 +146,7 @@ export const Navbar: React.FC = () => {
       <motion.div
         animate={{
           width: isScrolled || !isMainPage ? "90%" : "100%",
-          y: isScrolled || !isMainPage ? 12 : 0,
+          y: isHidden ? -100 : (isScrolled || !isMainPage ? 12 : 0),
           borderRadius: isScrolled || !isMainPage ? "9999px" : "0px", // Modern capsule rounded corner style!
           backgroundColor:
             isScrolled || !isMainPage
@@ -160,7 +171,7 @@ export const Navbar: React.FC = () => {
           borderWidth: "1px",
           borderStyle: "solid",
         }}
-        className="w-full max-w-6xl px-6 pointer-events-auto h-16 flex items-center justify-between transition-all duration-300 relative"
+        className="w-full max-w-6xl px-6 pointer-events-auto h-16 flex items-center justify-between transition-all duration-300 relative max-md:!bg-transparent max-md:!shadow-none max-md:!border-transparent max-md:!backdrop-blur-none max-md:!rounded-none max-md:!w-full max-md:!translate-y-0"
       >
         {/* Brand Logo with Geometric 'S' emblem */}
         <div
@@ -280,7 +291,7 @@ export const Navbar: React.FC = () => {
         <div className="flex md:hidden items-center">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`p-2 rounded-none transition-colors ${isDarkBg ? "text-white hover:bg-white/5" : "text-navy hover:bg-navy/5"}`}
+            className="p-2 rounded-none transition-colors text-navy hover:bg-navy/5"
           >
             {mobileMenuOpen ? (
               <X className="w-6 h-6" />

@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { dbService } from '../services/db';
+import { authService } from '../services/authService';
 import { 
   Shield, 
   Mail, 
@@ -24,24 +24,24 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 export const InsurePage: React.FC = () => {
-  const { navigate, refreshData, viewState } = useApp();
+  const { navigate, refreshData, viewState, register } = useApp();
   
   // Plan State selection defaulting to basic-plan or passed parameter
-  const [selectedPlan, setSelectedPlan] = useState<'basic-plan' | 'premium-plan' | 'bonanza-plan'>(
-    (viewState?.selectPlanId === 'premium-plan') ? 'premium-plan' : 
-    (viewState?.selectPlanId === 'bonanza-plan') ? 'bonanza-plan' : 'basic-plan'
-  );
+  const [selectedPlan, setSelectedPlan] = useState<string>('');
+  
+  const [institutions, setInstitutions] = useState<any[]>([]);
+  const [plans, setPlans] = useState<any[]>([]);
 
   // Sync state if viewState propagation changes selectPlanId
   React.useEffect(() => {
-    if (viewState?.selectPlanId === 'premium-plan') {
-      setSelectedPlan('premium-plan');
-    } else if (viewState?.selectPlanId === 'bonanza-plan') {
-      setSelectedPlan('bonanza-plan');
-    } else if (viewState?.selectPlanId === 'basic-plan') {
-      setSelectedPlan('basic-plan');
+    if (viewState?.selectPlanId && plans.length > 0) {
+      const mappedType = viewState.selectPlanId === 'bonanza-plan' ? 'BONANZA' : (viewState.selectPlanId === 'premium-plan' ? 'PREMIUM' : 'BASIC');
+      const foundPlan = plans.find((p: any) => p.type === mappedType || p.id === viewState.selectPlanId);
+      if (foundPlan) {
+        setSelectedPlan(foundPlan.id);
+      }
     }
-  }, [viewState]);
+  }, [viewState, plans]);
 
   // Form Field States
   const [firstName, setFirstName] = useState('');
@@ -55,13 +55,31 @@ export const InsurePage: React.FC = () => {
   const [hostel, setHostel] = useState('');
   const [momoNumber, setMomoNumber] = useState('');
 
-  const [institutions, setInstitutions] = useState<string[]>([]);
   React.useEffect(() => {
-    const list = dbService.getInstitutions().map(i => i.name);
-    setInstitutions(list);
-    if (list.length > 0) {
-      setUniversity(list[0]);
-    }
+    authService.getInstitutions()
+      .then(list => {
+        setInstitutions(list);
+        if (list.length > 0) {
+          setUniversity(list[0].id);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch institutions:', err);
+        setInstitutions([]);
+      });
+
+    authService.getPlans()
+      .then(res => {
+         setPlans(res || []);
+         if (res && res.length > 0) {
+           const basicPlan = res.find((p: any) => p.type === 'BASIC');
+           setSelectedPlan(basicPlan ? basicPlan.id : res[0].id);
+         }
+      })
+      .catch(err => {
+        console.error('Failed to load plans:', err);
+        setPlans([]);
+      });
   }, []);
 
   // Auxiliary States
@@ -75,7 +93,6 @@ export const InsurePage: React.FC = () => {
     setSuccessMsg('');
     setLoading(true);
 
-    // Standard Client Validation
     if (!firstName || !lastName || !phone || !email || !momoNumber || !gender || !university) {
       setErrorMsg('Please complete all required fields marked with an asterisk (*).');
       setLoading(false);
@@ -89,26 +106,26 @@ export const InsurePage: React.FC = () => {
     }
 
     const fullName = `${firstName} ${lastName}`.trim();
-    const finalPrice = selectedPlan === 'bonanza-plan' ? 120 : (selectedPlan === 'premium-plan' ? 50 : 20);
 
-    const offlineUserSession = dbService.signUp({
-      email,
-      fullName,
-      university,
-      studentId: studentId || `TBD-${Math.floor(100000 + Math.random() * 900000)}`,
-      phone,
-      gender,
-      role: 'student'
-    });
-
-    const pendingSubId = `sub-${Math.random().toString(36).substring(2, 9)}`;
-    const ref = `REF-SIM-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
-    const checkoutMockUrl = `${window.location.origin}?mock_checkout=1&reference=${ref}&amount=${finalPrice}&subId=${pendingSubId}&userId=${offlineUserSession.user.id}&planId=${selectedPlan}`;
-    
-    setSuccessMsg('Onboarding successful! Connecting securely with Paystack checkout hub...');
-    setTimeout(() => {
-      window.location.href = checkoutMockUrl;
-    }, 800);
+    try {
+      setSuccessMsg('Onboarding successful! Connecting securely with Paystack checkout hub...');
+      
+      await register({
+        email,
+        fullName,
+        universityId: university, // university state stores selected institution ID
+        studentId: studentId || `TBD-${Math.floor(100000 + Math.random() * 900000)}`,
+        phone: phone.replace(/[\s+-]/g, ""),
+        gender: gender.toUpperCase() as any, // "MALE" or "FEMALE"
+        residence: hostel || 'Campus Residence',
+        level: level ? Number(level) : 100,
+        planId: selectedPlan
+      });
+    } catch (err: any) {
+      console.error('API registration failed:', err);
+      setErrorMsg(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -137,70 +154,42 @@ export const InsurePage: React.FC = () => {
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            
-            {/* Basic Plan option */}
-            <div 
-              onClick={() => setSelectedPlan('basic-plan')}
-              className={`p-5 bg-white border cursor-pointer transition-all flex flex-col justify-between text-left rounded-xl ${
-                selectedPlan === 'basic-plan' 
-                  ? 'border-royal ring-1 ring-royal bg-white shadow-sm' 
-                  : 'border-slate-200 hover:border-slate-300 shadow-none'
-              }`}
-            >
-              <div>
-                <span className="text-xs font-bold text-slate-900 block font-sans">Basic Plan</span>
-                <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
-                  <span className="text-xl font-semibold text-[#00183D] font-sans">GH₵20</span>
-                  <span className="text-slate-450 text-[9px] font-semibold font-sans">/ sem</span>
-                </div>
+            {plans.length === 0 ? (
+              <div className="col-span-1 md:col-span-3 text-center py-8 text-slate-500 font-medium bg-slate-50 border border-dashed border-slate-300 rounded-xl">
+                No coverage plans available at the moment. Please check back later.
               </div>
-              <p className="text-[10px] text-slate-500 mt-1 font-medium select-none font-sans leading-normal">
-                Unlimited software install & fault diagnosis support.
-              </p>
-            </div>
-
-            {/* Premium Plan option */}
-            <div 
-              onClick={() => setSelectedPlan('premium-plan')}
-              className={`p-5 bg-white border cursor-pointer transition-all flex flex-col justify-between text-left rounded-xl relative overflow-hidden ${
-                selectedPlan === 'premium-plan' 
-                  ? 'border-royal ring-1 ring-royal bg-white shadow-sm' 
-                  : 'border-slate-200 hover:border-slate-300 shadow-none'
-              }`}
-            >
-              <div>
-                <span className="text-xs font-bold text-slate-900 block font-sans">Premium Shield ⭐️</span>
-                <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
-                  <span className="text-xl font-semibold text-[#00183D] font-sans">GH₵50</span>
-                  <span className="text-slate-450 text-[9px] font-semibold font-sans">/ sem</span>
-                </div>
-              </div>
-              <p className="text-[10px] text-slate-500 mt-1 font-medium select-none font-sans leading-normal">
-                Free repair labor + free personal portfolio website setup.
-              </p>
-            </div>
-
-            {/* Bonanza Plan option */}
-            <div 
-              onClick={() => setSelectedPlan('bonanza-plan')}
-              className={`p-5 bg-white border cursor-pointer transition-all flex flex-col justify-between text-left rounded-xl relative overflow-hidden ${
-                selectedPlan === 'bonanza-plan' 
-                  ? 'border-amber-500 ring-1 ring-amber-500 bg-[#FFFDF6] shadow-sm' 
-                  : 'border-slate-200 hover:border-slate-300 shadow-none'
-              }`}
-            >
-              <div>
-                <span className="text-xs font-bold text-amber-900 block font-sans">Bonanza Plan 🚀</span>
-                <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
-                  <span className="text-xl font-semibold text-amber-950 font-sans">GH₵120</span>
-                  <span className="text-amber-700 text-[9px] font-semibold font-sans">/ sem</span>
-                </div>
-              </div>
-              <p className="text-[10px] text-amber-800 mt-1 font-medium select-none font-sans leading-normal">
-                3 devices + Business Web Setup + Hosting + Consultations.
-              </p>
-            </div>
-
+            ) : (
+              plans.map((p) => {
+                const isSelected = selectedPlan === p.id;
+                const isBonanza = p.type === 'BONANZA';
+                return (
+                  <div 
+                    key={p.id}
+                    onClick={() => setSelectedPlan(p.id)}
+                    className={`p-5 bg-white border cursor-pointer transition-all flex flex-col justify-between text-left rounded-xl relative overflow-hidden ${
+                      isSelected 
+                        ? isBonanza
+                          ? 'border-amber-500 ring-1 ring-amber-500 bg-[#FFFDF6] shadow-sm'
+                          : 'border-royal ring-1 ring-royal bg-white shadow-sm' 
+                        : 'border-slate-200 hover:border-slate-300 shadow-none'
+                    }`}
+                  >
+                    <div>
+                      <span className={`text-xs font-bold block font-sans ${isBonanza ? 'text-amber-900' : 'text-slate-900'}`}>
+                        {p.type.charAt(0) + p.type.slice(1).toLowerCase()} Plan {isBonanza ? '🚀' : p.type === 'PREMIUM' ? '⭐️' : ''}
+                      </span>
+                      <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
+                        <span className={`text-xl font-semibold font-sans ${isBonanza ? 'text-amber-950' : 'text-[#00183D]'}`}>GH₵{p.fee}</span>
+                        <span className={`${isBonanza ? 'text-amber-700' : 'text-slate-450'} text-[9px] font-semibold font-sans`}>/ sem</span>
+                      </div>
+                    </div>
+                    <p className={`text-[10px] mt-1 font-medium select-none font-sans leading-normal ${isBonanza ? 'text-amber-800' : 'text-slate-500'}`}>
+                      {p.summary || p.description}
+                    </p>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -263,9 +252,8 @@ export const InsurePage: React.FC = () => {
                     className="w-full text-xs px-4 py-2.5 border border-slate-200 rounded-none text-slate-800 bg-white focus:outline-none focus:border-royal appearance-none cursor-pointer font-sans font-medium"
                   >
                     <option value="">Select gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
                   </select>
                   <ChevronDown className="absolute right-3.5 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
                 </div>
@@ -328,7 +316,7 @@ export const InsurePage: React.FC = () => {
                     className="w-full text-xs px-4 py-2.5 border border-slate-200 rounded-none text-slate-800 bg-white focus:outline-none focus:border-royal appearance-none cursor-pointer font-sans font-medium"
                   >
                     {institutions.map(inst => (
-                      <option key={inst} value={inst}>{inst}</option>
+                      <option key={inst.id} value={inst.id}>{inst.name}</option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-3.5 top-3 w-4 h-4 text-slate-400 pointer-events-none" />

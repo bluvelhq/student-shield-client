@@ -1,68 +1,10 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import re
 
-import React from 'react';
-import { useApp } from '../../context/AppContext';
-import { Check, X, Minus, Shield, HelpCircle, Sparkles } from 'lucide-react';
-import { motion } from 'motion/react';
-import { authService } from '../../services/authService';
-import { useState, useEffect } from 'react';
+with open("src/components/sections/PricingGrid.tsx", "r", encoding="utf-8") as f:
+    content = f.read()
 
-export const PricingGrid: React.FC = () => {
-  const { navigate, user } = useApp();
-  const [plans, setPlans] = useState<any[]>([]);
-
-  useEffect(() => {
-    authService.getPlans()
-      .then(res => setPlans(res || []))
-      .catch(err => {
-        console.error('Failed to fetch plans:', err);
-        setPlans([]);
-      });
-  }, []);
-
-  const handleSubscribeClick = (planId: string) => {
-    if (user) {
-      if (user.role === 'admin') {
-        navigate('admin');
-      } else {
-        navigate('dashboard', { tab: 'billing', selectPlanId: planId });
-      }
-    } else {
-      navigate('register', { selectPlanId: planId });
-    }
-  };
-
-  const planFeatures = [
-    { name: 'Software installation for one device per semester', basic: true, premium: true, bonanza: true },
-    { name: 'Free diagnosis for hardware faults', basic: true, premium: true, bonanza: true },
-    { name: 'Repair coordination & transport support', basic: true, premium: true, bonanza: true },
-    { name: 'Free technician repair labor fees', basic: false, premium: true, bonanza: true },
-    { name: 'Free tech consultations for the semester', basic: false, premium: false, bonanza: true },
-    { name: 'Monthly maintenance and health checks', basic: false, premium: false, bonanza: true },
-    { name: 'Max registered academic devices covered', basic: '1 device', premium: '1 device', bonanza: 'Up to 3 devices' }
-  ];
-
-  return (
-    <div id="coverage-plans" className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* Header Titles */}
-        <div className="text-center max-w-3xl mx-auto mb-20 select-none">
-          <span className="text-[11px] font-body font-semibold text-royal block mb-4 uppercase tracking-wide">
-            Pricing Plans
-          </span>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-bold tracking-tight text-navy mb-6">
-            Choose Your Protection Plan
-          </h2>
-          <p className="text-lg text-slate-600 leading-relaxed font-body font-light max-w-2xl mx-auto">
-            Flexible semester rates with no hidden fees. Choose what works best for your academic needs.
-          </p>
-        </div>
-
-        
+# Replace the static cards with mapped cards
+mapped_code = """
         {/* Flat pricing cards layout - 3 columns */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-20">
           {plans.map((p: any) => {
@@ -162,53 +104,30 @@ export const PricingGrid: React.FC = () => {
             );
           })}
         </div>
+"""
 
-        {/* High-Fidelity Comparison Table */}
-        <div className="hidden md:block max-w-5xl mx-auto mb-20 border border-slate-200/40 rounded-none overflow-hidden bg-white select-none shadow-none">
-          <div className="bg-white px-6 py-4.5 border-b border-slate-100 text-left">
-            <h3 className="text-sm font-bold text-navy">Feature-by-Feature Plan Alignment</h3>
-          </div>
-          <table className="w-full text-xs text-left">
-            <thead>
-              <tr className="bg-white border-b border-slate-100 font-semibold text-slate-500">
-                <th className="px-6 py-3.5">Technical Cover Feature</th>
-                <th className="px-6 py-3.5 w-32 text-center">Basic (GH₵20)</th>
-                <th className="px-6 py-3.5 w-32 text-center">Premium (GH₵50)</th>
-                <th className="px-6 py-3.5 w-32 text-center text-amber-700">Bonanza (GH₵120)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
-              {planFeatures.map((feat, index) => (
-                <tr key={index} className="hover:bg-slate-50/10 transition-colors">
-                  <td className="px-6 py-3.5 font-medium">{feat.name}</td>
-                  <td className="px-6 py-3.5 text-center">
-                    {typeof feat.basic === 'boolean' ? (
-                      feat.basic ? <Check className="w-4.5 h-4.5 text-emerald-500 mx-auto" /> : <X className="w-4.5 h-4.5 text-slate-300 mx-auto" />
-                    ) : (
-                      <span className="font-semibold text-slate-600 font-mono">{feat.basic}</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-3.5 text-center">
-                    {typeof feat.premium === 'boolean' ? (
-                      feat.premium ? <Check className="w-4.5 h-4.5 text-emerald-500 mx-auto" /> : <X className="w-4.5 h-4.5 text-slate-300 mx-auto" />
-                    ) : (
-                      <span className="font-semibold text-royal font-mono">{feat.premium}</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-3.5 text-center">
-                    {typeof feat.bonanza === 'boolean' ? (
-                      feat.bonanza ? <Check className="w-4.5 h-4.5 text-amber-600 mx-auto" /> : <X className="w-4.5 h-4.5 text-slate-300 mx-auto" />
-                    ) : (
-                      <span className="font-bold text-amber-700 font-mono">{feat.bonanza}</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+# Extract the static layout code
+pattern = re.compile(r"\{\/\* Flat pricing cards layout - 3 columns \*\/\}.*?\{\/\* High-Fidelity Comparison Table \*\/\}", re.DOTALL)
+content = pattern.sub(mapped_code + "\n        {/* High-Fidelity Comparison Table */}", content)
 
-      </div>
-    </div>
-  );
-};
+# Add state and useEffect for plans
+import_pattern = re.compile(r"import \{ motion \} from 'motion/react';")
+content = import_pattern.sub("import { motion } from 'motion/react';\nimport { authService } from '../../services/authService';\nimport { useState, useEffect } from 'react';", content)
+
+component_pattern = re.compile(r"export const PricingGrid: React\.FC = \(\) => \{\n  const \{ navigate, user \} = useApp\(\);")
+component_repl = """export const PricingGrid: React.FC = () => {
+  const { navigate, user } = useApp();
+  const [plans, setPlans] = useState<any[]>([]);
+
+  useEffect(() => {
+    authService.getPlans()
+      .then(res => setPlans(res || []))
+      .catch(err => {
+        console.error('Failed to fetch plans:', err);
+        setPlans([]);
+      });
+  }, []);"""
+content = component_pattern.sub(component_repl, content)
+
+with open("src/components/sections/PricingGrid.tsx", "w", encoding="utf-8") as f:
+    f.write(content)
