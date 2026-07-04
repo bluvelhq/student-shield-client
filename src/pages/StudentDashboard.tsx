@@ -1632,6 +1632,17 @@ export const StudentDashboard: React.FC = () => {
                       </div>
                     );
                   })}
+                  
+                  <p className="text-[10px] text-slate-450 text-center font-sans mt-4 leading-normal">
+                    By modifying or renewing plans, you agree to our{" "}
+                    <button
+                      onClick={() => navigate('service-agreement')}
+                      className="text-royal font-semibold hover:underline cursor-pointer"
+                    >
+                      Service Agreement
+                    </button>
+                    .
+                  </p>
                 </div>
               </div>
 

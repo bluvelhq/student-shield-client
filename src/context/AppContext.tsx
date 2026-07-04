@@ -83,6 +83,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return 'blog';
       case '/help-center':
         return 'help-center';
+      case '/service-agreement':
+        return 'service-agreement';
       case '/login':
         return 'login';
       case '/register':

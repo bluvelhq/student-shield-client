@@ -1293,3 +1293,91 @@ export const HelpCenterPage: React.FC = () => {
     </div>
   );
 };
+
+export const ServiceAgreementPage: React.FC = () => {
+  const { navigate } = useApp();
+
+  return (
+    <div className="selection:bg-royal selection:text-white bg-white font-sans min-h-screen text-slate-800 pb-20 overflow-hidden leading-relaxed">
+      <div className="relative pt-36 pb-16 px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-100 text-center text-[#00183D]">
+        <div className="absolute inset-0 w-full h-full opacity-100 pointer-events-auto z-0 overflow-hidden [--cell-border-color:rgba(37,99,235,0.15)] [--cell-fill-color:rgba(37,99,235,0.005)]">
+          <BackgroundRippleEffect rows={6} cols={35} cellSize={60} />
+        </div>
+
+        <div className="max-w-4xl mx-auto relative z-10 space-y-4 select-none">
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-royal/10 to-blue-600/10 border border-royal/20 rounded-full px-4 py-1.5 text-[10px] text-royal font-bold uppercase tracking-widest font-mono shadow-sm">
+            <Shield className="w-3.5 h-3.5" />
+            <span>LEGAL & RULES OF SERVICE</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#00183D] font-sans">
+            StudentShield Service Agreement
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
+            Please read these terms carefully. By subscribing to any StudentShield protection plan, you agree to these operating principles and service limits.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 space-y-10 font-sans">
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold text-navy">1. Platform Scope & Eligibility</h2>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+            StudentShield provides technology diagnostics, minor hardware checkups, and software troubleshooting services specifically for active university students in Ghana. To be eligible for plan registration, you must possess a valid academic email address and student identification code.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold text-navy">2. Protection Plan Limits & Labor Fees</h2>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+            Your semester subscription covers technician labor fees and diagnostic assessments based on your selected tier (Basic, Premium, or Bonanza). 
+          </p>
+          <ul className="list-disc pl-5 text-xs sm:text-sm text-slate-600 space-y-2 font-medium">
+            <li><strong>Labor Coverage:</strong> Basic coverage covers software diagnosis and general health reports. Premium/Bonanza tiers cover full labor coordinates for physical component replacements.</li>
+            <li><strong>Hardware Parts Cost Exclusion:</strong> Subscription plans do NOT cover the cost of physical replacement parts (e.g., keyboards, screens, hard drives, batteries, charging ports). Students are responsible for procuring parts, though our hub technicians will assist with free installation labor.</li>
+            <li><strong>Device Limits:</strong> Coverage is restricted strictly to the specific system serial numbers registered on your StudentShield dashboard profile.</li>
+          </ul>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold text-navy">3. Data Backup & Limitation of Liability</h2>
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start space-x-3">
+            <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <span className="text-xs font-bold text-amber-800 block">CRITICAL DATA DISCLAIMER</span>
+              <p className="text-[11px] text-amber-700 leading-relaxed font-medium">
+                StudentShield is NOT liable for any loss of academic progress, personal files, source code, or media assets during diagnostic re-installs, malware sweeps, or physical hardware repairs. <strong>It is the sole responsibility of the student subscriber to back up their data prior to handing over a device to hub technicians.</strong>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold text-navy">4. Subscription Term & Paystack Billing</h2>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+            Plans run strictly on a per-semester schedule and automatically expire at the end of the academic period. All transactions are securely initialized through Paystack. Due to instant setup allocations, plan fees are non-refundable once payment verification has succeeded.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold text-navy">5. Courier & Transportation Support</h2>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+            For complex logic board repairs or hardware issues requiring specialized laboratory machinery, StudentShield coordinates secure transport and shipping to certified external partners. We bear the shipping transit risk, but partner service pricing logs will be shared transparently for your approval before work begins.
+          </p>
+        </section>
+
+        <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-[11px] text-slate-550 font-medium">
+            Last Updated: July 2026 | StudentShield Ghana
+          </p>
+          <button
+            onClick={() => navigate('landing')}
+            className="px-5 py-2.5 bg-royal text-white font-bold text-xs rounded-full hover:bg-royal/90 shadow-md shadow-royal/10 transition-all cursor-pointer"
+          >
+            Return to Homepage
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+

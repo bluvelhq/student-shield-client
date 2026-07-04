@@ -175,7 +175,7 @@ export const Footer: React.FC = () => {
             <span>•</span>
             <button onClick={() => navigate('about')} className="hover:text-royal transition-colors">Privacy Principles</button>
             <span>•</span>
-            <button onClick={() => navigate('contact')} className="hover:text-royal transition-colors">Legal & T&C</button>
+            <button onClick={() => navigate('service-agreement')} className="hover:text-royal transition-colors">Service Agreement</button>
           </div>
         </div>
       </div>

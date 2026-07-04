@@ -468,17 +468,6 @@ export const AuthPages: React.FC<{
                     className="w-full text-xs pl-9 pr-3 py-2 border border-slate-200 bg-slate-50/50 text-slate-800 focus:outline-none focus:border-royal focus:bg-white transition-all rounded-none"
                   />
                 </div>
-                <div className="text-[10px] text-slate-500 mt-1 font-sans">
-                  For testing, use:{" "}
-                  <strong className="text-royal font-mono font-bold select-all">
-                    SS-TECH-01
-                  </strong>{" "}
-                  (Admin) or{" "}
-                  <strong className="text-royal font-mono font-bold select-all">
-                    SS-AGENT-01
-                  </strong>{" "}
-                  (Support)
-                </div>
               </div>
             ) : type === "login" ? (
               <div className="space-y-1 font-sans">
@@ -540,6 +529,20 @@ export const AuthPages: React.FC<{
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {type === "register" && (
+              <p className="text-[10px] text-slate-450 text-center font-sans mt-2 mb-3 leading-normal">
+                By subscribing, you agree to our{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("service-agreement")}
+                  className="text-royal font-semibold hover:underline cursor-pointer"
+                >
+                  Service Agreement
+                </button>
+                .
+              </p>
+            )}
 
             <button
               type="submit"

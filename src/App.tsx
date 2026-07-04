@@ -19,7 +19,8 @@ import {
   ServicesPage, 
   ContactPage, 
   BlogPage, 
-  HelpCenterPage 
+  HelpCenterPage,
+  ServiceAgreementPage
 } from './pages/PublicPages';
 import { AuthPages } from './pages/AuthPages';
 import { InsurePage } from './pages/InsurePage';
@@ -188,6 +189,13 @@ function MainLayout() {
         return (
           <motion.div key="help-center" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <HelpCenterPage />
+          </motion.div>
+        );
+
+      case 'service-agreement':
+        return (
+          <motion.div key="service-agreement" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+            <ServiceAgreementPage />
           </motion.div>
         );
 
