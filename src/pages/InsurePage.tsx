@@ -3,40 +3,47 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { useApp } from '../context/AppContext';
-import { authService } from '../services/authService';
-import { 
-  Shield, 
-  Mail, 
-  User, 
-  Phone, 
-  CheckCircle, 
-  GraduationCap, 
-  Unlock, 
-  Info, 
-  Laptop, 
-  Lock, 
+import React, { useState } from "react";
+import { useApp } from "../context/AppContext";
+import { authService } from "../services/authService";
+import {
+  Shield,
+  Mail,
+  User,
+  Phone,
+  CheckCircle,
+  GraduationCap,
+  Unlock,
+  Info,
+  Laptop,
+  Lock,
   Coins,
   CreditCard,
-  ChevronDown
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+  ChevronDown,
+} from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 export const InsurePage: React.FC = () => {
   const { navigate, refreshData, viewState, register } = useApp();
-  
+
   // Plan State selection defaulting to basic-plan or passed parameter
-  const [selectedPlan, setSelectedPlan] = useState<string>('');
-  
+  const [selectedPlan, setSelectedPlan] = useState<string>("");
+
   const [institutions, setInstitutions] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
 
   // Sync state if viewState propagation changes selectPlanId
   React.useEffect(() => {
     if (viewState?.selectPlanId && plans.length > 0) {
-      const mappedType = viewState.selectPlanId === 'bonanza-plan' ? 'BONANZA' : (viewState.selectPlanId === 'premium-plan' ? 'PREMIUM' : 'BASIC');
-      const foundPlan = plans.find((p: any) => p.type === mappedType || p.id === viewState.selectPlanId);
+      const mappedType =
+        viewState.selectPlanId === "bonanza-plan"
+          ? "BONANZA"
+          : viewState.selectPlanId === "premium-plan"
+            ? "PREMIUM"
+            : "BASIC";
+      const foundPlan = plans.find(
+        (p: any) => p.type === mappedType || p.id === viewState.selectPlanId,
+      );
       if (foundPlan) {
         setSelectedPlan(foundPlan.id);
       }
@@ -44,63 +51,75 @@ export const InsurePage: React.FC = () => {
   }, [viewState, plans]);
 
   // Form Field States
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [studentId, setStudentId] = useState('');
-  const [university, setUniversity] = useState('');
-  const [gender, setGender] = useState('');
-  const [level, setLevel] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [hostel, setHostel] = useState('');
-  const [momoNumber, setMomoNumber] = useState('');
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [studentId, setStudentId] = useState("");
+  const [university, setUniversity] = useState("");
+  const [gender, setGender] = useState("");
+  const [level, setLevel] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [hostel, setHostel] = useState("");
+  const [momoNumber, setMomoNumber] = useState("");
 
   React.useEffect(() => {
-    authService.getInstitutions()
-      .then(list => {
+    authService
+      .getInstitutions()
+      .then((list) => {
         setInstitutions(list);
         if (list.length > 0) {
           setUniversity(list[0].id);
         }
       })
-      .catch(err => {
-        console.error('Failed to fetch institutions:', err);
+      .catch((err) => {
+        console.error("Failed to fetch institutions:", err);
         setInstitutions([]);
       });
 
-    authService.getPlans()
-      .then(res => {
-         setPlans(res || []);
-         if (res && res.length > 0) {
-           const basicPlan = res.find((p: any) => p.type === 'BASIC');
-           setSelectedPlan(basicPlan ? basicPlan.id : res[0].id);
-         }
+    authService
+      .getPlans()
+      .then((res) => {
+        setPlans(res || []);
+        if (res && res.length > 0) {
+          const basicPlan = res.find((p: any) => p.type === "BASIC");
+          setSelectedPlan(basicPlan ? basicPlan.id : res[0].id);
+        }
       })
-      .catch(err => {
-        console.error('Failed to load plans:', err);
+      .catch((err) => {
+        console.error("Failed to load plans:", err);
         setPlans([]);
       });
   }, []);
 
   // Auxiliary States
-  const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
+    setErrorMsg("");
+    setSuccessMsg("");
     setLoading(true);
 
-    if (!firstName || !lastName || !phone || !email || !momoNumber || !gender || !university) {
-      setErrorMsg('Please complete all required fields marked with an asterisk (*).');
+    if (
+      !firstName ||
+      !lastName ||
+      !phone ||
+      !email ||
+      !momoNumber ||
+      !gender ||
+      !university
+    ) {
+      setErrorMsg(
+        "Please complete all required fields marked with an asterisk (*).",
+      );
       setLoading(false);
       return;
     }
 
-    if (!email.includes('@')) {
-      setErrorMsg('A valid student academic email is required.');
+    if (!email.includes("@")) {
+      setErrorMsg("A valid student academic email is required.");
       setLoading(false);
       return;
     }
@@ -108,42 +127,48 @@ export const InsurePage: React.FC = () => {
     const fullName = `${firstName} ${lastName}`.trim();
 
     try {
-      setSuccessMsg('Onboarding successful! Connecting securely with Paystack checkout hub...');
-      
+      setSuccessMsg(
+        "Onboarding successful! Connecting securely with Paystack checkout hub...",
+      );
+
       await register({
         email,
         fullName,
         universityId: university, // university state stores selected institution ID
-        studentId: studentId || `TBD-${Math.floor(100000 + Math.random() * 900000)}`,
+        studentId:
+          studentId || `TBD-${Math.floor(100000 + Math.random() * 900000)}`,
         phone: phone.replace(/[\s+-]/g, ""),
         gender: gender.toUpperCase() as any, // "MALE" or "FEMALE"
-        residence: hostel || 'Campus Residence',
+        residence: hostel || "Campus Residence",
         level: level ? Number(level) : 100,
-        planId: selectedPlan
+        planId: selectedPlan,
       });
     } catch (err: any) {
-      console.error('API registration failed:', err);
-      setErrorMsg(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
+      console.error("API registration failed:", err);
+      setErrorMsg(
+        err.response?.data?.message ||
+          err.message ||
+          "Registration failed. Please try again.",
+      );
       setLoading(false);
     }
   };
 
   return (
     <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-white min-h-screen font-sans select-none text-left relative overflow-hidden">
-      
       {/* Background Graphic Accents */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-royal/3 filter blur-3xl rounded-none pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-golden/3 filter blur-3xl rounded-none pointer-events-none" />
 
       <div className="max-w-3xl mx-auto relative z-10 space-y-8">
-        
         {/* Title Header Section */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#00183D] font-sans">
             Insure Your Laptop Today
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed font-sans font-medium">
-            Fill in your details and choose a plan. Coverage activates as soon as payment is confirmed.
+            Fill in your details and choose a plan. Coverage activates as soon
+            as payment is confirmed.
           </p>
         </div>
 
@@ -152,38 +177,52 @@ export const InsurePage: React.FC = () => {
           <h2 className="text-[10px] sm:text-[11px] uppercase font-bold tracking-widest text-royal font-mono leading-none">
             SELECT YOUR PLAN
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {plans.length === 0 ? (
               <div className="col-span-1 md:col-span-3 text-center py-8 text-slate-500 font-medium bg-slate-50 border border-dashed border-slate-300 rounded-xl">
-                No coverage plans available at the moment. Please check back later.
+                No coverage plans available at the moment. Please check back
+                later.
               </div>
             ) : (
               plans.map((p) => {
                 const isSelected = selectedPlan === p.id;
-                const isBonanza = p.type === 'BONANZA';
+                const isBonanza = p.type === "BONANZA";
                 return (
-                  <div 
+                  <div
                     key={p.id}
                     onClick={() => setSelectedPlan(p.id)}
                     className={`p-5 bg-white border cursor-pointer transition-all flex flex-col justify-between text-left rounded-xl relative overflow-hidden ${
-                      isSelected 
+                      isSelected
                         ? isBonanza
-                          ? 'border-amber-500 ring-1 ring-amber-500 bg-[#FFFDF6] shadow-sm'
-                          : 'border-royal ring-1 ring-royal bg-white shadow-sm' 
-                        : 'border-slate-200 hover:border-slate-300 shadow-none'
+                          ? "border-amber-500 ring-1 ring-amber-500 bg-[#FFFDF6] shadow-sm"
+                          : "border-royal ring-1 ring-royal bg-white shadow-sm"
+                        : "border-slate-200 hover:border-slate-300 shadow-none"
                     }`}
                   >
                     <div>
-                      <span className={`text-xs font-bold block font-sans ${isBonanza ? 'text-amber-900' : 'text-slate-900'}`}>
-                        {p.type.charAt(0) + p.type.slice(1).toLowerCase()} Plan {isBonanza ? '🚀' : p.type === 'PREMIUM' ? '⭐️' : ''}
+                      <span
+                        className={`text-xs font-bold block font-sans ${isBonanza ? "text-amber-900" : "text-slate-900"}`}
+                      >
+                        {p.type.charAt(0) + p.type.slice(1).toLowerCase()} Plan{" "}
+                        {isBonanza ? "🚀" : p.type === "PREMIUM" ? "⭐️" : ""}
                       </span>
                       <div className="flex items-baseline space-x-1 mt-2 mb-1.5">
-                        <span className={`text-xl font-semibold font-sans ${isBonanza ? 'text-amber-950' : 'text-[#00183D]'}`}>GH₵{p.fee}</span>
-                        <span className={`${isBonanza ? 'text-amber-700' : 'text-slate-450'} text-[9px] font-semibold font-sans`}>/ sem</span>
+                        <span
+                          className={`text-xl font-semibold font-sans ${isBonanza ? "text-amber-950" : "text-[#00183D]"}`}
+                        >
+                          GH₵{p.fee}
+                        </span>
+                        <span
+                          className={`${isBonanza ? "text-amber-700" : "text-slate-450"} text-[9px] font-semibold font-sans`}
+                        >
+                          / sem
+                        </span>
                       </div>
                     </div>
-                    <p className={`text-[10px] mt-1 font-medium select-none font-sans leading-normal ${isBonanza ? 'text-amber-800' : 'text-slate-500'}`}>
+                    <p
+                      className={`text-[10px] mt-1 font-medium select-none font-sans leading-normal ${isBonanza ? "text-amber-800" : "text-slate-500"}`}
+                    >
                       {p.summary || p.description}
                     </p>
                   </div>
@@ -195,7 +234,6 @@ export const InsurePage: React.FC = () => {
 
         {/* Master Student Info Card */}
         <div className="bg-white border border-slate-200 rounded-none p-6 sm:p-10 space-y-6 shadow-none">
-          
           <div className="pb-1 border-b border-slate-100">
             <h3 className="text-[10px] sm:text-[11px] uppercase font-bold tracking-widest text-slate-400 font-mono leading-none">
               STUDENT INFORMATION
@@ -203,11 +241,12 @@ export const InsurePage: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            
             {/* Row 1: First Name & Last Name */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
               <div className="space-y-1">
-                <label className="text-[10.5px] font-bold text-slate-700 block select-none">First Name *</label>
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none">
+                  First Name *
+                </label>
                 <input
                   type="text"
                   required
@@ -218,7 +257,9 @@ export const InsurePage: React.FC = () => {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans">Last Name *</label>
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans">
+                  Last Name *
+                </label>
                 <input
                   type="text"
                   required
@@ -233,7 +274,9 @@ export const InsurePage: React.FC = () => {
             {/* Row 2: Student ID & Gender */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
               <div className="space-y-1">
-                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans">Student ID</label>
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans">
+                  Student ID
+                </label>
                 <input
                   type="text"
                   value={studentId}
@@ -243,7 +286,9 @@ export const InsurePage: React.FC = () => {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans font-medium">Gender *</label>
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans font-medium">
+                  Gender *
+                </label>
                 <div className="relative">
                   <select
                     required
@@ -263,7 +308,9 @@ export const InsurePage: React.FC = () => {
             {/* Row 3: Level & Phone Number */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
               <div className="space-y-1">
-                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans">Level</label>
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans">
+                  Level
+                </label>
                 <div className="relative">
                   <select
                     value={level}
@@ -281,7 +328,9 @@ export const InsurePage: React.FC = () => {
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans font-medium">Phone Number *</label>
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans font-medium">
+                  Phone Number *
+                </label>
                 <input
                   type="text"
                   required
@@ -296,7 +345,9 @@ export const InsurePage: React.FC = () => {
             {/* Row 4: Email Address & Institution */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
               <div className="space-y-1">
-                <label className="text-[10.5px] font-bold text-slate-700 block select-none">Email Address *</label>
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none">
+                  Email Address *
+                </label>
                 <input
                   type="email"
                   required
@@ -307,7 +358,9 @@ export const InsurePage: React.FC = () => {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans font-medium">Institution *</label>
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans font-medium">
+                  Institution *
+                </label>
                 <div className="relative">
                   <select
                     required
@@ -315,8 +368,10 @@ export const InsurePage: React.FC = () => {
                     onChange={(e) => setUniversity(e.target.value)}
                     className="w-full text-xs px-4 py-2.5 border border-slate-200 rounded-none text-slate-800 bg-white focus:outline-none focus:border-royal appearance-none cursor-pointer font-sans font-medium"
                   >
-                    {institutions.map(inst => (
-                      <option key={inst.id} value={inst.id}>{inst.name}</option>
+                    {institutions.map((inst) => (
+                      <option key={inst.id} value={inst.id}>
+                        {inst.name}
+                      </option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-3.5 top-3 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -324,11 +379,11 @@ export const InsurePage: React.FC = () => {
               </div>
             </div>
 
-
-
             {/* Row 6: Hostel / Residence */}
             <div className="space-y-1">
-              <label className="text-[10.5px] font-bold text-slate-700 block select-none">Hostel / Residence</label>
+              <label className="text-[10.5px] font-bold text-slate-700 block select-none">
+                Hostel / Residence
+              </label>
               <input
                 type="text"
                 value={hostel}
@@ -350,13 +405,18 @@ export const InsurePage: React.FC = () => {
                   <CreditCard className="w-4 h-4" />
                 </div>
                 <p className="leading-relaxed text-[11px] text-[#713F12] font-sans font-medium">
-                  Payment via MTN MoMo or Telecel Cash. You&apos;ll receive payment instructions on WhatsApp after submitting. Coverage activates on payment confirmation.
+                  Payment via MTN MoMo or Telecel Cash. You&apos;ll receive
+                  payment instructions on WhatsApp after submitting. Coverage
+                  activates on payment confirmation. Please check MoMo approvals
+                  is alert does not show immediatley
                 </p>
               </div>
 
               {/* MoMo Number Input */}
               <div className="space-y-1">
-                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans">MoMo Number *</label>
+                <label className="text-[10.5px] font-bold text-slate-700 block select-none font-sans">
+                  MoMo Number *
+                </label>
                 <input
                   type="text"
                   required
@@ -373,7 +433,7 @@ export const InsurePage: React.FC = () => {
               {errorMsg && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
+                  animate={{ opacity: 1, height: "auto" }}
                   className="bg-red-50 border border-red-200 text-red-700 text-[11px] p-3.5 rounded-none flex items-start space-x-2 font-sans shadow-none"
                 >
                   <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -384,7 +444,7 @@ export const InsurePage: React.FC = () => {
               {successMsg && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
+                  animate={{ opacity: 1, height: "auto" }}
                   className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] p-3.5 rounded-none flex items-start space-x-2 font-sans shadow-none"
                 >
                   <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -401,28 +461,28 @@ export const InsurePage: React.FC = () => {
             >
               <Shield className="w-4.5 h-4.5 flex-shrink-0 text-white" />
               <span>
-                {loading ? 'Initializing Safe Payment Hub...' : 'Submit & Get Insured'}
+                {loading
+                  ? "Initializing Safe Payment Hub..."
+                  : "Submit & Get Insured"}
               </span>
             </button>
-            
-            <p className="text-[10px] text-slate-400 font-semibold text-center font-sans tracking-wide">
-              By submitting, you agree to our terms of service. Coverage activates upon payment confirmation.
-            </p>
 
+            <p className="text-[10px] text-slate-400 font-semibold text-center font-sans tracking-wide">
+              By submitting, you agree to our terms of service. Coverage
+              activates upon payment confirmation.
+            </p>
           </form>
 
           {/* Quick links */}
           <div className="border-t border-slate-100 pt-4 flex justify-center text-xs text-slate-400 font-semibold font-sans">
-            <button 
-              onClick={() => navigate('login')} 
+            <button
+              onClick={() => navigate("login")}
               className="hover:text-royal transition-colors font-bold cursor-pointer"
             >
               Already insured? Access Dashboard here.
             </button>
           </div>
-
         </div>
-
       </div>
     </div>
   );

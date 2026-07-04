@@ -279,6 +279,21 @@ export const AuthPages: React.FC<{
             </div>
           )}
 
+          {/* MoMo Approval Help Alert */}
+          {type === "register" && (
+            <div className="bg-amber-50 border border-amber-200 p-3.5 rounded-xl flex items-start space-x-2.5 text-left mb-2 mt-2">
+              <Info className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="text-[10px] font-bold text-amber-900 block font-sans">
+                  Mobile Money Payment Tip
+                </span>
+                <span className="text-[9.5px] text-amber-800 leading-normal font-semibold font-sans block mt-0.5">
+                  If you don't receive the payment approval prompt automatically, please check your provider's pending approvals menu manually (e.g., *170# for MTN MoMo).
+                </span>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Input fields */}
             {type === "register" && (
