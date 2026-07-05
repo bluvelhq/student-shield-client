@@ -77,8 +77,8 @@ export const AboutPage: React.FC = () => {
       avatar: dicksonImg,
       imgPosition: "center 20%",
       socials: {
-        linkedin: "www.linkedin.com/in/dickson-daniel-peprah-69a409305",
-        instagram: "https://instagram.com/dickson_peprah",
+        linkedin: "https://www.linkedin.com/in/dickson-daniel-peprah-69a409305",
+        instagram: "https://www.instagram.com/dickson_peprah",
         twitter: "https://twitter.com/dickson_peprah",
       },
     },

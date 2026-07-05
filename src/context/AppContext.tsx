@@ -204,7 +204,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               status: sub.subscriptionStatus.toLowerCase() as any,
               start_date: sub.joinedAt,
               end_date: new Date(new Date(sub.joinedAt).getTime() + 120 * 24 * 60 * 60 * 1000).toISOString(),
-              created_at: sub.joinedAt
+              created_at: sub.joinedAt,
+              plan: sub.plan
             });
           } else {
             setSubscription(null);

@@ -190,7 +190,7 @@ export const AuthPages: React.FC<{
           gender,
           residence: "Campus Residence",
           level: 100,
-          planId: selectedPlanId,
+          planId: dbPlan?.id || selectedPlanId,
         });
       } catch (err: any) {
         console.error("API Server registration failed:", err);
