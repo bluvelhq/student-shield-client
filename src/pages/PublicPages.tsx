@@ -65,8 +65,7 @@ export const AboutPage: React.FC = () => {
       avatar: officeSuite3,
       imgPosition: "center top",
       socials: {
-        linkedin:
-          "https://www.linkedin.com/in/derrick-boateng-mills-5a41b2234/",
+        linkedin: "https://www.linkedin.com/in/derrick-boateng-696263276/",
         instagram: "https://instagram.com/_boateng.d",
         twitter: "https://twitter.com/derrick_boateng",
       },
