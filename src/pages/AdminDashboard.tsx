@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
+import { AppLogo } from '../components/ui/AppLogo';
 import { adminService } from '../services/adminService';
 import { authService } from '../services/authService';
 import { 
@@ -487,13 +488,7 @@ export const AdminDashboard: React.FC = () => {
       <aside className="hidden md:flex w-64 bg-navy text-white flex flex-col justify-between border-r border-slate-800 shrink-0 sticky top-0 h-screen z-30">
         <div className="p-6">
           <div className="flex items-center space-x-3 pb-6 border-b border-slate-800">
-            <div className="w-8 h-8 bg-royal rounded-lg flex items-center justify-center text-white">
-              <Shield className="w-5 h-5 flex-shrink-0" />
-            </div>
-            <div>
-              <span className="font-semibold text-sm tracking-tight block">ShieldHQ Control</span>
-              <span className="text-[9px] text-blue-400 font-mono tracking-widest uppercase">{isAgent ? 'Support Desk' : 'Root Console'}</span>
-            </div>
+            <AppLogo size="sm" textColor="text-white" />
           </div>
 
           <nav className="mt-8 space-y-2.5">
@@ -569,7 +564,7 @@ export const AdminDashboard: React.FC = () => {
             className="w-full py-2 bg-rose-900/10 hover:bg-rose-900/20 text-rose-450 border border-rose-500/10 rounded-xl text-[10px] uppercase font-bold tracking-widest transition-colors flex items-center justify-center space-x-2 cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>Revoke Access</span>
+            <span>Logout</span>
           </button>
         </div>
       </aside>
@@ -592,13 +587,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="p-6">
           <div className="flex items-center justify-between pb-6 border-b border-slate-800">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-royal rounded-lg flex items-center justify-center text-white">
-                <Shield className="w-5 h-5 flex-shrink-0" />
-              </div>
-              <div>
-                <span className="font-semibold text-sm tracking-tight block">ShieldHQ Control</span>
-                <span className="text-[9px] text-blue-400 font-mono tracking-widest uppercase">{isAgent ? 'Support Desk' : 'Root Console'}</span>
-              </div>
+              <AppLogo size="sm" textColor="text-white" />
             </div>
             <button 
               onClick={() => setMobileMenuOpen(false)}
@@ -681,7 +670,7 @@ export const AdminDashboard: React.FC = () => {
             className="w-full py-2 bg-rose-900/10 hover:bg-rose-900/20 text-rose-450 border border-rose-500/10 rounded-xl text-[10px] uppercase font-bold tracking-widest transition-colors flex items-center justify-center space-x-2 cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>Revoke Access</span>
+            <span>Logout</span>
           </button>
         </div>
       </aside>

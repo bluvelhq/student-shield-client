@@ -186,9 +186,10 @@ export const PricingGrid: React.FC = () => {
                   {sortedPlans.map((p: any) => {
                     const maxDev = p.maxDevices ?? p.max_devices ?? 1;
                     const isHighest = p.id === sortedPlans[sortedPlans.length - 1]?.id;
+                    const isPremium = p.type === 'PREMIUM';
                     return (
-                      <td key={p.id} className={`px-6 py-3.5 text-center font-semibold font-mono ${isHighest ? 'text-royal' : 'text-slate-600'}`}>
-                        {maxDev === 1 ? '1 device' : `${maxDev} devices`}
+                      <td key={p.id} className={`px-6 py-3.5 text-center font-semibold font-mono ${isHighest ? 'text-royal' : 'text-slate-650'}`}>
+                        {isPremium ? '-' : (maxDev === 1 ? '1 device' : `${maxDev} devices`)}
                       </td>
                     );
                   })}

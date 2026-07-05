@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
+import { AppLogo } from '../components/ui/AppLogo';
 import { 
   Shield, Cpu, FileText, CheckCircle, 
   PlusCircle, ArrowLeft, X, Laptop, 
@@ -671,13 +672,7 @@ export const StudentDashboard: React.FC = () => {
       <aside className="hidden md:flex w-64 bg-navy text-white flex flex-col justify-between border-r border-slate-800 shrink-0 sticky top-0 h-screen select-none z-30">
         <div className="p-6">
           <div className="flex items-center space-x-3 pb-6 border-b border-slate-800">
-            <div className="w-8 h-8 bg-royal rounded-lg flex items-center justify-center text-white">
-              <Shield className="w-5 h-5 flex-shrink-0" />
-            </div>
-            <div>
-              <span className="font-semibold text-sm tracking-tight block">StudentShield</span>
-              <span className="text-[9px] text-slate-400 font-mono tracking-widest uppercase">Student Portal</span>
-            </div>
+            <AppLogo size="sm" textColor="text-white" />
           </div>
 
           <nav className="mt-8 space-y-2.5">
@@ -686,7 +681,7 @@ export const StudentDashboard: React.FC = () => {
               className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'dashboard' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
             >
               <Cpu className="w-4 h-4" />
-              <span>Overview Analytics</span>
+              <span>Overview</span>
             </button>
 
             <button 
@@ -778,13 +773,7 @@ export const StudentDashboard: React.FC = () => {
         <div className="p-6">
           <div className="flex items-center justify-between pb-6 border-b border-slate-800">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-royal rounded-lg flex items-center justify-center text-white">
-                <Shield className="w-5 h-5 flex-shrink-0" />
-              </div>
-              <div>
-                <span className="font-semibold text-sm tracking-tight block">StudentShield</span>
-                <span className="text-[9px] text-slate-400 font-mono tracking-widest uppercase">Student Portal</span>
-              </div>
+              <AppLogo size="sm" textColor="text-white" />
             </div>
             <button 
               onClick={() => setMobileSidebarOpen(false)}
@@ -800,7 +789,7 @@ export const StudentDashboard: React.FC = () => {
               className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold tracking-wide flex items-center space-x-3 transition-all cursor-pointer ${activeTab === 'dashboard' ? 'bg-royal text-white' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
             >
               <Cpu className="w-4 h-4" />
-              <span>Overview Analytics</span>
+              <span>Overview</span>
             </button>
 
             <button 
@@ -1027,27 +1016,27 @@ export const StudentDashboard: React.FC = () => {
                 </div>
 
                 <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
-                  <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">DEVICES ADDED</span>
+                  <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">COVERED DEVICES</span>
                   <span className="text-xl font-bold text-navy mt-1 tracking-tight block">{currentDevicesCount} / {maxDevicesAllowed}</span>
                   <span className="text-[10px] text-slate-455 block mt-1.5 font-semibold">Allocated devices count</span>
                 </div>
 
                 <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
-                  <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">TREATMENT REPAIRS</span>
+                  <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">REPAIRS & TICKETS</span>
                   <span className="text-xl font-bold text-emerald-600 mt-1 tracking-tight block">
                     {filteredTickets.filter(t => t.status === 'resolved').length} Resolved
                   </span>
                   <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">
-                    {filteredTickets.filter(t => t.status !== 'resolved' && t.status !== 'closed').length} in triage queue
+                    {filteredTickets.filter(t => t.status !== 'resolved' && t.status !== 'closed').length} in progress
                   </span>
                 </div>
 
                 <div className="bg-white border border-slate-200/70 p-5 rounded-2xl flex flex-col justify-between hover:border-royal/20 transition-all select-none">
-                  <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">SAVINGS CALCULATOR</span>
+                  <span className="text-[10px] uppercase font-bold text-royal tracking-wide block">ESTIMATED SAVINGS</span>
                   <span className="text-xl font-bold text-[#D97706] mt-1 tracking-tight block">
                     GH₵ {isBonanza ? '580.00' : (isPremium ? '320.00' : '80.00')}
                   </span>
-                  <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">vs. external service costs</span>
+                  <span className="text-[10px] text-slate-450 block mt-1.5 font-semibold">vs. external repair costs</span>
                 </div>
               </div>
 

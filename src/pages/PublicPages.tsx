@@ -64,6 +64,12 @@ export const AboutPage: React.FC = () => {
       bio: "On a mission to redefine device reliability and structural peace of mind for Uni students and beyond",
       avatar: officeSuite3,
       imgPosition: "center top",
+      socials: {
+        linkedin:
+          "https://www.linkedin.com/in/derrick-boateng-mills-5a41b2234/",
+        instagram: "https://instagram.com/_boateng.d",
+        twitter: "https://twitter.com/derrick_boateng",
+      },
     },
     {
       name: "Dickson Peprah",
@@ -71,6 +77,11 @@ export const AboutPage: React.FC = () => {
       bio: "On a mission to redefine device reliability and structural peace of mind for Uni students and beyond",
       avatar: dicksonImg,
       imgPosition: "center 20%",
+      socials: {
+        linkedin: "www.linkedin.com/in/dickson-daniel-peprah-69a409305",
+        instagram: "https://instagram.com/dickson_peprah",
+        twitter: "https://twitter.com/dickson_peprah",
+      },
     },
   ];
 
@@ -107,7 +118,7 @@ export const AboutPage: React.FC = () => {
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] text-transparent bg-clip-text bg-gradient-to-r from-[#00183D] via-[#003078] to-[#00183D] font-sans max-w-4xl mx-auto drop-shadow-sm"
           >
-            Empowering <br className="sm:hidden" /> Academic Continuity
+            Protecting Every Student's Academic Journey
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -115,9 +126,7 @@ export const AboutPage: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
             className="text-sm sm:text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed font-sans font-medium"
           >
-            Transforming the way campus developers and university students
-            maintain pristine, high-performing workspace gear. Seamless physical
-            help when crashes threaten your grades.
+            At StudentShield, we believe no student should have to miss deadlines, lectures, or opportunities because of a damaged or faulty device. We provide affordable laptop protection, fast support, and reliable repair solutions that help students stay focused on what matters most; their education.
           </motion.p>
         </div>
       </div>
@@ -281,13 +290,12 @@ export const AboutPage: React.FC = () => {
               Innovation
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto leading-relaxed font-sans font-medium">
-              We coordinate highly trained academic technologist circles
-              delivering consistent diagnostic peace of mind.
+            Our team works with experienced technicians to keep your devices protected and your academic journey uninterrupted
             </p>
           </div>
 
           {/* Grid matching Team arrangement with vertical highly cropped focus portraits */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-2xl mx-auto">
             {team.map((t, idx) => (
               <CometCard key={idx} className="h-full">
                 <div className="bg-white border border-slate-200/45 p-0 rounded-2xl overflow-hidden hover:border-royal transition-all text-left flex flex-col justify-between h-full bg-cover shadow-none hover:-translate-y-1.5 hover:shadow-2xl duration-350 cursor-pointer group">
@@ -315,9 +323,9 @@ export const AboutPage: React.FC = () => {
                     </p>
 
                     {/* Social Media Links */}
-                    {/* <div className="flex items-center gap-4 mt-4 pt-3 border-t border-slate-100 select-none">
+                    <div className="flex items-center gap-4 mt-4 pt-3 border-t border-slate-100 select-none">
                       <a
-                        href="https://linkedin.com"
+                        href={(t as any).socials.linkedin}
                         target="_blank"
                         rel="noreferrer"
                         className="text-slate-400 hover:text-royal transition-colors p-0.5"
@@ -327,7 +335,7 @@ export const AboutPage: React.FC = () => {
                         <Linkedin className="w-4 h-4" />
                       </a>
                       <a
-                        href="https://instagram.com"
+                        href={(t as any).socials.instagram}
                         target="_blank"
                         rel="noreferrer"
                         className="text-slate-400 hover:text-royal transition-colors p-0.5"
@@ -337,7 +345,7 @@ export const AboutPage: React.FC = () => {
                         <Instagram className="w-4 h-4" />
                       </a>
                       <a
-                        href="https://twitter.com"
+                        href={(t as any).socials.twitter}
                         target="_blank"
                         rel="noreferrer"
                         className="text-slate-400 hover:text-royal transition-colors p-0.5"
@@ -346,7 +354,7 @@ export const AboutPage: React.FC = () => {
                       >
                         <Twitter className="w-4 h-4" />
                       </a>
-                    </div> */}
+                    </div>
                   </div>
                 </div>
               </CometCard>
@@ -458,7 +466,7 @@ export const AboutPage: React.FC = () => {
                 Office Address
               </span>
               <p className="text-[12px] text-slate-200 font-semibold font-sans">
-                Jubilee Hall, University of Ghana
+                Campus University of Ghana
               </p>
             </div>
 
@@ -736,7 +744,7 @@ export const ContactPage: React.FC = () => {
                       Main Campus Booth
                     </span>
                     <p className="text-xs sm:text-sm font-bold text-white leading-snug mt-0.5 font-sans">
-                      Jubilee Hall, University of Ghana
+                      Campus University of Ghana
                     </p>
                   </div>
                 </div>
