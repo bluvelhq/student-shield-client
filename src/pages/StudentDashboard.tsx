@@ -196,36 +196,7 @@ export const StudentDashboard: React.FC = () => {
   };
 
   const handleUpgradeDowngrade = async (planId: string) => {
-    const confirmChange = window.confirm(`Are you sure you want to change your cover plan to ${planId.replace('-', ' ').toUpperCase()}?`);
-    if (confirmChange) {
-      try {
-        const plans = await authService.getPlans();
-        const mappedType = planId === 'bonanza-plan' ? 'BONANZA' : (planId === 'premium-plan' ? 'PREMIUM' : 'BASIC');
-        const targetPlan = plans.find((p: any) => p.type === mappedType || p.id === planId);
-        if (!targetPlan) {
-          alert('Selected plan is not configured in the system.');
-          return;
-        }
-
-        const isUpgrade = subscription && (targetPlan as any).fee > (subscription.plan_id === 'premium-plan' ? 50 : 20);
-        let res;
-        if (isUpgrade) {
-          res = await planService.upgradePlan((targetPlan as any).id);
-        } else {
-          res = await planService.renewPlan((targetPlan as any).id);
-        }
-
-        if (res && res.data && res.data.authorization_url) {
-          window.location.href = res.data.authorization_url;
-        } else {
-          alert(res.message || 'Plan change initiated successfully!');
-          refreshData();
-        }
-      } catch (err: any) {
-        console.error('Plan modification failed:', err);
-        showToast('Plan change failed', 'error');
-      }
-    }
+    showToast('Feature upcoming', 'info');
   };
 
   const handleRenewPlan = async () => {

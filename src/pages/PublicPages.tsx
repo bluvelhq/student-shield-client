@@ -75,7 +75,6 @@ export const AboutPage: React.FC = () => {
       role: "Co-Founder & Chief Operations Officer",
       bio: "On a mission to redefine device reliability and structural peace of mind for Uni students and beyond",
       avatar: dicksonImg,
-      imgPosition: "center 20%",
       socials: {
         linkedin: "https://www.linkedin.com/in/dickson-daniel-peprah-69a409305",
         instagram: "https://www.instagram.com/dickson_peprah",

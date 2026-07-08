@@ -88,6 +88,12 @@ export const AdminDashboard: React.FC = () => {
   const [cohortSubmittingType, setCohortSubmittingType] = useState<'suspend' | 'expire' | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  const displayedMembers = allUsers.filter(
+    (u) =>
+      u.subscription?.status === 'active' ||
+      u.subscription?.status === 'expired',
+  );
+
   const loadAdminData = async () => {
     setIsRefreshing(true);
     try {
@@ -174,7 +180,7 @@ export const AdminDashboard: React.FC = () => {
       })));
 
       const totalUsers = subscribers.length;
-      const activePlans = 3;
+      const activePlans = subscribers.filter((s: any) => s.subscriptionStatus === 'ACTIVE').length;
       const openTickets = requestsList.filter((t: any) => t.status !== 'RESOLVED' && t.status !== 'CLOSED').length;
       const activeDevicesCount = devicesList.length;
 
@@ -506,7 +512,7 @@ export const AdminDashboard: React.FC = () => {
             >
               <Users className="w-4 h-4" />
               <span>Members</span>
-              <span className="ml-auto bg-slate-850 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold text-slate-350">{allUsers.length}</span>
+              <span className="ml-auto bg-slate-850 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold text-slate-350">{displayedMembers.length}</span>
             </button>
 
             <button 
@@ -612,7 +618,7 @@ export const AdminDashboard: React.FC = () => {
             >
               <Users className="w-4 h-4" />
               <span>Members</span>
-              <span className="ml-auto bg-slate-850 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold text-slate-350">{allUsers.length}</span>
+              <span className="ml-auto bg-slate-850 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold text-slate-350">{displayedMembers.length}</span>
             </button>
 
             <button 
@@ -783,7 +789,7 @@ export const AdminDashboard: React.FC = () => {
                   </h3>
                   <div className="space-y-3 text-xs font-sans">
                     {institutions.slice(0, 5).map(inst => {
-                      const count = allUsers.filter(u => u.profile?.university === inst.name).length;
+                      const count = displayedMembers.filter(u => u.profile?.university === inst.name).length;
                       return (
                         <div key={inst.id} className="flex justify-between items-center p-2.5 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100/50 transition-colors">
                           <span className="font-semibold text-slate-800">{inst.name}</span>
@@ -801,7 +807,7 @@ export const AdminDashboard: React.FC = () => {
                   </h3>
                   <div className="space-y-3 text-xs font-sans">
                     {plans.map(plan => {
-                      const count = allUsers.filter(u => u.subscription?.plan_id === plan.id).length;
+                      const count = displayedMembers.filter(u => u.subscription?.plan_id === plan.id).length;
                       return (
                         <div key={plan.id} className="flex justify-between items-center p-2.5 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100/50 transition-colors">
                           <span className="font-semibold text-slate-800 uppercase tracking-wide">{plan.type || plan.name}</span>
@@ -825,7 +831,7 @@ export const AdminDashboard: React.FC = () => {
                   <p className="text-[11px] text-slate-400 mt-0.5">Manage user subscriptions and verify student device enrollment.</p>
                 </div>
                 <span className="text-[10px] font-mono bg-royal/5 border border-royal/10 text-royal px-2.5 py-1 rounded-full font-bold">
-                  {allUsers.length} total members
+                  {displayedMembers.length} total members
                 </span>
               </div>
 
@@ -842,7 +848,7 @@ export const AdminDashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {allUsers.map((m, idx) => {
+                    {displayedMembers.map((m, idx) => {
                       const status = m.subscription?.status || 'unprotected';
                       const plan = m.subscription?.plan?.type || m.subscription?.plan?.name || m.subscription?.plan_id || 'unprotected';
                       return (
